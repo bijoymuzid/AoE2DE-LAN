@@ -199,13 +199,31 @@ typedef int (*PfnPlatBool)(void *self);
 typedef int (*PfnPlatPriv)(void *self, int priv, void *out, unsigned char b);
 typedef int (*PfnPlatState)(void *self, int priv, unsigned char b);
 
-static int pv_signed_in(void *self) { (void)self; return 1; }
+// session 25: one-shot "called" lines separate "never asked" from "asked".
+static int pv_signed_in(void *self) {
+    static LONG once = 0; (void)self;
+    if (!InterlockedExchange(&once, 1)) log_line("mpunlock: called pv_signed_in");
+    return 1;
+}
 static int pv_has_priv(void *self, int priv, void *out, unsigned char b) {
-    (void)self; (void)priv; (void)out; (void)b; return 1;
+    static LONG once = 0; (void)self; (void)priv; (void)out; (void)b;
+    if (!InterlockedExchange(&once, 1)) log_line("mpunlock: called pv_has_priv");
+    return 1;
 }
 static int pv_priv_state(void *self, int priv, unsigned char b) {
-    (void)self; (void)priv; (void)b; return 0;   // 0 = allowed
+    static LONG once = 0; (void)self; (void)priv; (void)b;
+    if (!InterlockedExchange(&once, 1)) log_line("mpunlock: called pv_priv_state");
+    return 0;   // 0 = allowed
 }
+
+// the three slots, shared with the heartbeat re-read below
+static const struct { DWORD64 va; DWORD64 orig; void *repl; const char *what; } g_MpSlots[] = {
+    { 0x14366A078, 0x1403BA0F0, (void*)&pv_signed_in,  "slot 0xb8 user-signed-in" },
+    { 0x14366A080, 0x1403B7200, (void*)&pv_has_priv,   "slot 0xc0 HasPrivilege"    },
+    { 0x14366A088, 0x1403B7270, (void*)&pv_priv_state, "slot 0xc8 privilege state" },
+};
+static volatile LONG g_MpUnlocked = 0;   // set only when all three slots took
+static signed char g_MpReverted[3];
 
 static int getenv_flag(const WCHAR *name) {
     WCHAR v[8]; DWORD n = GetEnvironmentVariableW(name, v, 8);
@@ -213,19 +231,15 @@ static int getenv_flag(const WCHAR *name) {
 }
 
 static void mp_unlock(void) {
-    static const struct { DWORD64 va; DWORD64 orig; void *repl; const char *what; } P[] = {
-        { 0x14366A078, 0x1403BA0F0, (void*)&pv_signed_in,  "slot 0xb8 user-signed-in" },
-        { 0x14366A080, 0x1403B7200, (void*)&pv_has_priv,   "slot 0xc0 HasPrivilege"    },
-        { 0x14366A088, 0x1403B7270, (void*)&pv_priv_state, "slot 0xc8 privilege state" },
-    };
-    for (unsigned k = 0; k < sizeof(P)/sizeof(P[0]); k++) {
-        DWORD64 *slot = (DWORD64*)(g_Base + (P[k].va - (DWORD64)0x140000000));
+    int patched = 0;
+    for (unsigned k = 0; k < sizeof(g_MpSlots)/sizeof(g_MpSlots[0]); k++) {
+        DWORD64 *slot = (DWORD64*)(g_Base + (g_MpSlots[k].va - (DWORD64)0x140000000));
         // the loader relocates every pointer in .rdata with the image, so the
         // stock slot value is imagebase-relative, not the static 0x140000000 one.
-        if ((*slot - g_Base) != (P[k].orig - (DWORD64)0x140000000)) {
+        if ((*slot - g_Base) != (g_MpSlots[k].orig - (DWORD64)0x140000000)) {
             char b[160]; int i = 0; const char *m = "mpunlock: slot mismatch, skipped ";
             while (*m) b[i++]=*m++;
-            for (int j=0; P[k].what[j] && i<90; j++) b[i++]=P[k].what[j];
+            for (int j=0; g_MpSlots[k].what[j] && i<90; j++) b[i++]=g_MpSlots[k].what[j];
             { const char *t="; found rva="; while (*t) b[i++]=*t++;
               DWORD64 v = *slot - g_Base;
               for (int s=11;s>=0;s--) b[i++]="0123456789abcdef"[(v>>(s*4))&15]; }
@@ -234,17 +248,19 @@ static void mp_unlock(void) {
         { DWORD old;
           if (!VirtualProtect(slot, 8, PAGE_READWRITE, &old)) {
               log_line("mpunlock: VirtualProtect failed"); continue; }
-          *slot = (DWORD64)P[k].repl;
+          *slot = (DWORD64)g_MpSlots[k].repl;
           VirtualProtect(slot, 8, old, &old); }
         { char c[128]; int j=0; const char *t="mpunlock: patched ";
           while (*t) c[j++]=*t++;
-          for (int q=0; P[k].what[q]; q++) c[j++]=P[k].what[q];
+          for (int q=0; g_MpSlots[k].what[q]; q++) c[j++]=g_MpSlots[k].what[q];
           c[j++]=' ';
-          { const char *o = (*slot == (DWORD64)P[k].repl) ? "OK" : "VERIFY FAILED";
+          { const char *o = (*slot == (DWORD64)g_MpSlots[k].repl) ? "OK" : "VERIFY FAILED";
             while (*o) c[j++]=*o++; }
-          c[j]=0; log_line(c); }
+          c[j]=0; log_line(c);
+          if (*slot == (DWORD64)g_MpSlots[k].repl) patched++; }
     }
     log_line("mpunlock: platform vtable re-pointed (in-memory only)");
+    if (patched == (int)(sizeof(g_MpSlots)/sizeof(g_MpSlots[0]))) g_MpUnlocked = 1;
 }
 
 static DWORD WINAPI MainThread(LPVOID p) {
@@ -481,14 +497,37 @@ static LONG WINAPI LanCrashFilter(EXCEPTION_POINTERS *ep) {
     }
     return EXCEPTION_CONTINUE_SEARCH;             // let the game's own handler run
 }
+// session 25: 1 s re-read of the three re-pointed slots. Logs once per slot
+// when it no longer holds our stub — "asked then overruled/reverted" vs
+// "never asked" (the one-shot stub lines above).
+static void mp_check_slots(void) {
+    if (!g_MpUnlocked) return;
+    for (unsigned k = 0; k < sizeof(g_MpSlots)/sizeof(g_MpSlots[0]); k++) {
+        DWORD64 v = 0;
+        if (g_MpReverted[k]) continue;
+        __try { v = *(volatile DWORD64*)(g_Base + (g_MpSlots[k].va - (DWORD64)0x140000000)); }
+        __except (EXCEPTION_EXECUTE_HANDLER) { continue; }
+        if (v != (DWORD64)g_MpSlots[k].repl) {
+            char b[160]; int i = 0;
+            g_MpReverted[k] = 1;
+            i = cput(b, i, "mpunlock: slot reverted ");
+            for (int j = 0; g_MpSlots[k].what[j] && i < 90; j++) b[i++] = g_MpSlots[k].what[j];
+            i = cput(b, i, " now rva=0x"); i = chx(b, i, v - g_Base);
+            b[i] = 0; log_line(b);
+        }
+    }
+}
 static DWORD WINAPI HeartbeatThread(LPVOID p) {
     (void)p;
     for (int k = 1;; k++) {
-        Sleep(5000);
-        char b[64]; int i = 0;
-        i = cput(b, i, "hb alive sec="); i = cpct(b, i, (unsigned long long)k * 5);
-        b[i] = 0; log_line(b);
-        if (k > 4000) break;
+        Sleep(1000);
+        mp_check_slots();
+        if (k % 5 == 0) {   // keep the old 5 s liveness cadence
+            char b[64]; int i = 0;
+            i = cput(b, i, "hb alive sec="); i = cpct(b, i, (unsigned long long)k);
+            b[i] = 0; log_line(b);
+        }
+        if (k > 20000) break;
     }
     return 0;
 }
