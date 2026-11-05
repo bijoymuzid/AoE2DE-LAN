@@ -1,0 +1,138 @@
+[t=0.000s] lanhook v2 boot in D:\Age of Empires II Definitive Edition\dbghelp.dll
+[t=0.000s] lanhook boot: dbghelp proxy attached
+[t=0.000s] game base=0x00007ff75ab00000
+[t=0.000s] real dbghelp resolved
+[t=0.000s] LanHookThread stage=7
+[t=0.000s] iathook: swapped 62 IAT slots (winhttp+wininet+libHC+ws2+wsock+crypt32+k32)
+[t=1.156s] CRYPT32 OpenStore prov= Root
+[t=1.156s] CRYPT32 enum cert #1 enc=1 head=30820306
+[t=1.156s] CRYPT32 cert name=Titanium Root Certificate Authority
+[t=1.156s] CRYPT32 cert name=Amazon Root CA 4
+[t=1.156s] CRYPT32 cert name=Baltimore CyberTrust Root
+[t=1.156s] CRYPT32 cert name=AAA Certificate Services
+[t=1.156s] CRYPT32 cert name=Microsoft Root Certificate Authority
+[t=1.156s] CRYPT32 cert name=Thawte Timestamping CA
+[t=1.156s] CRYPT32 cert name=Starfield Class 2 Certification Authority
+[t=1.156s] CRYPT32 cert name=DigiCert Global Root CA
+[t=1.156s] CRYPT32 cert name=Microsoft Root Authority
+[t=1.156s] CRYPT32 cert name=Symantec Enterprise Mobile Root for Microsoft
+[t=1.156s] CRYPT32 cert name=Microsoft Root Certificate Authority 2011
+[t=1.156s] CRYPT32 cert name=Amazon Root CA 1
+[t=1.156s] CRYPT32 cert name=Microsoft Authenticode(tm) Root Authority
+[t=1.156s] CRYPT32 cert name=DigiCert High Assurance EV Root CA
+[t=1.156s] CRYPT32 cert name=Amazon Root CA 2
+[t=1.156s] CRYPT32 cert name=Microsoft Root Certificate Authority 2010
+[t=1.156s] CRYPT32 cert name=Microsoft ECC TS Root Certificate Authority 2018
+[t=1.156s] CRYPT32 cert name=Copyright (c) 1997 Microsoft Corp.
+[t=1.156s] CRYPT32 cert name=NO LIABILITY ACCEPTED, (c)97 VeriSign, Inc.
+[t=1.156s] CRYPT32 cert name=ageLANServer Self-signed
+[t=1.156s] CRYPT32 cert name=Amazon Root CA 3
+[t=1.156s] CRYPT32 cert name=Microsoft ECC Product Root Certificate Authority 2018
+[t=1.156s] CRYPT32 cert name=Microsoft Time Stamp Root Certificate Authority 2014
+[t=1.156s] CRYPT32 cert name=Microsoft Identity Verification Root Certificate Authority 2
+[t=1.156s] CRYPT32 cert name=Sectigo Public Server Authentication Root E46
+[t=1.156s] CRYPT32 cert name=SSL.com TLS RSA Root CA 2022
+[t=1.156s] CRYPT32 cert name=UTN-USERFirst-Object
+[t=1.156s] CRYPT32 cert name=IdenTrust Commercial Root CA 1
+[t=1.156s] CRYPT32 cert name=DigiCert Global Root G2
+[t=1.156s] CRYPT32 cert name=QuoVadis Root Certification Authority
+[t=1.156s] CRYPT32 cert name=DigiCert Trusted Root G4
+[t=1.156s] CRYPT32 cert name=GlobalSign
+[t=1.156s] CRYPT32 cert name=Certum Trusted Network CA 2
+[t=1.156s] CRYPT32 cert name=USERTrust ECC Certification Authority
+[t=1.156s] CRYPT32 cert name=Sectigo Public Code Signing Root R46
+[t=1.156s] CRYPT32 cert name=ISRG Root X1
+[t=1.156s] CRYPT32 cert name=SSL.com Root Certification Authority ECC
+[t=1.156s] CRYPT32 cert name=SSL.com Root Certification Authority RSA
+[t=1.156s] CRYPT32 cert name=Starfield Root Certificate Authority - G2
+[t=1.156s] CRYPT32 cert name=GlobalSign Root CA
+[t=1.156s] CRYPT32 cert name=COMODO RSA Certification Authority
+[t=1.156s] CRYPT32 cert name=Sectigo Public Server Authentication Root R46
+[t=1.156s] CRYPT32 cert name=Starfield Services Root Certificate Authority - G2
+[t=1.156s] CRYPT32 cert name=thawte Primary Root CA
+[t=1.156s] CRYPT32 cert name=SecureTrust CA
+[t=1.156s] CRYPT32 cert name=DigiCert CS ECC P384 Root G5
+[t=1.156s] CRYPT32 cert name=GlobalSign
+[t=1.156s] CRYPT32 cert name=DigiCert Global Root G3
+[t=1.156s] CRYPT32 cert name=SSL.com EV Root Certification Authority RSA R2
+[t=1.156s] CRYPT32 cert name=Class 3 Public Primary Certification Authority
+[t=1.156s] CRYPT32 cert name=Security Communication RootCA2
+[t=1.156s] CRYPT32 cert name=DigiCert CS RSA4096 Root G5
+[t=1.156s] CRYPT32 cert name=Hotspot 2.0 Trust Root CA - 03
+[t=1.156s] CRYPT32 cert name=Entrust.net Certification Authority (2048)
+[t=1.156s] CRYPT32 cert name=GlobalSign Code Signing Root R45
+[t=1.156s] CRYPT32 cert name=VeriSign Class 3 Public Primary Certification Authority - G5
+[t=1.156s] CRYPT32 cert name=Go Daddy Root Certificate Authority - G2
+[t=1.156s] CRYPT32 cert name=VeriSign Universal Root Certification Authority
+[t=1.156s] CRYPT32 cert name=USERTrust RSA Certification Authority
+[t=1.156s] CRYPT32 cert name=Go Daddy Class 2 Certification Authority
+[t=1.156s] CRYPT32 cert name=Certum Trusted Network CA
+[t=1.156s] CRYPT32 cert name=DigiCert Assured ID Root CA
+[t=1.156s] CRYPT32 cert name=AddTrust External CA Root
+[t=1.156s] CRYPT32 cert name=HARICA TLS RSA Root CA 2021
+[t=1.156s] CRYPT32 cert name=Hellenic Academic and Research Institutions RootCA 2015
+[t=1.156s] CRYPT32 store enum END store=0x000002456fe76ed0
+[t=3.860s] HC SET GET https://title.mgt.xboxlive.com/titles/default/endpoints?type=1
+[t=3.860s] HC REQHDR Connection=Keep-Alive
+[t=3.860s] HC REQHDR x-xbl-contract-version=1
+[t=3.860s] HC REQHDR MS-CV=a3qe4W0ryvIanVhO.1.0
+[t=3.860s] HC REQHDR User-Agent=XAL Win32 2024.02.20240220.000
+[t=3.860s] HC PERFORM (request sent)
+[t=3.985s] DNS resolve api.ageofempires.com svc=443
+[t=3.985s] DNS resolve pb-live-release6-api.worldsedgelink.com svc=443
+[t=3.985s] DNS   -> 192.168.0.103:443
+[t=3.985s] DNS   -> 192.168.0.103:443
+[t=4.375s] HC STATUS 200
+[t=4.375s] HC STATUS 200
+[t=4.375s] HC RSPHDR MS-CV=a3qe4W0ryvIanVhO.1.0.0
+[t=4.375s] HC STATUS 200
+[t=4.875s] HC SET POST https://self.events.data.microsoft.com/OneCollector/1.0/
+[t=4.875s] HC REQBODY-via-readfunction (streamed upload)
+[t=4.875s] HC REQHDR APIKey=1cc8ecb09142448998fee840a1269be8-136c4dca-7c5e-4eff-b721-68018a2ab521-7334
+[t=4.875s] HC REQHDR Client-Id=NO_AUTH
+[t=4.875s] HC REQHDR Content-Encoding=deflate
+[t=4.875s] HC REQHDR Content-Type=application/bond-compact-binary
+[t=4.875s] HC REQHDR Expect=100-continue
+[t=4.875s] HC REQHDR SDK-Version=EVT-Windows-C++-No-3.5.131.1
+[t=4.875s] HC REQHDR Upload-Time=1793646719024
+[t=4.875s] HC REQHDR User-Agent=XAL Win32 2024.02.20240220.000
+[t=4.875s] HC PERFORM (request sent)
+[t=6.203s] HC STATUS 200
+[t=6.203s] HC HDRS: Access-Control-Allow-Credentials=true
+[t=6.203s] HC hdrs+: Access-Control-Allow-Headers=Strict-Transport-Security,time-delta-millis,Content-Type,Content-Length
+[t=6.203s] HC hdrs+: Access-Control-Allow-Methods=POST
+[t=6.203s] HC hdrs+: Access-Control-Allow-Origin=*
+[t=6.203s] HC hdrs+: Access-Control-Expose-Headers=time-delta-millis
+[t=6.203s] HC hdrs+: Content-Length=10
+[t=6.203s] HC hdrs+: Content-Type=application/json
+[t=6.203s] HC hdrs+: Date=Mon, 02 Nov 2026 19:12:04 GMT
+[t=6.203s] HC hdrs+: Server=Microsoft-HTTPAPI/2.0
+[t=6.203s] HC hdrs+: Strict-Transport-Security=max-age=31536000
+[t=6.203s] HC hdrs+: time-delta-millis=5562
+[t=8.078s] DNS resolve cdn.ageofempires.com svc=443
+[t=8.078s] DNS   -> 192.168.0.103:443
+[t=9.641s] SOCK WSASocketA af=23 type=1 flags=0x00000081
+[t=9.641s] SOCK WSASocketA af=23 type=1 flags=0x00000081
+[t=9.641s] DNS resolve localhost svc=4341
+[t=9.641s] DNS   -> [v6]:4341
+[t=9.641s] DNS   -> 127.0.0.1:4341
+[t=9.641s] SOCK WSASocketA af=23 type=1 flags=0x00000081
+[t=9.641s] WSAIoctl: ext-fn GUID f17d36b5accbcf1195ca00805f48a192
+[t=9.641s] WSAIoctl code=0x8004667e
+[t=9.641s] SOCK WSASocketA af=23 type=1 flags=0x00000081
+[t=9.641s] WSAIoctl: ext-fn GUID f17d36b5accbcf1195ca00805f48a192
+[t=9.641s] WSAIoctl code=0x8004667e
+[t=9.641s] SOCK WSASocketA af=23 type=1 flags=0x00000081
+[t=9.641s] WSAIoctl code=0x8004667e
+[t=9.641s] SOCK WSASocketA af=23 type=1 flags=0x00000081
+[t=9.641s] WSAIoctl code=0x8004667e
+[t=10.219s] DNS resolve pb-live-release6-api.worldsedgelink.com svc=443
+[t=10.219s] DNS resolve api.ageofempires.com svc=443
+[t=10.219s] DNS   -> 192.168.0.103:443
+[t=10.219s] DNS   -> 192.168.0.103:443
+[t=12.828s] DNS resolve api.ageofempires.com svc=443
+[t=12.828s] DNS   -> 192.168.0.103:443
+[t=72.969s] DNS resolve pb-live-release6-api.worldsedgelink.com svc=443
+[t=72.969s] DNS   -> 192.168.0.103:443
+[t=245.594s] WSAIoctl: ext-fn GUID 112eda7f30866f43a031f536a6eec157
+[t=245.594s] WSAIoctl: ext-fn GUID 112eda7f30866f43a031f536a6eec157

@@ -1,0 +1,109 @@
+[t=0.000s] lanhook v2 boot in D:\Age of Empires II Definitive Edition\dbghelp.dll
+[t=0.000s] lanhook boot: dbghelp proxy attached
+[t=0.000s] game base=0x00007ff6d6be0000
+[t=0.000s] real dbghelp resolved
+[t=0.000s] LanHookThread stage=8
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallPerformAsync
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallRequestSetUrl
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallRequestSetRequestBodyBytes
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallRequestSetRequestBodyString
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallRequestSetHeader
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallResponseGetResponseString
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallResponseGetResponseBodyBytesSize
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallResponseGetResponseBodyBytes
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallResponseGetStatusCode
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallResponseGetNetworkErrorCode
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallResponseGetHeader
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallResponseGetNumHeaders
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallResponseGetHeaderAtIndex
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCWebSocketConnectAsync
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCWebSocketSendMessageAsync
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallRequestSetRequestBodyReadFunction
+[t=0.000s] IAT+ WSOCK32.dll!connect
+[t=0.000s] IAT+ WSOCK32.dll!socket
+[t=0.000s] IAT+ WSOCK32.dll!closesocket
+[t=0.000s] IAT+ WSOCK32.dll!recvfrom
+[t=0.000s] IAT+ WSOCK32.dll!send
+[t=0.000s] IAT+ WSOCK32.dll!recv
+[t=0.000s] IAT+ WS2_32.dll!WSAConnect
+[t=0.000s] IAT+ WS2_32.dll!WSASend
+[t=0.000s] IAT+ WS2_32.dll!WSARecv
+[t=0.000s] IAT+ WS2_32.dll!WSARecvFrom
+[t=0.000s] IAT+ WS2_32.dll!WSAGetOverlappedResult
+[t=0.000s] IAT+ WS2_32.dll!WSASocketA
+[t=0.000s] IAT+ WS2_32.dll!WSAIoctl
+[t=0.000s] IAT+ WS2_32.dll!getaddrinfo
+[t=0.000s] IAT+ CRYPT32.dll!CertAddCertificateContextToStore
+[t=0.000s] IAT+ CRYPT32.dll!CryptStringToBinaryA
+[t=0.000s] IAT+ CRYPT32.dll!CertEnumCertificatesInStore
+[t=0.000s] IAT+ CRYPT32.dll!CertOpenStore
+[t=0.000s] IAT+ CRYPT32.dll!CryptQueryObject
+[t=0.000s] IAT+ CRYPT32.dll!CertGetNameStringW
+[t=0.000s] IAT+ CRYPT32.dll!CertFreeCertificateContext
+[t=0.000s] IAT+ CRYPT32.dll!CertGetNameStringA
+[t=0.000s] IAT+ CRYPT32.dll!CertCreateCertificateChainEngine
+[t=0.000s] IAT+ CRYPT32.dll!CertGetCertificateChain
+[t=0.000s] IAT+ CRYPT32.dll!CertVerifyCertificateChainPolicy
+[t=0.000s] IAT+ CRYPT32.dll!CertFindCertificateInStore
+[t=0.000s] IAT+ CRYPT32.dll!CertCloseStore
+[t=0.000s] IAT+ WINHTTP.dll!WinHttpReceiveResponse
+[t=0.000s] IAT+ WINHTTP.dll!WinHttpReadData
+[t=0.000s] IAT+ WINHTTP.dll!WinHttpCrackUrl
+[t=0.000s] IAT+ WINHTTP.dll!WinHttpAddRequestHeaders
+[t=0.000s] IAT+ WINHTTP.dll!WinHttpQueryDataAvailable
+[t=0.000s] IAT+ WINHTTP.dll!WinHttpSendRequest
+[t=0.000s] IAT+ WINHTTP.dll!WinHttpQueryHeaders
+[t=0.000s] IAT+ WINHTTP.dll!WinHttpCloseHandle
+[t=0.000s] IAT+ WINHTTP.dll!WinHttpOpen
+[t=0.000s] IAT+ WINHTTP.dll!WinHttpOpenRequest
+[t=0.000s] IAT+ WINHTTP.dll!WinHttpSetStatusCallback
+[t=0.000s] IAT+ WINHTTP.dll!WinHttpConnect
+[t=0.000s] IAT+ WINHTTP.dll!WinHttpSetOption
+[t=0.000s] IAT+ KERNEL32.dll!GetQueuedCompletionStatus
+[t=0.000s] IAT+ WININET.dll!InternetCloseHandle
+[t=0.000s] IAT+ WININET.dll!InternetConnectA
+[t=0.000s] IAT+ WININET.dll!InternetReadFile
+[t=0.000s] IAT+ WININET.dll!InternetQueryOptionW
+[t=0.000s] IAT+ WININET.dll!InternetSetStatusCallbackW
+[t=0.000s] IAT+ WININET.dll!HttpOpenRequestA
+[t=0.000s] IAT+ WININET.dll!HttpAddRequestHeadersA
+[t=0.000s] IAT+ WININET.dll!InternetCrackUrlA
+[t=0.000s] IAT+ WININET.dll!HttpQueryInfoA
+[t=0.000s] IAT+ WININET.dll!InternetOpenW
+[t=0.000s] IAT+ WININET.dll!HttpSendRequestW
+[t=0.000s] iathook: swapped 68 IAT slots (winhttp+wininet+libHC+ws2+wsock+crypt32+k32)
+[t=0.000s] dbg: ws2 loaded
+[t=0.000s] dbg: ssp loaded
+[t=0.000s] dbg: crypt loaded
+[t=0.000s] dbg: adv loaded
+[t=0.000s] cert: fns ok
+[t=0.047s] cert: CSP RSA 2048 key ready (silent)
+[t=0.047s] cert: CACPK o ks=2 le=0x00000000
+[t=0.047s] cert: selfsigned der=958
+[t=0.047s] cert: user-Root deferred to first connection
+[t=0.047s] dbg: cert ok
+[t=0.047s] probe anon cred st=0x00000000
+[t=0.047s] probe pkg name starts M (wide ok)
+[t=0.063s] dbg: cred ok
+[t=0.063s] LanHookThread stage=8 (H1): redirect+server live, installing LogHelpers
+[t=0.063s] hook filter: only 4:LogHelper,5:LogHelper2 + TLS set
+[t=0.063s] LanHookThread: enter
+[t=0.063s] srv: H1 login server listening on 127.0.0.1:443 (TLS)
+[t=0.063s] self pid=0x0000000000003cd4
+[t=0.063s] self ppid=0x00000000000053f0
+[t=0.063s] cmdline="AoE2DE_s.exe" 
+[t=0.063s] exepath=D:\Age of Empires II Definitive Edition\AoE2DE_s.exe
+[t=0.063s] near page=0x00007ff6b7af0000
+[t=0.063s] probe: OnAppSuspending byte readable =0x0000000000000040
+[t=0.063s] target clean, installing 0x00000001402bcb30
+[t=0.063s] installed LogHelper n=5 slot=0x00007ff6b7af0000
+[t=0.063s] target clean, installing 0x00000001402abc80
+[t=0.063s] installed LogHelper2 n=5 slot=0x00007ff6b7af0040
+[t=0.063s] target clean, installing 0x000000014292bc30
+[t=0.063s] installed CTXSetVerify n=6 slot=0x00007ff6b7af0080
+[t=0.063s] target clean, installing 0x000000014292ba40
+[t=0.063s] installed CTXSetStore n=5 slot=0x00007ff6b7af00c0
+[t=0.063s] target clean, installing 0x000000014297d450
+[t=0.063s] installed StoreAddCert n=5 slot=0x00007ff6b7af0100
+[t=0.063s] LanHookThread: install loop done
+[t=1.250s] cert: user-Root registered (schannel trust path live)

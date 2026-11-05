@@ -1,0 +1,27 @@
+[t=0.000s] lanhook v2 boot in D:\Age of Empires II Definitive Edition\dbghelp.dll
+[t=0.000s] lanhook boot: dbghelp proxy attached
+[t=0.000s] game base=0x00007ff75ab00000
+[t=0.000s] real dbghelp resolved
+[t=0.000s] LanHookThread stage=7
+[t=0.000s] iathook: swapped 40 IAT slots (winhttp+wininet+libHC)
+[t=10.922s] HC SET GET https://title.mgt.xboxlive.com/titles/default/endpoints?type=1
+[t=10.922s] HC REQHDR Connection=Keep-Alive
+[t=10.922s] HC REQHDR x-xbl-contract-version=1
+[t=10.922s] HC REQHDR MS-CV=pC8DgplN2bwm3z5F.1.0
+[t=10.922s] HC REQHDR User-Agent=XAL Win32 2024.02.20240220.000
+[t=10.922s] HC PERFORM (request sent)
+[t=11.656s] HC STATUS 200
+[t=11.656s] HC STATUS 200
+[t=11.656s] HC RSPHDR MS-CV=pC8DgplN2bwm3z5F.1.0.0
+[t=11.656s] HC STATUS 200
+[t=11.937s] HC SET POST https://self.events.data.microsoft.com/OneCollector/1.0/
+[t=11.937s] HC REQBODY-via-readfunction (streamed upload)
+[t=11.937s] HC REQHDR APIKey=1cc8ecb09142448998fee840a1269be8-136c4dca-7c5e-4eff-b721-68018a2ab521-7334
+[t=11.937s] HC REQHDR Client-Id=NO_AUTH
+[t=11.937s] HC REQHDR Content-Encoding=deflate
+[t=11.937s] HC REQHDR Content-Type=application/bond-compact-binary
+[t=11.937s] HC REQHDR Expect=100-continue
+[t=11.937s] HC REQHDR SDK-Version=EVT-Windows-C++-No-3.5.131.1
+[t=11.937s] HC REQHDR Upload-Time=1793642334930
+[t=11.937s] HC REQHDR User-Agent=XAL Win32 2024.02.20240220.000
+[t=11.937s] HC PERFORM (request sent)

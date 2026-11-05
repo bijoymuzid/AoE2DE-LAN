@@ -1,0 +1,1275 @@
+[t=0.000s] lanhook v2 boot in D:\Age of Empires II Definitive Edition\dbghelp.dll
+[t=0.000s] lanhook boot: dbghelp proxy attached
+[t=0.000s] game base=0x00007ff6d6be0000
+[t=0.000s] real dbghelp resolved
+[t=0.000s] LanHookThread stage=8
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallPerformAsync
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallRequestSetUrl
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallRequestSetRequestBodyBytes
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallRequestSetRequestBodyString
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallRequestSetHeader
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallResponseGetResponseString
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallResponseGetResponseBodyBytesSize
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallResponseGetResponseBodyBytes
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallResponseGetStatusCode
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallResponseGetNetworkErrorCode
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallResponseGetHeader
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallResponseGetNumHeaders
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallResponseGetHeaderAtIndex
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCWebSocketConnectAsync
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCWebSocketSendMessageAsync
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallRequestSetRequestBodyReadFunction
+[t=0.000s] IAT+ WSOCK32.dll!connect
+[t=0.000s] IAT+ WSOCK32.dll!socket
+[t=0.000s] IAT+ WSOCK32.dll!closesocket
+[t=0.000s] IAT+ WSOCK32.dll!recvfrom
+[t=0.000s] IAT+ WSOCK32.dll!send
+[t=0.000s] IAT+ WSOCK32.dll!recv
+[t=0.000s] IAT+ WS2_32.dll!WSAConnect
+[t=0.000s] IAT+ WS2_32.dll!WSASend
+[t=0.000s] IAT+ WS2_32.dll!WSARecv
+[t=0.000s] IAT+ WS2_32.dll!WSARecvFrom
+[t=0.000s] IAT+ WS2_32.dll!WSAGetOverlappedResult
+[t=0.000s] IAT+ WS2_32.dll!WSASocketA
+[t=0.000s] IAT+ WS2_32.dll!WSAIoctl
+[t=0.000s] IAT+ WS2_32.dll!getaddrinfo
+[t=0.000s] IAT+ CRYPT32.dll!CertAddCertificateContextToStore
+[t=0.000s] IAT+ CRYPT32.dll!CryptStringToBinaryA
+[t=0.000s] IAT+ CRYPT32.dll!CertEnumCertificatesInStore
+[t=0.000s] IAT+ CRYPT32.dll!CertOpenStore
+[t=0.000s] IAT+ CRYPT32.dll!CryptQueryObject
+[t=0.000s] IAT+ CRYPT32.dll!CertGetNameStringW
+[t=0.000s] IAT+ CRYPT32.dll!CertFreeCertificateContext
+[t=0.000s] IAT+ CRYPT32.dll!CertGetNameStringA
+[t=0.000s] IAT+ CRYPT32.dll!CertCreateCertificateChainEngine
+[t=0.000s] IAT+ CRYPT32.dll!CertGetCertificateChain
+[t=0.000s] IAT+ CRYPT32.dll!CertVerifyCertificateChainPolicy
+[t=0.000s] IAT+ CRYPT32.dll!CertFindCertificateInStore
+[t=0.000s] IAT+ CRYPT32.dll!CertCloseStore
+[t=0.000s] IAT+ WINHTTP.dll!WinHttpReceiveResponse
+[t=0.000s] IAT+ WINHTTP.dll!WinHttpReadData
+[t=0.000s] IAT+ WINHTTP.dll!WinHttpCrackUrl
+[t=0.000s] IAT+ WINHTTP.dll!WinHttpAddRequestHeaders
+[t=0.000s] IAT+ WINHTTP.dll!WinHttpQueryDataAvailable
+[t=0.000s] IAT+ WINHTTP.dll!WinHttpSendRequest
+[t=0.000s] IAT+ WINHTTP.dll!WinHttpQueryHeaders
+[t=0.000s] IAT+ WINHTTP.dll!WinHttpCloseHandle
+[t=0.000s] IAT+ WINHTTP.dll!WinHttpOpen
+[t=0.000s] IAT+ WINHTTP.dll!WinHttpOpenRequest
+[t=0.000s] IAT+ WINHTTP.dll!WinHttpSetStatusCallback
+[t=0.000s] IAT+ WINHTTP.dll!WinHttpConnect
+[t=0.000s] IAT+ WINHTTP.dll!WinHttpSetOption
+[t=0.000s] IAT+ KERNEL32.dll!GetQueuedCompletionStatus
+[t=0.000s] IAT+ WININET.dll!InternetCloseHandle
+[t=0.000s] IAT+ WININET.dll!InternetConnectA
+[t=0.000s] IAT+ WININET.dll!InternetReadFile
+[t=0.000s] IAT+ WININET.dll!InternetQueryOptionW
+[t=0.000s] IAT+ WININET.dll!InternetSetStatusCallbackW
+[t=0.000s] IAT+ WININET.dll!HttpOpenRequestA
+[t=0.000s] IAT+ WININET.dll!HttpAddRequestHeadersA
+[t=0.000s] IAT+ WININET.dll!InternetCrackUrlA
+[t=0.000s] IAT+ WININET.dll!HttpQueryInfoA
+[t=0.000s] IAT+ WININET.dll!InternetOpenW
+[t=0.000s] IAT+ WININET.dll!HttpSendRequestW
+[t=0.000s] iathook: swapped 68 IAT slots (winhttp+wininet+libHC+ws2+wsock+crypt32+k32)
+[t=0.000s] dbg: ws2 loaded
+[t=0.000s] dbg: ssp loaded
+[t=0.000s] dbg: crypt loaded
+[t=0.000s] dbg: adv loaded
+[t=0.000s] cert: fns ok
+[t=0.047s] cert: CSP RSA 2048 key ready (silent)
+[t=0.047s] cert: CACPK o ks=2 le=0x00000000
+[t=0.047s] cert: selfsigned der=958
+[t=0.047s] cert: user-Root deferred to first connection
+[t=0.047s] dbg: cert ok
+[t=0.047s] probe anon cred st=0x00000000
+[t=0.047s] probe pkg name starts M (wide ok)
+[t=0.062s] dbg: cred ok
+[t=0.062s] LanHookThread stage=8 (H1): redirect+server live, installing LogHelpers
+[t=0.062s] hook filter: only 4:LogHelper,5:LogHelper2 + TLS set
+[t=0.062s] LanHookThread: enter
+[t=0.062s] srv: H1 login server listening on 127.0.0.1:443 (TLS)
+[t=0.062s] self pid=0x0000000000003908
+[t=0.062s] self ppid=0x0000000000002514
+[t=0.062s] cmdline="AoE2DE_s.exe" 
+[t=0.062s] exepath=D:\Age of Empires II Definitive Edition\AoE2DE_s.exe
+[t=0.062s] near page=0x00007ff6b7af0000
+[t=0.062s] probe: OnAppSuspending byte readable =0x0000000000000040
+[t=0.062s] target clean, installing 0x00000001402bcb30
+[t=0.062s] installed LogHelper n=5 slot=0x00007ff6b7af0000
+[t=0.062s] target clean, installing 0x00000001402abc80
+[t=0.062s] installed LogHelper2 n=5 slot=0x00007ff6b7af0040
+[t=0.062s] target clean, installing 0x000000014292bc30
+[t=0.062s] installed CTXSetVerify n=6 slot=0x00007ff6b7af0080
+[t=0.062s] target clean, installing 0x000000014292ba40
+[t=0.062s] installed CTXSetStore n=5 slot=0x00007ff6b7af00c0
+[t=0.062s] target clean, installing 0x000000014297d450
+[t=0.062s] installed StoreAddCert n=5 slot=0x00007ff6b7af0100
+[t=0.062s] LanHookThread: install loop done
+[t=1.172s] HIT LogHelper #1: "WorldwideLoginService::WorldwideLoginService - initializing" r8=0x0000021113854440 r9=0x000000000000000c a5=0x0000021115e26370 a6=0x000002111e0892b0 ret=0x00007ff6d7260062
+[t=1.172s] CRYPT32 OpenStore prov= Root
+[t=1.172s] HIT LogHelper #2: "SystemCertsWin: Opened the CA system store." r8=0x000000a59d4fe088 s8="m" r9=0x0000000000000000 a5=0x000002111e0892b0 a6=0x000002111e088638 ret=0x00007ff6d735ea21
+[t=1.172s] CRYPT32 enum cert #1 enc=1 head=308203ba
+[t=1.172s] CRYPT32 cert name=pb-live-release6-api.worldsedgelink.com
+[t=1.172s] HIT StoreAddCert #1 rcx=0x000002111df516e0 rdx=0x000002111e046820 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #2 rcx=0x000002111df50e70 rdx=0x000002111df516e0 r9=0x000002111df50c90 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #3 rcx=0x000002111df50cc0 rdx=0x000002111e046700 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #4 rcx=0x000002111df50e70 rdx=0x000002111df50cc0 r9=0x000002111df50d20 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #5 rcx=0x000002111df50f30 rdx=0x000002111e046820 r9=0x0000000000000060 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #6 rcx=0x000002111df50f30 rdx=0x000002111e046700 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #7 rcx=0x000002111df51740 rdx=0x000002111df51110 r9=0x000002111df51110 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #8 rcx=0x000002111df51110 rdx=0x000002111e0464a0 r9=0x000002111df50fe6 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #9 rcx=0x000002111df51740 rdx=0x000002111df51560 r9=0x000002111df51560 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #10 rcx=0x000002111df51560 rdx=0x000002111e046460 r9=0x0000021116040f16 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #11 rcx=0x000002111df51080 rdx=0x000002111e046760 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #12 rcx=0x000002111df50c60 rdx=0x000002111df51080 r9=0x000002111df516e0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #13 rcx=0x000002111df50ea0 rdx=0x000002111e0465e0 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #14 rcx=0x000002111df50c60 rdx=0x000002111df50ea0 r9=0x000002111df51110 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #15 rcx=0x000002111df51530 rdx=0x000002111e046760 r9=0x0000000000000060 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #16 rcx=0x000002111df51530 rdx=0x000002111e0465e0 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #17 rcx=0x000002111df51740 rdx=0x000002111df51170 r9=0x000002111df51170 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #18 rcx=0x000002111df51170 rdx=0x000002111e046620 r9=0x000002111df51316 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #19 rcx=0x000002111df51740 rdx=0x000002111df51140 r9=0x000002111df51140 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #20 rcx=0x000002111df51140 rdx=0x000002111e0464a0 r9=0x0000021116040f76 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #21 rcx=0x000002111df51560 rdx=0x000002111df51590 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #22 rcx=0x000002111df51560 rdx=0x000002111df516e0 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #23 rcx=0x000002111df51560 rdx=0x000002111df51740 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #24 rcx=0x000002111df51560 rdx=0x000002111df50ea0 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT LogHelper #3: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" r9=0x000000a59d4fdf80 s9="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" a5=0x3063393162316164 a6=0x3078303d74657220 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=pb-live-release6-api.worldsedgelink.com
+[t=1.172s] HIT StoreAddCert #25 rcx=0x000002111df50f60 rdx=0x000002111e76b550 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #26 rcx=0x000002111df515f0 rdx=0x000002111df50f60 r9=0x000002111df50f00 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #27 rcx=0x000002111df50cc0 rdx=0x000002111e76b2d0 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #28 rcx=0x000002111df515f0 rdx=0x000002111df50cc0 r9=0x000002111df50db0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #29 rcx=0x000002111df51080 rdx=0x000002111e76b550 r9=0x0000000000000060 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #30 rcx=0x000002111df51080 rdx=0x000002111e76b2d0 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #31 rcx=0x000002111df510b0 rdx=0x000002111df51320 r9=0x000002111df51320 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #32 rcx=0x000002111df51320 rdx=0x000002111e76b750 r9=0x000002111df51166 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #33 rcx=0x000002111df510b0 rdx=0x000002111df517a0 r9=0x000002111df517a0 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #34 rcx=0x000002111df517a0 rdx=0x000002111e76b310 r9=0x0000021116041046 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #35 rcx=0x000002111df517a0 rdx=0x000002111e76b310 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #36 rcx=0x000002111df515f0 rdx=0x000002111df517a0 r9=0x000002111df512f0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #37 rcx=0x000002111df50cc0 rdx=0x000002111e76b8d0 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #38 rcx=0x000002111df515f0 rdx=0x000002111df50cc0 r9=0x000002111df50d50 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #39 rcx=0x000002111df50db0 rdx=0x000002111e76b310 r9=0x0000000000000060 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #40 rcx=0x000002111df50db0 rdx=0x000002111e76b8d0 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #41 rcx=0x000002111df50f90 rdx=0x000002111df51110 r9=0x000002111df51110 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #42 rcx=0x000002111df51110 rdx=0x000002111e76b130 r9=0x000002111df51196 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #43 rcx=0x000002111df50f90 rdx=0x000002111df51230 r9=0x000002111df51230 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #44 rcx=0x000002111df51230 rdx=0x000002111e76b590 r9=0x0000021116041076 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #45 rcx=0x000002111df50cc0 rdx=0x000002111df50f00 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #46 rcx=0x000002111df50cc0 rdx=0x000002111df517a0 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #47 rcx=0x000002111df50cc0 rdx=0x000002111df51170 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #48 rcx=0x000002111df50cc0 rdx=0x000002111df50f90 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT LogHelper #4: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" r9=0x000000a59d4fdf80 s9="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" a5=0x3063393162316164 a6=0x3078303d74657220 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=pb-live-release6-api.worldsedgelink.com
+[t=1.172s] HIT StoreAddCert #49 rcx=0x000002111df51f50 rdx=0x000002111e76b7b0 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #50 rcx=0x000002111df51ad0 rdx=0x000002111df51f50 r9=0x000002111df51a10 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #51 rcx=0x000002111df51800 rdx=0x000002111e76b4b0 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #52 rcx=0x000002111df51ad0 rdx=0x000002111df51800 r9=0x000002111df51920 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #53 rcx=0x000002111df511a0 rdx=0x000002111e76b7b0 r9=0x0000000000000060 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #54 rcx=0x000002111df511a0 rdx=0x000002111e76b4b0 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #55 rcx=0x000002111df51d40 rdx=0x000002111df51da0 r9=0x000002111df51da0 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #56 rcx=0x000002111df51da0 rdx=0x000002111e76b510 r9=0x000002111df519d6 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #57 rcx=0x000002111df51d40 rdx=0x000002111df51860 r9=0x000002111df51860 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #58 rcx=0x000002111df51860 rdx=0x000002111e76b530 r9=0x000002111d9639b6 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #59 rcx=0x000002111df518c0 rdx=0x000002111e76b7f0 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #60 rcx=0x000002111df51890 rdx=0x000002111df518c0 r9=0x000002111df51d40 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #61 rcx=0x000002111df51b30 rdx=0x000002111e76b930 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #62 rcx=0x000002111df51890 rdx=0x000002111df51b30 r9=0x000002111df51bc0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #63 rcx=0x000002111df51350 rdx=0x000002111e76b7f0 r9=0x0000000000000060 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #64 rcx=0x000002111df51350 rdx=0x000002111e76b930 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #65 rcx=0x000002111df51ef0 rdx=0x000002111df51950 r9=0x000002111df51950 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #66 rcx=0x000002111df51950 rdx=0x000002111e76be70 r9=0x000002111df51c16 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #67 rcx=0x000002111df51ef0 rdx=0x000002111df51c80 r9=0x000002111df51c80 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #68 rcx=0x000002111df51c80 rdx=0x000002111e76bb50 r9=0x000002111d9639e6 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #69 rcx=0x000002111df51ce0 rdx=0x000002111df51e30 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #70 rcx=0x000002111df51ce0 rdx=0x000002111df51cb0 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #71 rcx=0x000002111df51ce0 rdx=0x000002111df51800 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #72 rcx=0x000002111df51ce0 rdx=0x000002111df51dd0 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT LogHelper #5: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" r9=0x000000a59d4fdf80 s9="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" a5=0x3063393162316164 a6=0x3078303d74657220 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=pb-live-release6-api.worldsedgelink.com
+[t=1.172s] HIT StoreAddCert #73 rcx=0x000002111df51bf0 rdx=0x000002111e76bcf0 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #74 rcx=0x000002111df51ef0 rdx=0x000002111df51bf0 r9=0x000002111df51ec0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #75 rcx=0x000002111df51a70 rdx=0x000002111e76c030 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #76 rcx=0x000002111df51ef0 rdx=0x000002111df51a70 r9=0x000002111df51f20 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #77 rcx=0x000002111df51c80 rdx=0x000002111e76bcf0 r9=0x0000000000000060 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #78 rcx=0x000002111df51c80 rdx=0x000002111e76c030 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #79 rcx=0x000002111df51bc0 rdx=0x000002111df518c0 r9=0x000002111df518c0 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #80 rcx=0x000002111df518c0 rdx=0x000002111e76bd30 r9=0x000002111df51916 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #81 rcx=0x000002111df51bc0 rdx=0x000002111df51d40 r9=0x000002111df51d40 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #82 rcx=0x000002111df51d40 rdx=0x000002111e76bd90 r9=0x000002111d9639e6 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #83 rcx=0x000002111df51e00 rdx=0x000002111e76ba70 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #84 rcx=0x000002111df51a70 rdx=0x000002111df51e00 r9=0x000002111df51ec0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #85 rcx=0x000002111df51d40 rdx=0x000002111e76bc90 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #86 rcx=0x000002111df51a70 rdx=0x000002111df51d40 r9=0x000002111df51ef0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #87 rcx=0x000002111df51b60 rdx=0x000002111e76ba70 r9=0x0000000000000060 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #88 rcx=0x000002111df51b60 rdx=0x000002111e76bc90 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #89 rcx=0x000002111df51f50 rdx=0x000002111df51830 r9=0x000002111df51830 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #90 rcx=0x000002111df51830 rdx=0x000002111e76bbf0 r9=0x000002111df518e6 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #91 rcx=0x000002111df51f50 rdx=0x000002111df51920 r9=0x000002111df51920 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #92 rcx=0x000002111df51920 rdx=0x000002111e76bb90 r9=0x000002111d963b96 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #93 rcx=0x000002111df51ec0 rdx=0x000002111df51830 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #94 rcx=0x000002111df51ec0 rdx=0x000002111df51920 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #95 rcx=0x000002111df51ec0 rdx=0x000002111df51bc0 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #96 rcx=0x000002111df51ec0 rdx=0x000002111df51ef0 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT LogHelper #6: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" r9=0x000000a59d4fdf80 s9="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" a5=0x3063393162316164 a6=0x3078303d74657220 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=pb-live-release6-api.worldsedgelink.com
+[t=1.172s] HIT StoreAddCert #97 rcx=0x000002111df51a70 rdx=0x000002111e76b9f0 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #98 rcx=0x000002111df519b0 rdx=0x000002111df51a70 r9=0x000002111dbada80 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #99 rcx=0x000002111dbad210 rdx=0x000002111e76ba90 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #100 rcx=0x000002111df519b0 rdx=0x000002111dbad210 r9=0x000002111dbad7e0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #101 rcx=0x000002111dbad5d0 rdx=0x000002111e76b9f0 r9=0x0000000000000060 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #102 rcx=0x000002111dbad5d0 rdx=0x000002111e76ba90 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #103 rcx=0x000002111dbadba0 rdx=0x000002111dbad360 r9=0x000002111dbad360 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #104 rcx=0x000002111dbad360 rdx=0x000002111e76bb90 r9=0x000002111dbad146 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #105 rcx=0x000002111dbadba0 rdx=0x000002111dbadc30 r9=0x000002111dbadc30 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #106 rcx=0x000002111dbadc30 rdx=0x000002111e76bf90 r9=0x000002111d963c76 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #107 rcx=0x000002111dbad570 rdx=0x000002111e76bd10 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #108 rcx=0x000002111dbadba0 rdx=0x000002111dbad570 r9=0x000002111dbad450 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #109 rcx=0x000002111dbad900 rdx=0x000002111e76bb30 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #110 rcx=0x000002111dbadba0 rdx=0x000002111dbad900 r9=0x000002111dbad4b0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #111 rcx=0x000002111dbad2d0 rdx=0x000002111e76bd10 r9=0x0000000000000060 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #112 rcx=0x000002111dbad2d0 rdx=0x000002111e76bb30 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #113 rcx=0x000002111dbad480 rdx=0x000002111dbadc30 r9=0x000002111dbadc30 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #114 rcx=0x000002111dbadc30 rdx=0x000002111e76bbf0 r9=0x000002111dbad2c6 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #115 rcx=0x000002111dbad480 rdx=0x000002111dbad1b0 r9=0x000002111dbad1b0 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #116 rcx=0x000002111dbad1b0 rdx=0x000002111e76bd90 r9=0x000002111d963a16 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #117 rcx=0x000002111dbadba0 rdx=0x000002111dbad330 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #118 rcx=0x000002111dbadba0 rdx=0x000002111dbad510 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #119 rcx=0x000002111dbadba0 rdx=0x000002111dbad8d0 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #120 rcx=0x000002111dbadba0 rdx=0x000002111dbad480 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT LogHelper #7: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" r9=0x000000a59d4fdf80 s9="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" a5=0x6339316231616436 a6=0x78303d7465722030 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=pb-live-release6-api.worldsedgelink.com
+[t=1.172s] HIT StoreAddCert #121 rcx=0x000002111dbada50 rdx=0x000002111dbaf3f0 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #122 rcx=0x000002111dbad2a0 rdx=0x000002111dbada50 r9=0x000002111dbad9f0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #123 rcx=0x000002111dbad180 rdx=0x000002111dbaf270 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #124 rcx=0x000002111dbad2a0 rdx=0x000002111dbad180 r9=0x000002111dbadb40 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #125 rcx=0x000002111dbad360 rdx=0x000002111dbaf3f0 r9=0x0000000000000060 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #126 rcx=0x000002111dbad360 rdx=0x000002111dbaf270 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #127 rcx=0x000002111dbad450 rdx=0x000002111dbad540 r9=0x000002111dbad540 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #128 rcx=0x000002111dbad540 rdx=0x000002111dbaf410 r9=0x000002111dbad896 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #129 rcx=0x000002111dbad450 rdx=0x000002111dbad900 r9=0x000002111dbad900 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #130 rcx=0x000002111dbad900 rdx=0x000002111dbaf310 r9=0x000002111d963a26 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #131 rcx=0x000002111dbad3f0 rdx=0x000002111dbaf690 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #132 rcx=0x000002111dbad3c0 rdx=0x000002111dbad3f0 r9=0x000002111dbad450 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #133 rcx=0x000002111dbad630 rdx=0x000002111dbaf4f0 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #134 rcx=0x000002111dbad3c0 rdx=0x000002111dbad630 r9=0x000002111dbad240 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #135 rcx=0x000002111dbad7b0 rdx=0x000002111dbaf690 r9=0x0000000000000060 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #136 rcx=0x000002111dbad7b0 rdx=0x000002111dbaf4f0 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #137 rcx=0x000002111dbad570 rdx=0x000002111dbadab0 r9=0x000002111dbadab0 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #138 rcx=0x000002111dbadab0 rdx=0x000002111dbaf6b0 r9=0x000002111dbad8c6 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #139 rcx=0x000002111dbad570 rdx=0x000002111dbadb10 r9=0x000002111dbadb10 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #140 rcx=0x000002111dbadb10 rdx=0x000002111dbaf830 r9=0x000002111d963a26 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #141 rcx=0x000002111dbad120 rdx=0x000002111dbadab0 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #142 rcx=0x000002111dbad120 rdx=0x000002111dbadc00 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #143 rcx=0x000002111dbad120 rdx=0x000002111dbadb10 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #144 rcx=0x000002111dbad120 rdx=0x000002111dbad240 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT LogHelper #8: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" r9=0x000000a59d4fdf80 s9="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" a5=0x6339316231616436 a6=0x78303d7465722030 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=pb-live-release6-api.worldsedgelink.com
+[t=1.172s] HIT StoreAddCert #145 rcx=0x000002111dbad630 rdx=0x000002111dbaf310 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #146 rcx=0x000002111dbad8a0 rdx=0x000002111dbad630 r9=0x000002111dbad150 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #147 rcx=0x000002111dbad7e0 rdx=0x000002111dbaf770 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #148 rcx=0x000002111dbad8a0 rdx=0x000002111dbad7e0 r9=0x000002111dbadb40 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #149 rcx=0x000002111dbad450 rdx=0x000002111dbaf310 r9=0x0000000000000060 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #150 rcx=0x000002111dbad450 rdx=0x000002111dbaf770 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #151 rcx=0x000002111dbad690 rdx=0x000002111dbadc60 r9=0x000002111dbadc60 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #152 rcx=0x000002111dbadc60 rdx=0x000002111dbaf170 r9=0x000002111dbad746 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #153 rcx=0x000002111dbad690 rdx=0x000002111dbad210 r9=0x000002111dbad210 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #154 rcx=0x000002111dbad210 rdx=0x000002111dbaf190 r9=0x000002111d963b16 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #155 rcx=0x000002111dbadc60 rdx=0x000002111dbaf370 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #156 rcx=0x000002111dbadb40 rdx=0x000002111dbadc60 r9=0x000002111dbad210 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #157 rcx=0x000002111dbad090 rdx=0x000002111dbaf350 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #158 rcx=0x000002111dbadb40 rdx=0x000002111dbad090 r9=0x000002111dbad900 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #159 rcx=0x000002111dbad0f0 rdx=0x000002111dbaf370 r9=0x0000000000000060 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #160 rcx=0x000002111dbad0f0 rdx=0x000002111dbaf350 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #161 rcx=0x000002111dbad150 rdx=0x000002111dbad1e0 r9=0x000002111dbad1e0 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #162 rcx=0x000002111dbad1e0 rdx=0x000002111dbaf390 r9=0x000002111dbad716 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #163 rcx=0x000002111dbad150 rdx=0x000002111dbad750 r9=0x000002111dbad750 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #164 rcx=0x000002111dbad750 rdx=0x000002111dbaf250 r9=0x000002111d963c86 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #165 rcx=0x000002111dbad750 rdx=0x000002111dbad6f0 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #166 rcx=0x000002111dbad750 rdx=0x000002111dbad720 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #167 rcx=0x000002111dbad750 rdx=0x000002111dbad150 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #168 rcx=0x000002111dbad750 rdx=0x000002111dbad7e0 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT LogHelper #9: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" r9=0x000000a59d4fdf80 s9="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" a5=0x6339316231616436 a6=0x78303d7465722030 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=pb-live-release6-api.worldsedgelink.com
+[t=1.172s] HIT StoreAddCert #169 rcx=0x000002111dbae650 rdx=0x000002111dbaf730 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #170 rcx=0x000002111dbad1e0 rdx=0x000002111dbae650 r9=0x000002111dbae4a0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #171 rcx=0x000002111dbae5c0 rdx=0x000002111dbaf3d0 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #172 rcx=0x000002111dbad1e0 rdx=0x000002111dbae5c0 r9=0x000002111dbae080 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #173 rcx=0x000002111dbad1b0 rdx=0x000002111dbaf730 r9=0x0000000000000060 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #174 rcx=0x000002111dbad1b0 rdx=0x000002111dbaf3d0 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #175 rcx=0x000002111dbae530 rdx=0x000002111dbae590 r9=0x000002111dbae590 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #176 rcx=0x000002111dbae590 rdx=0x000002111dbaf4d0 r9=0x000002111dbae6a6 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #177 rcx=0x000002111dbae530 rdx=0x000002111dbae560 r9=0x000002111dbae560 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #178 rcx=0x000002111dbae560 rdx=0x000002111dbaf8d0 r9=0x000002111d963cb6 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #179 rcx=0x000002111dbadf30 rdx=0x000002111dbaf970 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #180 rcx=0x000002111dbad1e0 rdx=0x000002111dbadf30 r9=0x000002111dbadf60 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #181 rcx=0x000002111dbadcc0 rdx=0x000002111dbafb90 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #182 rcx=0x000002111dbad1e0 rdx=0x000002111dbadcc0 r9=0x000002111dbae3b0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #183 rcx=0x000002111dbad8a0 rdx=0x000002111dbaf970 r9=0x0000000000000060 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #184 rcx=0x000002111dbad8a0 rdx=0x000002111dbafb90 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #185 rcx=0x000002111dbade10 rdx=0x000002111dbae440 r9=0x000002111dbae440 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #186 rcx=0x000002111dbae440 rdx=0x000002111dbafe30 r9=0x000002111dbae3a6 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #187 rcx=0x000002111dbade10 rdx=0x000002111dbae470 r9=0x000002111dbae470 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #188 rcx=0x000002111dbae470 rdx=0x000002111dbafeb0 r9=0x0000021116040b26 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #189 rcx=0x000002111dbae080 rdx=0x000002111dbae350 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #190 rcx=0x000002111dbae080 rdx=0x000002111dbae740 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #191 rcx=0x000002111dbae080 rdx=0x000002111dbae4a0 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #192 rcx=0x000002111dbae080 rdx=0x000002111dbae6b0 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT LogHelper #10: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" r9=0x000000a59d4fdf80 s9="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" a5=0x6339316231616436 a6=0x78303d7465722030 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=pb-live-release6-api.worldsedgelink.com
+[t=1.172s] HIT StoreAddCert #193 rcx=0x000002111dbadfc0 rdx=0x000002111dbaf910 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #194 rcx=0x000002111dbade70 rdx=0x000002111dbadfc0 r9=0x000002111dbaded0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #195 rcx=0x000002111dbadd80 rdx=0x000002111dbaf9b0 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #196 rcx=0x000002111dbade70 rdx=0x000002111dbadd80 r9=0x000002111dbae6e0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #197 rcx=0x000002111dbae320 rdx=0x000002111dbaf910 r9=0x0000000000000060 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #198 rcx=0x000002111dbae320 rdx=0x000002111dbaf9b0 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #199 rcx=0x000002111dbae200 rdx=0x000002111dbae290 r9=0x000002111dbae290 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #200 rcx=0x000002111dbae290 rdx=0x000002111dbafd10 r9=0x000002111dbae256 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #201 rcx=0x000002111dbae200 rdx=0x000002111dbae7d0 r9=0x000002111dbae7d0 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #202 rcx=0x000002111dbae7d0 rdx=0x000002111dbafa50 r9=0x000002111e76d806 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #203 rcx=0x000002111dbadea0 rdx=0x000002111dbafef0 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #204 rcx=0x000002111dbae470 rdx=0x000002111dbadea0 r9=0x000002111dbae1d0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #205 rcx=0x000002111dbadff0 rdx=0x000002111dbaff10 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #206 rcx=0x000002111dbae470 rdx=0x000002111dbadff0 r9=0x000002111dbae7d0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #207 rcx=0x000002111dbae200 rdx=0x000002111dbafef0 r9=0x0000000000000060 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #208 rcx=0x000002111dbae200 rdx=0x000002111dbaff10 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #209 rcx=0x000002111dbae380 rdx=0x000002111dbae260 r9=0x000002111dbae260 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #210 rcx=0x000002111dbae260 rdx=0x000002111dbafd90 r9=0x000002111dbae106 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #211 rcx=0x000002111dbae380 rdx=0x000002111dbae560 r9=0x000002111dbae560 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #212 rcx=0x000002111dbae560 rdx=0x000002111dbaff70 r9=0x000002111e76d7a6 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #213 rcx=0x000002111dbadd80 rdx=0x000002111dbade40 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #214 rcx=0x000002111dbadd80 rdx=0x000002111dbae110 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #215 rcx=0x000002111dbadd80 rdx=0x000002111dbae470 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #216 rcx=0x000002111dbadd80 rdx=0x000002111dbae590 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT LogHelper #11: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" r9=0x000000a59d4fdf80 s9="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" a5=0x6339316231616436 a6=0x78303d7465722030 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=pb-live-release6-api.worldsedgelink.com
+[t=1.172s] HIT StoreAddCert #217 rcx=0x000002111dbae5c0 rdx=0x000002111dbafa70 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #218 rcx=0x000002111dbae770 rdx=0x000002111dbae5c0 r9=0x000002111dbadea0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #219 rcx=0x000002111dbae290 rdx=0x000002111dbb0090 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #220 rcx=0x000002111dbae770 rdx=0x000002111dbae290 r9=0x000002111dbae4d0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #221 rcx=0x000002111dbae5f0 rdx=0x000002111dbafa70 r9=0x0000000000000060 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #222 rcx=0x000002111dbae5f0 rdx=0x000002111dbb0090 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #223 rcx=0x000002111dbae680 rdx=0x000002111dbade70 r9=0x000002111dbade70 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #224 rcx=0x000002111dbade70 rdx=0x000002111dbaf8d0 r9=0x000002111dbadf86 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #225 rcx=0x000002111dbae680 rdx=0x000002111dbaded0 r9=0x000002111dbaded0 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #226 rcx=0x000002111dbaded0 rdx=0x000002111dbaf950 r9=0x000002111e76da36 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #227 rcx=0x000002111dbae5c0 rdx=0x000002111dbafd70 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #228 rcx=0x000002111dbade70 rdx=0x000002111dbae5c0 r9=0x000002111dbae620 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #229 rcx=0x000002111dbae680 rdx=0x000002111dbafd50 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #230 rcx=0x000002111dbade70 rdx=0x000002111dbae680 r9=0x000002111dbae4d0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #231 rcx=0x000002111dbae770 rdx=0x000002111dbafd70 r9=0x0000000000000060 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #232 rcx=0x000002111dbae770 rdx=0x000002111dbafd50 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #233 rcx=0x000002111dbae1d0 rdx=0x000002111dbae410 r9=0x000002111dbae410 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #234 rcx=0x000002111dbae410 rdx=0x000002111dbb00b0 r9=0x000002111dbadf56 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #235 rcx=0x000002111dbae1d0 rdx=0x000002111dbadcc0 r9=0x000002111dbadcc0 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #236 rcx=0x000002111dbadcc0 rdx=0x000002111dbafdf0 r9=0x000002111e76db16 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #237 rcx=0x000002111dbaddb0 rdx=0x000002111dbadcc0 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #238 rcx=0x000002111dbaddb0 rdx=0x000002111dbadea0 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #239 rcx=0x000002111dbaddb0 rdx=0x000002111dbae0e0 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #240 rcx=0x000002111dbaddb0 rdx=0x000002111dbae4d0 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT LogHelper #12: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" r9=0x000000a59d4fdf80 s9="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" a5=0x6339316231616436 a6=0x78303d7465722030 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=Titanium Root Certificate Authority
+[t=1.172s] HIT StoreAddCert #241 rcx=0x000002111dbae680 rdx=0x000002111dbb0450 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #242 rcx=0x000002111dbaded0 rdx=0x000002111dbae680 r9=0x000002111dbadd20 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #243 rcx=0x000002111dbadde0 rdx=0x000002111dbb0450 r9=0x0000000000000040 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #244 rcx=0x000002111dbade70 rdx=0x000002111dbae2f0 r9=0x000002111dbae2f0 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #245 rcx=0x000002111dbae2f0 rdx=0x000002111dbb05d0 r9=0x0000000000000040 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #246 rcx=0x000002111dbae680 rdx=0x000002111dbb0130 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #247 rcx=0x000002111dbae2f0 rdx=0x000002111dbae680 r9=0x000002111dbadd50 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #248 rcx=0x000002111dbaded0 rdx=0x000002111dbb0130 r9=0x0000000000000040 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #249 rcx=0x000002111dbaefe0 rdx=0x000002111dbaeb00 r9=0x000002111dbaeb00 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #250 rcx=0x000002111dbaeb00 rdx=0x000002111dbb0430 r9=0x0000000000000040 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #251 rcx=0x000002111dbade70 rdx=0x000002111dbae2f0 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #252 rcx=0x000002111dbade70 rdx=0x000002111dbaef20 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT LogHelper #13: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/CN=Titanium Root Certificate Authority" r9=0x000000a59d4fdf80 s9="/CN=Titanium Root Certificate Authority" a5=0x6339316231616436 a6=0x78303d7465722030 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=pb-live-release6-api.worldsedgelink.com
+[t=1.172s] HIT StoreAddCert #253 rcx=0x000002111dbaef80 rdx=0x000002111dbb0330 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #254 rcx=0x000002111dbae9b0 rdx=0x000002111dbaef80 r9=0x000002111dbaee00 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #255 rcx=0x000002111dbaefb0 rdx=0x000002111dbb0850 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #256 rcx=0x000002111dbae9b0 rdx=0x000002111dbaefb0 r9=0x000002111dbaee60 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #257 rcx=0x000002111dbae980 rdx=0x000002111dbb0330 r9=0x0000000000000060 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #258 rcx=0x000002111dbae980 rdx=0x000002111dbb0850 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #259 rcx=0x000002111dbaef50 rdx=0x000002111dbae9e0 r9=0x000002111dbae9e0 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #260 rcx=0x000002111dbae9e0 rdx=0x000002111dbb0190 r9=0x000002111dbaeeb6 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #261 rcx=0x000002111dbaef50 rdx=0x000002111dbaeef0 r9=0x000002111dbaeef0 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #262 rcx=0x000002111dbaeef0 rdx=0x000002111dbb0670 r9=0x000002111e76d926 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #263 rcx=0x000002111dbaec80 rdx=0x000002111dbb0550 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #264 rcx=0x000002111dbaea10 rdx=0x000002111dbaec80 r9=0x000002111dbaef80 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #265 rcx=0x000002111dbae920 rdx=0x000002111dbb0270 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #266 rcx=0x000002111dbaea10 rdx=0x000002111dbae920 r9=0x000002111dbaeb60 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #267 rcx=0x000002111dbaed70 rdx=0x000002111dbb0550 r9=0x0000000000000060 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #268 rcx=0x000002111dbaed70 rdx=0x000002111dbb0270 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #269 rcx=0x000002111dbaed10 rdx=0x000002111dbaebc0 r9=0x000002111dbaebc0 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #270 rcx=0x000002111dbaebc0 rdx=0x000002111dbb0390 r9=0x000002111dbaec76 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #271 rcx=0x000002111dbaed10 rdx=0x000002111dbaefb0 r9=0x000002111dbaefb0 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #272 rcx=0x000002111dbaefb0 rdx=0x000002111dbb03b0 r9=0x000002111e76d9c6 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #273 rcx=0x000002111dbaebc0 rdx=0x000002111dbaeec0 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #274 rcx=0x000002111dbaebc0 rdx=0x000002111dbaec20 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #275 rcx=0x000002111dbaebc0 rdx=0x000002111dbaec50 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #276 rcx=0x000002111dbaebc0 rdx=0x000002111dbaee00 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT LogHelper #14: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" r9=0x000000a59d4fdf80 s9="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" a5=0x6339316231616436 a6=0x78303d7465722030 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=pb-live-release6-api.worldsedgelink.com
+[t=1.172s] HIT StoreAddCert #277 rcx=0x000002111dbaed40 rdx=0x000002111dbb03d0 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #278 rcx=0x000002111dbaeef0 rdx=0x000002111dbaed40 r9=0x000002111dbaec80 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #279 rcx=0x000002111dbaed10 rdx=0x000002111dbb0690 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #280 rcx=0x000002111dbaeef0 rdx=0x000002111dbaed10 r9=0x000002111dbaee60 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #281 rcx=0x000002111dbaefe0 rdx=0x000002111dbb03d0 r9=0x0000000000000060 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #282 rcx=0x000002111dbaefe0 rdx=0x000002111dbb0690 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #283 rcx=0x000002111dbae890 rdx=0x000002111dbae8f0 r9=0x000002111dbae8f0 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #284 rcx=0x000002111dbae8f0 rdx=0x000002111dbb00d0 r9=0x000002111dbae9d6 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #285 rcx=0x000002111dbae890 rdx=0x000002111df518c0 r9=0x000002111df518c0 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #286 rcx=0x000002111df518c0 rdx=0x000002111dbb0190 r9=0x000002111e76da86 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #287 rcx=0x000002111df51950 rdx=0x000002111dbb0750 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #288 rcx=0x000002111df518c0 rdx=0x000002111df51950 r9=0x000002111df51f50 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #289 rcx=0x000002111df51980 rdx=0x000002111dbb0110 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #290 rcx=0x000002111df518c0 rdx=0x000002111df51980 r9=0x000002111df518f0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #291 rcx=0x000002111dbaec80 rdx=0x000002111dbb0750 r9=0x0000000000000060 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #292 rcx=0x000002111dbaec80 rdx=0x000002111dbb0110 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #293 rcx=0x000002111dbaed40 rdx=0x000002111dbae890 r9=0x000002111dbae890 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #294 rcx=0x000002111dbae890 rdx=0x000002111dbb0190 r9=0x000002111dbaea36 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #295 rcx=0x000002111dbaed40 rdx=0x000002111dbaef80 r9=0x000002111dbaef80 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #296 rcx=0x000002111dbaef80 rdx=0x000002111dbb0e30 r9=0x000002111e76d9b6 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #297 rcx=0x000002111dbaed40 rdx=0x000002111dbaee60 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #298 rcx=0x000002111dbaed40 rdx=0x000002111dbaef80 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #299 rcx=0x000002111dbaed40 rdx=0x000002111dbae890 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #300 rcx=0x000002111dbaed40 rdx=0x000002111dbae8f0 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT LogHelper #15: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" r9=0x000000a59d4fdf80 s9="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" a5=0x6339316231616436 a6=0x78303d7465722030 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=pb-live-release6-api.worldsedgelink.com
+[t=1.172s] HIT StoreAddCert #301 rcx=0x000002111dd0a760 rdx=0x000002111dbb0f10 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #302 rcx=0x000002111df51980 rdx=0x000002111dd0a760 r9=0x000002111dd0a370 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #303 rcx=0x000002111dd0ab20 rdx=0x000002111dbb1030 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #304 rcx=0x000002111df51980 rdx=0x000002111dd0ab20 r9=0x000002111dd0aa90 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #305 rcx=0x000002111dd0a850 rdx=0x000002111dbb0f10 r9=0x0000000000000060 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #306 rcx=0x000002111dd0a850 rdx=0x000002111dbb1030 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #307 rcx=0x000002111dd0ac10 rdx=0x000002111dd0a100 r9=0x000002111dd0a100 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #308 rcx=0x000002111dd0a100 rdx=0x000002111dbb0f50 r9=0x000002111dd0a5a6 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #309 rcx=0x000002111dd0ac10 rdx=0x000002111dd0a8b0 r9=0x000002111dd0a8b0 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #310 rcx=0x000002111dd0a8b0 rdx=0x000002111dbb0c70 r9=0x000002111e76d9e6 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #311 rcx=0x000002111dd0ab80 rdx=0x000002111dbb0ab0 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #312 rcx=0x000002111dd0a250 rdx=0x000002111dd0ab80 r9=0x000002111dd0a280 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #313 rcx=0x000002111dd0a520 rdx=0x000002111dbb1090 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #314 rcx=0x000002111dd0a250 rdx=0x000002111dd0a520 r9=0x000002111dd0a8b0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #315 rcx=0x000002111dd0aaf0 rdx=0x000002111dbb0ab0 r9=0x0000000000000060 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #316 rcx=0x000002111dd0aaf0 rdx=0x000002111dbb1090 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #317 rcx=0x000002111dd0a550 rdx=0x000002111dd0a2b0 r9=0x000002111dd0a2b0 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #318 rcx=0x000002111dd0a2b0 rdx=0x000002111dbb1050 r9=0x000002111dd0a996 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #319 rcx=0x000002111dd0a550 rdx=0x000002111dd0a910 r9=0x000002111dd0a910 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #320 rcx=0x000002111dd0a910 rdx=0x000002111dbb0ef0 r9=0x000002111e76db06 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #321 rcx=0x000002111dd0a160 rdx=0x000002111dd0a970 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #322 rcx=0x000002111dd0a160 rdx=0x000002111dd0a8e0 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #323 rcx=0x000002111dd0a160 rdx=0x000002111dd0a580 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #324 rcx=0x000002111dd0a160 rdx=0x000002111dd0ab80 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT LogHelper #16: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" r9=0x000000a59d4fdf80 s9="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" a5=0x6339316231616436 a6=0x78303d7465722030 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=pb-live-release6-api.worldsedgelink.com
+[t=1.172s] HIT StoreAddCert #325 rcx=0x000002111dd0a250 rdx=0x000002111dbb10b0 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #326 rcx=0x000002111dd0aac0 rdx=0x000002111dd0a250 r9=0x000002111dd0a310 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #327 rcx=0x000002111dd0a5e0 rdx=0x000002111dbb0d10 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #328 rcx=0x000002111dd0aac0 rdx=0x000002111dd0a5e0 r9=0x000002111dd0a9d0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #329 rcx=0x000002111dd0a2e0 rdx=0x000002111dbb10b0 r9=0x0000000000000060 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #330 rcx=0x000002111dd0a2e0 rdx=0x000002111dbb0d10 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #331 rcx=0x000002111dd0a9a0 rdx=0x000002111dd0a280 r9=0x000002111dd0a280 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #332 rcx=0x000002111dd0a280 rdx=0x000002111dbb0b50 r9=0x000002111dd0a486 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #333 rcx=0x000002111dd0a9a0 rdx=0x000002111dd0ac10 r9=0x000002111dd0ac10 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #334 rcx=0x000002111dd0ac10 rdx=0x000002111dbb0c10 r9=0x000002111e76da76 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #335 rcx=0x000002111dd0aa30 rdx=0x000002111dbb0a10 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #336 rcx=0x000002111dd0ac10 rdx=0x000002111dd0aa30 r9=0x000002111dd0a340 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #337 rcx=0x000002111dd0a910 rdx=0x000002111dbb09f0 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #338 rcx=0x000002111dd0ac10 rdx=0x000002111dd0a910 r9=0x000002111dd0a940 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #339 rcx=0x000002111dd0a6a0 rdx=0x000002111dbb0a10 r9=0x0000000000000060 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #340 rcx=0x000002111dd0a6a0 rdx=0x000002111dbb09f0 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #341 rcx=0x000002111dd0a9a0 rdx=0x000002111dd0a760 r9=0x000002111dd0a760 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #342 rcx=0x000002111dd0a760 rdx=0x000002111dbb0b50 r9=0x000002111dd0a426 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #343 rcx=0x000002111dd0a9a0 rdx=0x000002111dd0a790 r9=0x000002111dd0a790 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #344 rcx=0x000002111dd0a790 rdx=0x000002111dbb08f0 r9=0x000002111e76da76 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #345 rcx=0x000002111dd0a9a0 rdx=0x000002111dd0a790 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #346 rcx=0x000002111dd0a9a0 rdx=0x000002111dd0aa30 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #347 rcx=0x000002111dd0a9a0 rdx=0x000002111dd0a910 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #348 rcx=0x000002111dd0a9a0 rdx=0x000002111dd0a2b0 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT LogHelper #17: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" r9=0x000000a59d4fdf80 s9="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" a5=0x0000000000000000 a6=0x000000a59d4fdbb0 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=pb-live-release6-api.worldsedgelink.com
+[t=1.172s] HIT StoreAddCert #349 rcx=0x000002111dd0a310 rdx=0x000002111dbb1690 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #350 rcx=0x000002111dd0a0d0 rdx=0x000002111dd0a310 r9=0x000002111dd0a1c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #351 rcx=0x000002111dd0aac0 rdx=0x000002111dbb1130 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #352 rcx=0x000002111dd0a0d0 rdx=0x000002111dd0aac0 r9=0x000002111dd0a3d0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #353 rcx=0x000002111dd0a400 rdx=0x000002111dbb1690 r9=0x0000000000000060 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #354 rcx=0x000002111dd0a400 rdx=0x000002111dbb1130 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #355 rcx=0x000002111dd0a760 rdx=0x000002111dd0a4c0 r9=0x000002111dd0a4c0 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #356 rcx=0x000002111dd0a4c0 rdx=0x000002111dbb10f0 r9=0x000002111dd0a606 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #357 rcx=0x000002111dd0a760 rdx=0x000002111dd0a670 r9=0x000002111dd0a670 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #358 rcx=0x000002111dd0a670 rdx=0x000002111dbb1390 r9=0x000002111e76da86 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #359 rcx=0x000002111dd0a310 rdx=0x000002111dbb11d0 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #360 rcx=0x000002111dd0a0d0 rdx=0x000002111dd0a310 r9=0x000002111dd0a940 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #361 rcx=0x000002111dd0a760 rdx=0x000002111dbb11f0 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #362 rcx=0x000002111dd0a0d0 rdx=0x000002111dd0a760 r9=0x000002111dd0ab50 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #363 rcx=0x000002111dd0a3d0 rdx=0x000002111dbb11d0 r9=0x0000000000000060 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #364 rcx=0x000002111dd0a3d0 rdx=0x000002111dbb11f0 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #365 rcx=0x000002111dd0a4c0 rdx=0x000002111dd0a7f0 r9=0x000002111dd0a7f0 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #366 rcx=0x000002111dd0a7f0 rdx=0x000002111dbb1530 r9=0x000002111dd0a516 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #367 rcx=0x000002111dd0a4c0 rdx=0x000002111dd0aa00 r9=0x000002111dd0aa00 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #368 rcx=0x000002111dd0aa00 rdx=0x000002111dbb1370 r9=0x000002111e76d8a6 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #369 rcx=0x000002111dd0a310 rdx=0x000002111dd0a0d0 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #370 rcx=0x000002111dd0a310 rdx=0x000002111dd0a5e0 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #371 rcx=0x000002111dd0a310 rdx=0x000002111dd0a8b0 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #372 rcx=0x000002111dd0a310 rdx=0x000002111dd0a4f0 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT LogHelper #18: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" r9=0x000000a59d4fdf80 s9="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" a5=0x6339316231616436 a6=0x78303d7465722030 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=pb-live-release6-api.worldsedgelink.com
+[t=1.172s] HIT StoreAddCert #373 rcx=0x000002111dd0acd0 rdx=0x000002111dbb1830 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #374 rcx=0x000002111dd0aa00 rdx=0x000002111dd0acd0 r9=0x000002111dd0b000 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #375 rcx=0x000002111dd0b7e0 rdx=0x000002111dbb1850 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #376 rcx=0x000002111dd0aa00 rdx=0x000002111dd0b7e0 r9=0x000002111dd0ae20 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #377 rcx=0x000002111dd0a6d0 rdx=0x000002111dbb1830 r9=0x0000000000000060 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #378 rcx=0x000002111dd0a6d0 rdx=0x000002111dbb1850 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #379 rcx=0x000002111dd0af70 rdx=0x000002111dd0b450 r9=0x000002111dd0b450 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #380 rcx=0x000002111dd0b450 rdx=0x000002111dbb1730 r9=0x000002111dd0b3b6 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #381 rcx=0x000002111dd0af70 rdx=0x000002111dd0aeb0 r9=0x000002111dd0aeb0 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #382 rcx=0x000002111dd0aeb0 rdx=0x000002111dbb1310 r9=0x000002111e76d936 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #383 rcx=0x000002111dd0b030 rdx=0x000002111dbb14d0 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #384 rcx=0x000002111dd0aa00 rdx=0x000002111dd0b030 r9=0x000002111dd0b3f0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #385 rcx=0x000002111dd0aca0 rdx=0x000002111dbb1390 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #386 rcx=0x000002111dd0aa00 rdx=0x000002111dd0aca0 r9=0x000002111dd0b660 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #387 rcx=0x000002111dd0a760 rdx=0x000002111dbb14d0 r9=0x0000000000000060 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #388 rcx=0x000002111dd0a760 rdx=0x000002111dbb1390 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #389 rcx=0x000002111dd0b180 rdx=0x000002111dd0b210 r9=0x000002111dd0b210 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #390 rcx=0x000002111dd0b210 rdx=0x000002111dbb1750 r9=0x000002111dd0b6b6 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #391 rcx=0x000002111dd0b180 rdx=0x000002111dd0adf0 r9=0x000002111dd0adf0 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #392 rcx=0x000002111dd0adf0 rdx=0x000002111dbb1890 r9=0x000002111e76d936 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #393 rcx=0x000002111dd0afa0 rdx=0x000002111dd0b180 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #394 rcx=0x000002111dd0afa0 rdx=0x000002111dd0b150 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #395 rcx=0x000002111dd0afa0 rdx=0x000002111dd0b2a0 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #396 rcx=0x000002111dd0afa0 rdx=0x000002111dd0b390 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT LogHelper #19: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" r9=0x000000a59d4fdf80 s9="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" a5=0x6339316231616436 a6=0x78303d7465722030 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=pb-live-release6-api.worldsedgelink.com
+[t=1.172s] HIT StoreAddCert #397 rcx=0x000002111dd0aca0 rdx=0x000002111dbb12b0 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #398 rcx=0x000002111dd0b300 rdx=0x000002111dd0aca0 r9=0x000002111dd0adf0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #399 rcx=0x000002111dd0af40 rdx=0x000002111dbb17d0 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #400 rcx=0x000002111dd0b300 rdx=0x000002111dd0af40 r9=0x000002111dd0b120 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #401 rcx=0x000002111dd0ae20 rdx=0x000002111dbb12b0 r9=0x0000000000000060 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #402 rcx=0x000002111dd0ae20 rdx=0x000002111dbb17d0 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #403 rcx=0x000002111dd0af70 rdx=0x000002111dd0b5a0 r9=0x000002111dd0b5a0 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #404 rcx=0x000002111dd0b5a0 rdx=0x000002111dbb10d0 r9=0x000002111dd0b566 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #405 rcx=0x000002111dd0af70 rdx=0x000002111dd0b480 r9=0x000002111dd0b480 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #406 rcx=0x000002111dd0b480 rdx=0x000002111dbb1150 r9=0x000002111e76d7a6 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #407 rcx=0x000002111dd0b7e0 rdx=0x000002111dbb1110 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #408 rcx=0x000002111dd0ae50 rdx=0x000002111dd0b7e0 r9=0x000002111dd0b5a0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #409 rcx=0x000002111dd0ad60 rdx=0x000002111dbb1150 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #410 rcx=0x000002111dd0ae50 rdx=0x000002111dd0ad60 r9=0x000002111dd0b5d0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #411 rcx=0x000002111dd0aeb0 rdx=0x000002111dbb1110 r9=0x0000000000000060 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #412 rcx=0x000002111dd0aeb0 rdx=0x000002111dbb1150 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #413 rcx=0x000002111dd0afd0 rdx=0x000002111dd0aee0 r9=0x000002111dd0aee0 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #414 rcx=0x000002111dd0aee0 rdx=0x000002111dbb1290 r9=0x000002111dd0acf6 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #415 rcx=0x000002111dd0afd0 rdx=0x000002111dd0af10 r9=0x000002111dd0af10 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #416 rcx=0x000002111dd0af10 rdx=0x000002111dbb1510 r9=0x000002111e76d8e6 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #417 rcx=0x000002111dd0b1e0 rdx=0x000002111dd0b360 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #418 rcx=0x000002111dd0b1e0 rdx=0x000002111dd0b5a0 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #419 rcx=0x000002111dd0b1e0 rdx=0x000002111dd0acd0 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #420 rcx=0x000002111dd0b1e0 rdx=0x000002111dd0b690 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT LogHelper #20: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" r9=0x000000a59d4fdf80 s9="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" a5=0x6339316231616436 a6=0x78303d7465722030 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=Amazon Root CA 4
+[t=1.172s] HIT StoreAddCert #421 rcx=0x000002111dd0b840 rdx=0x000002111dbb1b70 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #422 rcx=0x000002111dd0b6f0 rdx=0x000002111dd0b840 r9=0x000002111dd0af10 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #423 rcx=0x000002111dd0b7b0 rdx=0x000002111dbb1b30 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #424 rcx=0x000002111dd0b6f0 rdx=0x000002111dd0b7b0 r9=0x000002111dd0b4b0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #425 rcx=0x000002111dd0b4e0 rdx=0x000002111dbb2070 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #426 rcx=0x000002111dd0b6f0 rdx=0x000002111dd0b4e0 r9=0x000002111dd0b090 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #427 rcx=0x000002111dd0b210 rdx=0x000002111dbb1b70 r9=0x0000000000000040 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #428 rcx=0x000002111dd0b210 rdx=0x000002111dbb1b30 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #429 rcx=0x000002111dd0b210 rdx=0x000002111dbb2070 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #430 rcx=0x000002111dd0b720 rdx=0x000002111dd0af40 r9=0x000002111dd0af40 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #431 rcx=0x000002111dd0af40 rdx=0x000002111dbb1970 r9=0x000002111e76d8a1 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #432 rcx=0x000002111dd0b720 rdx=0x000002111dd0b6c0 r9=0x000002111dd0b6c0 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #433 rcx=0x000002111dd0b6c0 rdx=0x000002111dbb1e70 r9=0x000002111e76d8e5 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #434 rcx=0x000002111dd0b720 rdx=0x000002111dd0b780 r9=0x000002111dd0b780 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #435 rcx=0x000002111dd0b780 rdx=0x000002111dbb1c70 r9=0x000002111dbb1b5f ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #436 rcx=0x000002111dd0af10 rdx=0x000002111dbb18f0 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #437 rcx=0x000002111dd0b480 rdx=0x000002111dd0af10 r9=0x000002111dd0b630 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #438 rcx=0x000002111dd0af40 rdx=0x000002111dbb1e30 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #439 rcx=0x000002111dd0b480 rdx=0x000002111dd0af40 r9=0x000002111dd0ad60 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #440 rcx=0x000002111dd0b4b0 rdx=0x000002111dbb1c30 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #441 rcx=0x000002111dd0b480 rdx=0x000002111dd0b4b0 r9=0x000002111dd0b660 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #442 rcx=0x000002111dd0ad00 rdx=0x000002111dbb18f0 r9=0x0000000000000040 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #443 rcx=0x000002111dd0ad00 rdx=0x000002111dbb1e30 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #444 rcx=0x000002111dd0ad00 rdx=0x000002111dbb1c30 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #445 rcx=0x000002111dd0b6c0 rdx=0x000002111dd0b6f0 r9=0x000002111dd0b6f0 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #446 rcx=0x000002111dd0b6f0 rdx=0x000002111dbb1a70 r9=0x000002111e76d8e1 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #447 rcx=0x000002111dd0b6c0 rdx=0x000002111dd0af70 r9=0x000002111dd0af70 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #448 rcx=0x000002111dd0af70 rdx=0x000002111dbb1e50 r9=0x000002111e76d9c5 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #449 rcx=0x000002111dd0b6c0 rdx=0x000002111dd0b330 r9=0x000002111dd0b330 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #450 rcx=0x000002111dd0b330 rdx=0x000002111dbb1a90 r9=0x000002111dbb193f ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #451 rcx=0x000002111dd0b630 rdx=0x000002111dd0b4b0 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #452 rcx=0x000002111dd0b630 rdx=0x000002111dd0b660 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #453 rcx=0x000002111dd0b630 rdx=0x000002111dd0b780 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT LogHelper #21: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=US/O=Amazon/CN=Amazon Root CA 4" r9=0x000000a59d4fdf80 s9="/C=US/O=Amazon/CN=Amazon Root CA 4" a5=0x6339316231616436 a6=0x78303d7465722030 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=Baltimore CyberTrust Root
+[t=1.172s] HIT StoreAddCert #454 rcx=0x000002111dd0b750 rdx=0x000002111dbb1eb0 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #455 rcx=0x000002111dd0b720 rdx=0x000002111dd0b750 r9=0x000002111dd0ad60 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #456 rcx=0x000002111dd0ad90 rdx=0x000002111dbb1910 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #457 rcx=0x000002111dd0b720 rdx=0x000002111dd0ad90 r9=0x000002111dd0adc0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #458 rcx=0x000002111dd0adf0 rdx=0x000002111dbb19b0 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #459 rcx=0x000002111dd0b720 rdx=0x000002111dd0adf0 r9=0x000002111dd0af40 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #460 rcx=0x000002111dd0af70 rdx=0x000002111dbb2010 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #461 rcx=0x000002111dd0b720 rdx=0x000002111dd0af70 r9=0x000002111dd0b120 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #462 rcx=0x000002111dd0b300 rdx=0x000002111dbb1eb0 r9=0x0000000000000060 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #463 rcx=0x000002111dd0b300 rdx=0x000002111dbb1910 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #464 rcx=0x000002111dd0b300 rdx=0x000002111dbb19b0 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #465 rcx=0x000002111dd0b300 rdx=0x000002111dbb2010 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #466 rcx=0x000002111dd0bd80 rdx=0x000002111dd0bdb0 r9=0x000002111dd0bdb0 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #467 rcx=0x000002111dd0bdb0 rdx=0x000002111dbb1d10 r9=0x000002111e76d551 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #468 rcx=0x000002111dd0bd80 rdx=0x000002111dd0b960 r9=0x000002111dd0b960 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #469 rcx=0x000002111dd0b960 rdx=0x000002111dbb2890 r9=0x000002111dbb2798 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #470 rcx=0x000002111dd0bd80 rdx=0x000002111dd0bab0 r9=0x000002111dd0bab0 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #471 rcx=0x000002111dd0bab0 rdx=0x000002111dbb2430 r9=0x000002111dbb2659 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #472 rcx=0x000002111dd0bd80 rdx=0x000002111dd0bb10 r9=0x000002111dd0bb10 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #473 rcx=0x000002111dd0bb10 rdx=0x000002111dbb25b0 r9=0x000002111dd0bbb8 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #474 rcx=0x000002111dd0b120 rdx=0x000002111dbb2130 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #475 rcx=0x000002111dd0af40 rdx=0x000002111dd0b120 r9=0x000002111dd0b720 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #476 rcx=0x000002111dd0b750 rdx=0x000002111dbb2150 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #477 rcx=0x000002111dd0af40 rdx=0x000002111dd0b750 r9=0x000002111dd0ad90 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #478 rcx=0x000002111dd0adc0 rdx=0x000002111dbb2370 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #479 rcx=0x000002111dd0af40 rdx=0x000002111dd0adc0 r9=0x000002111dd0adf0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #480 rcx=0x000002111dd0af10 rdx=0x000002111dbb2870 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #481 rcx=0x000002111dd0af40 rdx=0x000002111dd0af10 r9=0x000002111dd0bdb0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #482 rcx=0x000002111dd0b090 rdx=0x000002111dbb2130 r9=0x0000000000000060 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #483 rcx=0x000002111dd0b090 rdx=0x000002111dbb2150 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #484 rcx=0x000002111dd0b090 rdx=0x000002111dbb2370 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #485 rcx=0x000002111dd0b090 rdx=0x000002111dbb2870 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #486 rcx=0x000002111dd0bf60 rdx=0x000002111dd0bc90 r9=0x000002111dd0bc90 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #487 rcx=0x000002111dd0bc90 rdx=0x000002111dbb2810 r9=0x000002111e76d4b1 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #488 rcx=0x000002111dd0bf60 rdx=0x000002111dd0bf30 r9=0x000002111dd0bf30 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #489 rcx=0x000002111dd0bf30 rdx=0x000002111dbb2250 r9=0x000002111dbb2178 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #490 rcx=0x000002111dd0bf60 rdx=0x000002111dd0be70 r9=0x000002111dd0be70 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #491 rcx=0x000002111dd0be70 rdx=0x000002111dbb2430 r9=0x000002111dbb2679 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #492 rcx=0x000002111dd0bf60 rdx=0x000002111dd0bba0 r9=0x000002111dd0bba0 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert #493 rcx=0x000002111dd0bba0 rdx=0x000002111dbb2110 r9=0x000002111dd0bbe8 ret=0x00007ff6d9563198
+[t=1.172s] HIT StoreAddCert #494 rcx=0x000002111dd0b120 rdx=0x000002111dd0af40 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #495 rcx=0x000002111dd0b120 rdx=0x000002111dd0ad60 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #496 rcx=0x000002111dd0b120 rdx=0x000002111dd0ad90 r9=0x00007ff6da1b19c0 ret=0x00007ff6d9587225
+[t=1.172s] HIT LogHelper #22: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=IE/O=Baltimore/OU=CyberTrust/CN=Baltimore CyberTrust Root" r9=0x000000a59d4fdf80 s9="/C=IE/O=Baltimore/OU=CyberTrust/CN=Baltimore CyberTrust Root" a5=0x6339316231616436 a6=0x78303d7465722030 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=AAA Certificate Services
+[t=1.172s] HIT StoreAddCert #497 rcx=0x000002111dd0bb70 rdx=0x000002111dbb2590 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #498 rcx=0x000002111dd0bc60 rdx=0x000002111dd0bb70 r9=0x000002111dd0bcf0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #499 rcx=0x000002111dd0ba80 rdx=0x000002111dbb26d0 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #500 rcx=0x000002111dd0bc60 rdx=0x000002111dd0ba80 r9=0x000002111dd0bd20 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #501 rcx=0x000002111dd0bde0 rdx=0x000002111dbb23b0 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #502 rcx=0x000002111dd0bc60 rdx=0x000002111dd0bde0 r9=0x000002111dd0be40 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #503 rcx=0x000002111dd0bf90 rdx=0x000002111dbb23d0 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #504 rcx=0x000002111dd0bc60 rdx=0x000002111dd0bf90 r9=0x000002111dd0bd50 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #505 rcx=0x000002111dd0b9c0 rdx=0x000002111dbb28b0 r9=0x00007ff6da196460 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #506 rcx=0x000002111dd0bc60 rdx=0x000002111dd0b9c0 r9=0x000002111dd0bfc0 ret=0x00007ff6d9587225
+[t=1.172s] HIT StoreAddCert #507 rcx=0x000002111dd0bba0 rdx=0x000002111dbb2590 r9=0x0000000000000080 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #508 rcx=0x000002111dd0bba0 rdx=0x000002111dbb26d0 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #509 rcx=0x000002111dd0bba0 rdx=0x000002111dbb23b0 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #510 rcx=0x000002111dd0bba0 rdx=0x000002111dbb23d0 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #511 rcx=0x000002111dd0bba0 rdx=0x000002111dbb28b0 r9=0x0000000000000000 ret=0x00007ff6d95626d8
+[t=1.172s] HIT StoreAddCert #512 rcx=0x000002111dd0b8a0 rdx=0x000002111dd0b9f0 r9=0x000002111dd0b9f0 ret=0x00007ff6d956302a
+[t=1.172s] HIT StoreAddCert log capped at 512 lines
+[t=1.172s] HIT LogHelper #23: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=GB/ST=Greater Manchester/L=Salford/O=Comodo CA Limited/CN=AAA Certif" r9=0x000000a59d4fdf80 s9="/C=GB/ST=Greater Manchester/L=Salford/O=Comodo CA Limited/CN=AAA Certif" a5=0x000002111dd0bbe0 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=Microsoft Root Certificate Authority
+[t=1.172s] HIT LogHelper #24: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/DC=com/DC=microsoft/CN=Microsoft Root Certificate Authority" r9=0x000000a59d4fdf80 s9="/DC=com/DC=microsoft/CN=Microsoft Root Certificate Authority" a5=0x000002111dd0bdf0 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=Thawte Timestamping CA
+[t=1.172s] HIT LogHelper #25: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=ZA/ST=Western Cape/L=Durbanville/O=Thawte/OU=Thawte Certification/CN" r9=0x000000a59d4fdf80 s9="/C=ZA/ST=Western Cape/L=Durbanville/O=Thawte/OU=Thawte Certification/CN" a5=0x000002111dd14e50 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=Starfield Class 2 Certification Authority
+[t=1.172s] HIT LogHelper #26: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=US/O=Starfield Technologies, Inc./OU=Starfield Class 2 Certification" r9=0x000000a59d4fdf80 s9="/C=US/O=Starfield Technologies, Inc./OU=Starfield Class 2 Certification" a5=0x000002111dd14e80 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=DigiCert Global Root CA
+[t=1.172s] HIT LogHelper #27: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert Global Root CA" r9=0x000000a59d4fdf80 s9="/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert Global Root CA" a5=0x000002111dd14d90 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=Microsoft Root Authority
+[t=1.172s] HIT LogHelper #28: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/OU=Copyright (c) 1997 Microsoft Corp./OU=Microsoft Corporation/CN=Micr" r9=0x000000a59d4fdf80 s9="/OU=Copyright (c) 1997 Microsoft Corp./OU=Microsoft Corporation/CN=Micr" a5=0x000002111dd14580 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=Symantec Enterprise Mobile Root for Microsoft
+[t=1.172s] HIT LogHelper #29: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=US/O=Symantec Corporation/CN=Symantec Enterprise Mobile Root for Mic" r9=0x000000a59d4fdf80 s9="/C=US/O=Symantec Corporation/CN=Symantec Enterprise Mobile Root for Mic" a5=0x000002111dd15390 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=Microsoft Root Certificate Authority 2011
+[t=1.172s] HIT LogHelper #30: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=US/ST=Washington/L=Redmond/O=Microsoft Corporation/CN=Microsoft Root" r9=0x000000a59d4fdf80 s9="/C=US/ST=Washington/L=Redmond/O=Microsoft Corporation/CN=Microsoft Root" a5=0x000002111dd153c0 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=Amazon Root CA 1
+[t=1.172s] HIT LogHelper #31: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=US/O=Amazon/CN=Amazon Root CA 1" r9=0x000000a59d4fdf80 s9="/C=US/O=Amazon/CN=Amazon Root CA 1" a5=0x000002111dd15000 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=Microsoft Authenticode(tm) Root Authority
+[t=1.172s] HIT LogHelper #32: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=US/O=MSFT/CN=Microsoft Authenticode(tm) Root Authority" r9=0x000000a59d4fdf80 s9="/C=US/O=MSFT/CN=Microsoft Authenticode(tm) Root Authority" a5=0x000002111dd15c90 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=DigiCert High Assurance EV Root CA
+[t=1.172s] HIT LogHelper #33: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert High Assurance EV " r9=0x000000a59d4fdf80 s9="/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert High Assurance EV " a5=0x000002111dd164d0 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=Amazon Root CA 2
+[t=1.172s] HIT LogHelper #34: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=US/O=Amazon/CN=Amazon Root CA 2" r9=0x000000a59d4fdf80 s9="/C=US/O=Amazon/CN=Amazon Root CA 2" a5=0x0000000000000000 a6=0x000000a59d4fdbb0 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=Microsoft Root Certificate Authority 2010
+[t=1.172s] HIT LogHelper #35: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=US/ST=Washington/L=Redmond/O=Microsoft Corporation/CN=Microsoft Root" r9=0x000000a59d4fdf80 s9="/C=US/ST=Washington/L=Redmond/O=Microsoft Corporation/CN=Microsoft Root" a5=0x000002111dd15e40 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=Microsoft ECC TS Root Certificate Authority 2018
+[t=1.172s] HIT LogHelper #36: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=US/ST=Washington/L=Redmond/O=Microsoft Corporation/CN=Microsoft ECC " r9=0x000000a59d4fdf80 s9="/C=US/ST=Washington/L=Redmond/O=Microsoft Corporation/CN=Microsoft ECC " a5=0x000002111dd16ca0 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=Copyright (c) 1997 Microsoft Corp.
+[t=1.172s] HIT LogHelper #37: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/O=Microsoft Trust Network/OU=Microsoft Corporation/OU=Microsoft Time S" r9=0x000000a59d4fdf80 s9="/O=Microsoft Trust Network/OU=Microsoft Corporation/OU=Microsoft Time S" a5=0x00000000ffffffff a6=0x00007ff900000000 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=NO LIABILITY ACCEPTED, (c)97 VeriSign, Inc.
+[t=1.172s] HIT LogHelper #38: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/O=VeriSign Trust Network/OU=VeriSign, Inc./OU=VeriSign Time Stamping S" r9=0x000000a59d4fdf80 s9="/O=VeriSign Trust Network/OU=VeriSign, Inc./OU=VeriSign Time Stamping S" a5=0x00000000ffffffff a6=0x00007ff900000000 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=ageLANServer Self-signed
+[t=1.172s] HIT LogHelper #39: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/O=github.com/luskaner/ageLANServer/CN=ageLANServer Self-signed" r9=0x000000a59d4fdf80 s9="/O=github.com/luskaner/ageLANServer/CN=ageLANServer Self-signed" a5=0x000002111dd168e0 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=Amazon Root CA 3
+[t=1.172s] HIT LogHelper #40: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=US/O=Amazon/CN=Amazon Root CA 3" r9=0x000000a59d4fdf80 s9="/C=US/O=Amazon/CN=Amazon Root CA 3" a5=0x000002111dd13ec0 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=Microsoft ECC Product Root Certificate Authority 2018
+[t=1.172s] HIT LogHelper #41: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=US/ST=Washington/L=Redmond/O=Microsoft Corporation/CN=Microsoft ECC " r9=0x000000a59d4fdf80 s9="/C=US/ST=Washington/L=Redmond/O=Microsoft Corporation/CN=Microsoft ECC " a5=0x000002111dd139d0 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=Microsoft Time Stamp Root Certificate Authority 2014
+[t=1.172s] HIT LogHelper #42: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=US/ST=Washington/L=Redmond/O=Microsoft Corporation/CN=Microsoft Time" r9=0x000000a59d4fdf80 s9="/C=US/ST=Washington/L=Redmond/O=Microsoft Corporation/CN=Microsoft Time" a5=0x000002111dd14250 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=Microsoft Identity Verification Root Certificate Authority 2
+[t=1.172s] HIT LogHelper #43: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=US/O=Microsoft Corporation/CN=Microsoft Identity Verification Root C" r9=0x000000a59d4fdf80 s9="/C=US/O=Microsoft Corporation/CN=Microsoft Identity Verification Root C" a5=0x000002111dd13aa0 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=Sectigo Public Server Authentication Root E46
+[t=1.172s] HIT LogHelper #44: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=GB/O=Sectigo Limited/CN=Sectigo Public Server Authentication Root E4" r9=0x000000a59d4fdf80 s9="/C=GB/O=Sectigo Limited/CN=Sectigo Public Server Authentication Root E4" a5=0x000002111e0685e0 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=SSL.com TLS RSA Root CA 2022
+[t=1.172s] HIT LogHelper #45: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=US/O=SSL Corporation/CN=SSL.com TLS RSA Root CA 2022" r9=0x000000a59d4fdf80 s9="/C=US/O=SSL Corporation/CN=SSL.com TLS RSA Root CA 2022" a5=0x000002111e0680d0 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=UTN-USERFirst-Object
+[t=1.172s] HIT LogHelper #46: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=US/ST=UT/L=Salt Lake City/O=The USERTRUST Network/OU=http://www.user" r9=0x000000a59d4fdf80 s9="/C=US/ST=UT/L=Salt Lake City/O=The USERTRUST Network/OU=http://www.user" a5=0x000002111e068960 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=IdenTrust Commercial Root CA 1
+[t=1.172s] HIT LogHelper #47: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=US/O=IdenTrust/CN=IdenTrust Commercial Root CA 1" r9=0x000000a59d4fdf80 s9="/C=US/O=IdenTrust/CN=IdenTrust Commercial Root CA 1" a5=0x000002111e068970 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=DigiCert Global Root G2
+[t=1.172s] HIT LogHelper #48: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert Global Root G2" r9=0x000000a59d4fdf80 s9="/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert Global Root G2" a5=0x000002111e0692a0 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=QuoVadis Root Certification Authority
+[t=1.172s] HIT LogHelper #49: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=BM/O=QuoVadis Limited/OU=Root Certification Authority/CN=QuoVadis Ro" r9=0x000000a59d4fdf80 s9="/C=BM/O=QuoVadis Limited/OU=Root Certification Authority/CN=QuoVadis Ro" a5=0x000002111e069000 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=DigiCert Trusted Root G4
+[t=1.172s] HIT LogHelper #50: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert Trusted Root G4" r9=0x000000a59d4fdf80 s9="/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert Trusted Root G4" a5=0x000002111e069540 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=GlobalSign
+[t=1.172s] HIT LogHelper #51: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/OU=GlobalSign Root CA - R3/O=GlobalSign/CN=GlobalSign" r9=0x000000a59d4fdf80 s9="/OU=GlobalSign Root CA - R3/O=GlobalSign/CN=GlobalSign" a5=0x000002111e069ba0 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=Certum Trusted Network CA 2
+[t=1.172s] HIT LogHelper #52: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=PL/O=Unizeto Technologies S.A./OU=Certum Certification Authority/CN=" r9=0x000000a59d4fdf80 s9="/C=PL/O=Unizeto Technologies S.A./OU=Certum Certification Authority/CN=" a5=0x000002111e069ea0 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=USERTrust ECC Certification Authority
+[t=1.172s] HIT LogHelper #53: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=US/ST=New Jersey/L=Jersey City/O=The USERTRUST Network/CN=USERTrust " r9=0x000000a59d4fdf80 s9="/C=US/ST=New Jersey/L=Jersey City/O=The USERTRUST Network/CN=USERTrust " a5=0x000002111e069f00 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=Sectigo Public Code Signing Root R46
+[t=1.172s] HIT LogHelper #54: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=GB/O=Sectigo Limited/CN=Sectigo Public Code Signing Root R46" r9=0x000000a59d4fdf80 s9="/C=GB/O=Sectigo Limited/CN=Sectigo Public Code Signing Root R46" a5=0x000002111e069db0 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=ISRG Root X1
+[t=1.172s] HIT LogHelper #55: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=US/O=Internet Security Research Group/CN=ISRG Root X1" r9=0x000000a59d4fdf80 s9="/C=US/O=Internet Security Research Group/CN=ISRG Root X1" a5=0x000002111e06a6b0 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=SSL.com Root Certification Authority ECC
+[t=1.172s] HIT LogHelper #56: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=US/ST=Texas/L=Houston/O=SSL Corporation/CN=SSL.com Root Certificatio" r9=0x000000a59d4fdf80 s9="/C=US/ST=Texas/L=Houston/O=SSL Corporation/CN=SSL.com Root Certificatio" a5=0x000002111e066ff0 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=SSL.com Root Certification Authority RSA
+[t=1.172s] HIT LogHelper #57: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=US/ST=Texas/L=Houston/O=SSL Corporation/CN=SSL.com Root Certificatio" r9=0x000000a59d4fdf80 s9="/C=US/ST=Texas/L=Houston/O=SSL Corporation/CN=SSL.com Root Certificatio" a5=0x000002111e0674a0 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=Starfield Root Certificate Authority - G2
+[t=1.172s] HIT LogHelper #58: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=US/ST=Arizona/L=Scottsdale/O=Starfield Technologies, Inc./CN=Starfie" r9=0x000000a59d4fdf80 s9="/C=US/ST=Arizona/L=Scottsdale/O=Starfield Technologies, Inc./CN=Starfie" a5=0x000002111e066d20 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=GlobalSign Root CA
+[t=1.172s] HIT LogHelper #59: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=BE/O=GlobalSign nv-sa/OU=Root CA/CN=GlobalSign Root CA" r9=0x000000a59d4fdf80 s9="/C=BE/O=GlobalSign nv-sa/OU=Root CA/CN=GlobalSign Root CA" a5=0x000002111e067320 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=COMODO RSA Certification Authority
+[t=1.172s] HIT LogHelper #60: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=GB/ST=Greater Manchester/L=Salford/O=COMODO CA Limited/CN=COMODO RSA" r9=0x000000a59d4fdf80 s9="/C=GB/ST=Greater Manchester/L=Salford/O=COMODO CA Limited/CN=COMODO RSA" a5=0x000002111e067ef0 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=Sectigo Public Server Authentication Root R46
+[t=1.172s] HIT LogHelper #61: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=GB/O=Sectigo Limited/CN=Sectigo Public Server Authentication Root R4" r9=0x000000a59d4fdf80 s9="/C=GB/O=Sectigo Limited/CN=Sectigo Public Server Authentication Root R4" a5=0x000002111e0676b0 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=Starfield Services Root Certificate Authority - G2
+[t=1.172s] HIT LogHelper #62: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=US/ST=Arizona/L=Scottsdale/O=Starfield Technologies, Inc./CN=Starfie" r9=0x000000a59d4fdf80 s9="/C=US/ST=Arizona/L=Scottsdale/O=Starfield Technologies, Inc./CN=Starfie" a5=0x000002111e068040 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=thawte Primary Root CA
+[t=1.172s] HIT LogHelper #63: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=US/O=thawte, Inc./OU=Certification Services Division/OU=(c) 2006 tha" r9=0x000000a59d4fdf80 s9="/C=US/O=thawte, Inc./OU=Certification Services Division/OU=(c) 2006 tha" a5=0x000002111e0675f0 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=SecureTrust CA
+[t=1.172s] HIT LogHelper #64: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=US/O=SecureTrust Corporation/CN=SecureTrust CA" r9=0x000000a59d4fdf80 s9="/C=US/O=SecureTrust Corporation/CN=SecureTrust CA" a5=0x000002111e07a590 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=DigiCert CS ECC P384 Root G5
+[t=1.172s] HIT LogHelper #65: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=US/O=DigiCert, Inc./CN=DigiCert CS ECC P384 Root G5" r9=0x000000a59d4fdf80 s9="/C=US/O=DigiCert, Inc./CN=DigiCert CS ECC P384 Root G5" a5=0x000002111e07a260 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=GlobalSign
+[t=1.172s] HIT LogHelper #66: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/OU=GlobalSign Root CA - R6/O=GlobalSign/CN=GlobalSign" r9=0x000000a59d4fdf80 s9="/OU=GlobalSign Root CA - R6/O=GlobalSign/CN=GlobalSign" a5=0x000002111e07a410 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=DigiCert Global Root G3
+[t=1.172s] HIT LogHelper #67: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert Global Root G3" r9=0x000000a59d4fdf80 s9="/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert Global Root G3" a5=0x000002111e07b1c0 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=SSL.com EV Root Certification Authority RSA R2
+[t=1.172s] HIT LogHelper #68: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=US/ST=Texas/L=Houston/O=SSL Corporation/CN=SSL.com EV Root Certifica" r9=0x000000a59d4fdf80 s9="/C=US/ST=Texas/L=Houston/O=SSL Corporation/CN=SSL.com EV Root Certifica" a5=0x000002111e07b670 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=Class 3 Public Primary Certification Authority
+[t=1.172s] HIT LogHelper #69: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=US/O=VeriSign, Inc./OU=Class 3 Public Primary Certification Authorit" r9=0x000000a59d4fdf80 s9="/C=US/O=VeriSign, Inc./OU=Class 3 Public Primary Certification Authorit" a5=0x00000000ffffffff a6=0x00007ff900000000 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=Security Communication RootCA2
+[t=1.172s] HIT LogHelper #70: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=JP/O=SECOM Trust Systems CO.,LTD./OU=Security Communication RootCA2" r9=0x000000a59d4fdf80 s9="/C=JP/O=SECOM Trust Systems CO.,LTD./OU=Security Communication RootCA2" a5=0x000002111e07b310 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=DigiCert CS RSA4096 Root G5
+[t=1.172s] HIT LogHelper #71: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=US/O=DigiCert, Inc./CN=DigiCert CS RSA4096 Root G5" r9=0x000000a59d4fdf80 s9="/C=US/O=DigiCert, Inc./CN=DigiCert CS RSA4096 Root G5" a5=0x000002111e07bb50 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=Hotspot 2.0 Trust Root CA - 03
+[t=1.172s] HIT LogHelper #72: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=US/O=WFA Hotspot 2.0/CN=Hotspot 2.0 Trust Root CA - 03" r9=0x000000a59d4fdf80 s9="/C=US/O=WFA Hotspot 2.0/CN=Hotspot 2.0 Trust Root CA - 03" a5=0x0000000000000000 a6=0x000000a59d4fdbb0 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=Entrust.net Certification Authority (2048)
+[t=1.172s] HIT LogHelper #73: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/O=Entrust.net/OU=www.entrust.net/CPS_2048 incorp. by ref. (limits liab" r9=0x000000a59d4fdf80 s9="/O=Entrust.net/OU=www.entrust.net/CPS_2048 incorp. by ref. (limits liab" a5=0x000002111e07c120 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=GlobalSign Code Signing Root R45
+[t=1.172s] HIT LogHelper #74: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=BE/O=GlobalSign nv-sa/CN=GlobalSign Code Signing Root R45" r9=0x000000a59d4fdf80 s9="/C=BE/O=GlobalSign nv-sa/CN=GlobalSign Code Signing Root R45" a5=0x000002111e07c240 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=VeriSign Class 3 Public Primary Certification Authority - G5
+[t=1.172s] HIT LogHelper #75: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=US/O=VeriSign, Inc./OU=VeriSign Trust Network/OU=(c) 2006 VeriSign, " r9=0x000000a59d4fdf80 s9="/C=US/O=VeriSign, Inc./OU=VeriSign Trust Network/OU=(c) 2006 VeriSign, " a5=0x000002111e07c8d0 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=Go Daddy Root Certificate Authority - G2
+[t=1.172s] HIT LogHelper #76: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=US/ST=Arizona/L=Scottsdale/O=GoDaddy.com, Inc./CN=Go Daddy Root Cert" r9=0x000000a59d4fdf80 s9="/C=US/ST=Arizona/L=Scottsdale/O=GoDaddy.com, Inc./CN=Go Daddy Root Cert" a5=0x000002111e07cd20 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=VeriSign Universal Root Certification Authority
+[t=1.172s] HIT LogHelper #77: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=US/O=VeriSign, Inc./OU=VeriSign Trust Network/OU=(c) 2008 VeriSign, " r9=0x000000a59d4fdf80 s9="/C=US/O=VeriSign, Inc./OU=VeriSign Trust Network/OU=(c) 2008 VeriSign, " a5=0x000002111e07c780 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=USERTrust RSA Certification Authority
+[t=1.172s] HIT LogHelper #78: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=US/ST=New Jersey/L=Jersey City/O=The USERTRUST Network/CN=USERTrust " r9=0x000000a59d4fdf80 s9="/C=US/ST=New Jersey/L=Jersey City/O=The USERTRUST Network/CN=USERTrust " a5=0x000002111e07cd50 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=Go Daddy Class 2 Certification Authority
+[t=1.172s] HIT LogHelper #79: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=US/O=The Go Daddy Group, Inc./OU=Go Daddy Class 2 Certification Auth" r9=0x000000a59d4fdf80 s9="/C=US/O=The Go Daddy Group, Inc./OU=Go Daddy Class 2 Certification Auth" a5=0x000002111e07d2f0 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=Certum Trusted Network CA
+[t=1.172s] HIT LogHelper #80: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=PL/O=Unizeto Technologies S.A./OU=Certum Certification Authority/CN=" r9=0x000000a59d4fdf80 s9="/C=PL/O=Unizeto Technologies S.A./OU=Certum Certification Authority/CN=" a5=0x000002111e079510 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=DigiCert Assured ID Root CA
+[t=1.172s] HIT LogHelper #81: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert Assured ID Root CA" r9=0x000000a59d4fdf80 s9="/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert Assured ID Root CA" a5=0x000002111e079840 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=AddTrust External CA Root
+[t=1.172s] HIT LogHelper #82: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=SE/O=AddTrust AB/OU=AddTrust External TTP Network/CN=AddTrust Extern" r9=0x000000a59d4fdf80 s9="/C=SE/O=AddTrust AB/OU=AddTrust External TTP Network/CN=AddTrust Extern" a5=0x000002111e079a20 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=HARICA TLS RSA Root CA 2021
+[t=1.172s] HIT LogHelper #83: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=GR/O=Hellenic Academic and Research Institutions CA/CN=HARICA TLS RS" r9=0x000000a59d4fdf80 s9="/C=GR/O=Hellenic Academic and Research Institutions CA/CN=HARICA TLS RS" a5=0x000002111e5c5c10 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 cert name=Hellenic Academic and Research Institutions RootCA 2015
+[t=1.172s] HIT LogHelper #84: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/C=GR/L=Athens/O=Hellenic Academic and Research Institutions Cert. Auth" r9=0x000000a59d4fdf80 s9="/C=GR/L=Athens/O=Hellenic Academic and Research Institutions Cert. Auth" a5=0x000002111e5c5d90 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] CRYPT32 INJECT: own cert appended to store enum
+[t=1.172s] CRYPT32 cert name=pb-live-release6-api.worldsedgelink.com
+[t=1.172s] HIT LogHelper #85: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdb80 s8="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" r9=0x000000a59d4fdf80 s9="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" a5=0x000002111e5c55e0 a6=0x0000000000000004 ret=0x00007ff6d735dd33
+[t=1.172s] HIT LogHelper #86: "SystemCertsWin: %zd certificates loaded" r8=0x0000000000000053 r9=0x000000018001e6f3 a5=0x0000021113de3390 a6=0x0000000000000000 ret=0x00007ff6d735ed18
+[t=1.187s] HIT LogHelper #87: "AutomatchInternal: Instantiating" r8=0xfffaffdc00baf85f r9=0x000000000000002f a5=0x000002111e055ad0 a6=0x000002111e055918 ret=0x00007ff6d711bd9d
+[t=1.187s] HIT LogHelper #88: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x000000a59d4fdf10 s8="/C=CA/ST=British Columbia/L=Vancouver/O=Relic Entertainment/CN=RelicLin" r9=0x000000a59d4fe310 s9="/C=CA/ST=British Columbia/L=Vancouver/O=Relic Entertainment/CN=RelicLin" a5=0x0000021113970000 a6=0x0000021113970000 ret=0x00007ff6d735dd33
+[t=1.234s] cert: user-Root registered (schannel trust path live)
+[t=4.000s] HC SET GET https://title.mgt.xboxlive.com/titles/default/endpoints?type=1
+[t=4.000s] HC REQHDR Connection=Keep-Alive
+[t=4.000s] HC REQHDR x-xbl-contract-version=1
+[t=4.000s] HC REQHDR MS-CV=0fcdRH2sYTPjF3QM.1.0
+[t=4.000s] HC REQHDR User-Agent=XAL Win32 2024.02.20240220.000
+[t=4.000s] HC PERFORM (request sent)
+[t=4.000s] HIT LogHelper #89: "Requesting ticket" r8=0x0000000000000083 r9=0x000000007ffeb000 s9="HalT" a5=0x00000106e5f7d7b3 a6=0x0000000000000000 ret=0x00007ff6d734f59a
+[t=4.000s] HIT LogHelper #90: "OnRequest app ticket returned %c" r8=0x000000000000004e r9=0x0000000000000003 a5=0x0000000000000004 a6=0x00007fffa4a4325f ret=0x00007ff6d734eef4
+[t=4.000s] HIT LogHelper #91: "SteamAuth received ticket at t=%I64u" r8=0x0000000006baee2d r9=0x000000007ffeb000 s9="HalT" a5=0x00000106e5f7daf0 a6=0x000002111604e0a0 ret=0x00007ff6d734f18f
+[t=4.156s] DNS REDIRECT pb-live-release6-api.worldsedgelink.com -> 127.0.0.1 svc=443
+[t=4.156s] DNS resolve api.ageofempires.com svc=443
+[t=4.156s] DNS   -> 192.168.0.103:443
+[t=4.203s] SOCK connect 127.0.0.1:443
+[t=4.203s] srv: connection accepted
+[t=4.203s] SOCK send to 127.0.0.1:443 204B 16030300c7010000c303036aeb60d267 7285eba493a444c3eb6a774923afa418 b8b6fde6c14464d08eeb2b000024c02c c02bc030c02fc024c023c028c027c00a c009c014c013009d009c003d003c0035 002f010000760000002c002a00002770 622d6c6976652d72656c65617365362d 6170692e776f726c6473656467656c69 |...........j.`.gr.....D..jwI#........Dd...+..$.,.+.0./.$.#.(.'.............=.<.5./...v...,.*..'pb-live-release6-api.worldsedgeli|
+[t=4.203s] SOCK send to 127.0.0.1:443 SNI=pb-live-release6-api.worldsedgelink.com ver=3.3 suites=18
+[t=4.203s] SOCK CH full 204B 16030300c7010000c303036aeb60d267 7285eba493a444c3eb6a774923afa418 b8b6fde6c14464d08eeb2b000024c02c c02bc030c02fc024c023c028c027c00a c009c014c013009d009c003d003c0035 002f010000760000002c002a00002770 622d6c6976652d72656c65617365362d 6170692e776f726c6473656467656c69 6e6b2e636f6d00050005010000000000 0a00080006001d00170018000b000201 00000d001a0018080408050806040105 01020104030503020302020601060300 23000000170000ff01000100
+[t=4.219s] SOCK connect 192.168.0.103:443
+[t=4.265s] SOCK recv from 127.0.0.1:443 1427B 160303058e0200005103036aeb60d2a5 ca47763ec299d6d3289b0289e4a57924 66eee059d76c52e7ee7aca20d3230000 b5445b2e03a024fcba280fe0aa6b6f13 2375127d4ae572be8dd13868c0300000 0900170000ff010001000b0003c40003 c10003be308203ba308202a2a0030201 020210633f35b33a3423924641c70667 |........Q..j.`...Gv>....(.....y$f..Y.lR..z. .#...D[...$..(...ko.#u.}J.r...8h.0......................0...0..........c?5.:4#.FA..g|
+[t=4.265s] TLS ServerHello ver=3.03
+[t=4.281s] SOCK send to 127.0.0.1:443 158B 16030300661000006261042582dbe612 421f58fea91a71ee499074f2a00a71bd 83ffbb7662710d599bdc8b50be36ca90 7b480498117eead5f8b92a5e3c345a7a b09dc2339904d0a0dc6dbe6d06e21c6f b8f4874b33bf0ff08821626702734e7c 4dbcdfeff179ecc817fee51403030001 011603030028000000000000000091fc |....f...ba.%....B.X...q.I.t...q....vbq.Y...P.6..{H...~....*^<4Zz...3.....m.m...o...K3....!bg.sN|M....y...............(..........|
+[t=4.281s] SOCK CH full 158B 16030300661000006261042582dbe612 421f58fea91a71ee499074f2a00a71bd 83ffbb7662710d599bdc8b50be36ca90 7b480498117eead5f8b92a5e3c345a7a b09dc2339904d0a0dc6dbe6d06e21c6f b8f4874b33bf0ff08821626702734e7c 4dbcdfeff179ecc817fee51403030001 011603030028000000000000000091fc 1b628baee1a09ce29739e48c6eeb1f42 d14adf78c6d84a0b2c5df22c7a66
+[t=4.281s] TLS: handshake complete (server side)
+[t=4.328s] SOCK recv from 127.0.0.1:443 51B 14030300010116030300280000000000 000000162f6daf8735cafc987c0a2a72 ea06fe5067ffca916e2452884512dd9a adab77 |..........(........./m..5...|.*r...Pg...n$R.E.....w|
+[t=4.328s] SOCK send to 127.0.0.1:443 359B 170303016200000000000000011319fd 7e3ed81137b6c5b3381146820ddc3762 daef147cb17a4ac0eec8e9d99893248b bda9cfb46dda77644a4a8928cfbb706b 3211ad09a7e08d84a65e5aa59a9bdc0b 63643f4fb4bc71444b6aeda9591c79c0 c638dc81a3221b520cad16923076fa03 b5244fdd1b477a763db05a5764559b37 |....b...........~>..7...8.F...7b...|.zJ.......$.....m.wdJJ.(..pk2........^Z.....cd?O..qDKj..Y.y..8...".R....0v...$O..Gzv=.ZWdU.7|
+[t=4.328s] SOCK CH full 359B 170303016200000000000000011319fd 7e3ed81137b6c5b3381146820ddc3762 daef147cb17a4ac0eec8e9d99893248b bda9cfb46dda77644a4a8928cfbb706b 3211ad09a7e08d84a65e5aa59a9bdc0b 63643f4fb4bc71444b6aeda9591c79c0 c638dc81a3221b520cad16923076fa03 b5244fdd1b477a763db05a5764559b37 1778c3ceb3ee02c3aa926198f6672189 95d6d49c9d4fb987ee7dd05c172a9c37 e66addd15f7629d3e07ed77e53a8cce7 1fa09aa2c64f044cd261e19b5b69d044 68de4dd6d507b2125f7f379074c616fe eee23dffcee221773387c9ec16a35aa1 038016b96b251ce1eafb0683fa5bb0d3 1860cf2d9e113700ee88d17ffee0d90e 671a8ce55779f693c6dbf34c1dae35e5 bd39d6a785f534fd0af519dea434eea7 e94b21bc6c2c9809aade7f708455163d 0f77120da4c9fa5f0d79796cc7c3de90 e21346b41eeaea60ce2c5a0809da6345 1f0292f0145effc2645b4e8f043821a0 aa7a0db4345f61
+[t=4.328s] SOCK send to 127.0.0.1:443 445B 17030301b80000000000000002f22f3c 81491163cf721b6a19a76d966e2088af 672bd841bcda226511211262dbb4ef1e 3470c29f7563ae2191271a0adbd7f812 33a404497d13b700c97578acdbadf626 71451ef1721aeb9f28ab283a9f9a4d1b 20f055199b133998e71371b491dfbff6 67791be99cabaf34338ebeaad572d6a0 |............../<.I.c.r.j..m.n ..g+.A.."e.!.b....4p..uc.!.'......3..I}....ux....&qE..r...(.(:..M. .U...9...q.....gy.....43....r..|
+[t=4.328s] SOCK CH full 445B 17030301b80000000000000002f22f3c 81491163cf721b6a19a76d966e2088af 672bd841bcda226511211262dbb4ef1e 3470c29f7563ae2191271a0adbd7f812 33a404497d13b700c97578acdbadf626 71451ef1721aeb9f28ab283a9f9a4d1b 20f055199b133998e71371b491dfbff6 67791be99cabaf34338ebeaad572d6a0 b5e2c8f2ea87bda63fd04dc19fd468b2 f1ab17adc5761ad38b725d90f5a5887c df560a8e5e8dd2acb1edef89272e488c e487e681b7ea820b4e05eceacad76feb cea585c96f03a334200b297e0a0fca22 aca25208c2fb8bd2a46fa114c730bba3 49702e068ab5b5e5aaff1dbea1c57e6e c85a360b12cbdb662966a4544839feb2 3fa7f17c7c63570b80143ccb8b755781 ec3fe18884bcfc3089eb24d8a0671d9e 305ec1b20f7e854256a6def40d81f662 9b5b672a448d9c9b384a9b04a76a4f13 5d27571456c0e68f3fa813df8f43ba9a 4ad9132020cb0b305cb3e2aadf518dde 75692afb1ba5a98efd8939f20a80b340 5875bac384278d1df4b41f5f864e3c2f f25c3148f5b07b10408ad462be6f3f82 9d9aefbdaa047baa387677c7f59e8d2b 990a91041457e76200634cedfc4116e9 a9c3b48a9fb404dcdd90c87dcf
+[t=4.328s] HTTP REQ /game/login/platformlogin
+[t=4.328s] WSAIoctl code=0x4004747b
+[t=4.328s] HTTP BODY accountType=STEAM&activeMatchId=-1&alias=AnkerGames&appID=813780&auth=AQAAADkFAAAFAAAAoxwAAMCxl6QRAAAA&callNum=0&clientLibVersion=194&connect_id=&country=US&installationType=windows&language=en&macAddress=34-5A-60-B9-97-CF&majorVersion=4.0.0&minorVersion=0&platformEnvironment=&platformUserID=7656119
+[t=4.328s] LOGIN: serving synthetic profile, alias=AnkerGames
+[t=4.328s] HTTP RESP BODY {"resultCode":0,"connectionToken":"1193810642","connectionID":549000000,"serverTime":1793810642,"accountInfo":{"id":3842241165083521967,"accountName":"AnkerGames","accountType":3,"ssoID":-1,"ssoStatus":0,"country":"US","currency":"eur","spamAllowed":false,"metaData":"{}","profiles":null},"profiles":
+[t=4.328s] HTTP RESP: building head
+[t=4.328s] HTTP RESP: encrypting from static big[]
+[t=4.328s] HTTP RESP: sent
+[t=4.390s] SOCK recv from 127.0.0.1:443 2592B 1703030a1b00000000000000014d2cbe 9e0f7bc154154aa09ee622200f39a9c3 5e04ad9487d4ed1b24a1bab5eefd1ed7 58c01fdf4fce5261f4a48e57afd43f80 43574c89c476e674bebb0b6c4c1cd304 0d02a5536ec85dc8e77bdb5612188981 b1cf82dc23db3da235104af98f305bf7 9f4676b3407d510b92002b60f7563f5c |.............M,...{.T.J..." .9..^.......$.......X...O.Ra...W..?.CWL..v.t...lL......Sn.]..{.V........#.=.5.J..0[..Fv.@}Q...+`.V?\|
+[t=4.453s] HIT LogHelper #92: "Found %zd profiles for account %s" r8=0x0000000000000000 r9=0x000000a5a10fee10 a5=0x0000000000000001 a6=0x00000211a4abd1e0 ret=0x00007ff6d7264542
+[t=4.453s] HIT LogHelper #93: "WorldwidePollingService::OnAccountEvent: Client is using Long Polling to receive updates from the server" r8=0x0000000000000028 r9=0x0000000000000040 a5=0x000002111df90bf0 a6=0x000000a500000000 ret=0x00007ff6d72b4b20
+[t=4.484s] HC STATUS 200
+[t=4.484s] HC STATUS 200
+[t=4.484s] HC RSPHDR MS-CV=0fcdRH2sYTPjF3QM.1.0.0
+[t=4.484s] HC STATUS 200
+[t=4.531s] PROBE needle=profileID (8B LE)
+[t=4.781s] SOCK send to 127.0.0.1:443 317B 170303013800000000000000035d2517 5da86d1e73faf94f22b4315474ed6a2b 48b5fab2c6b6c8a9b951cfe67f9a1b73 8d12b9d1802ae2eabfe2c547a6684a1d a91d374a025ae4953360db96097f7311 3c16455d86a865160f8b09fe0a518dca 9c885ea610d5ab408e8caa59320a8ae3 66f56fa9bc44e88ebbf645997ce0400b |....8........]%.].m.s..O".1Tt.j+H........Q.....s.....*.....G.hJ...7J.Z..3`....s.<.E]..e......Q....^....@...Y2...f.o..D....E.|.@.|
+[t=4.781s] SOCK CH full 317B 170303013800000000000000035d2517 5da86d1e73faf94f22b4315474ed6a2b 48b5fab2c6b6c8a9b951cfe67f9a1b73 8d12b9d1802ae2eabfe2c547a6684a1d a91d374a025ae4953360db96097f7311 3c16455d86a865160f8b09fe0a518dca 9c885ea610d5ab408e8caa59320a8ae3 66f56fa9bc44e88ebbf645997ce0400b 085fc6f1d91d73d98329314b5c99a388 07374bc4e5ee965d24a299fdb1c76b2c f4effb998859cb2c4cc0cdae48ca93cf 0e110367fbee0ce38aa02eef9f9d8561 2b143b4e71f9abca5c86cd35e4b04eb1 69f892eff4c96db41c9a31f5d50ae8a1 e5aef2e6e7bd9d6c6af7b488f9ab4a60 944d2653b951307854343556e7d3dc3a a7c5c73ed10e49bc59963246b6566387 05a2d8c62adf51b265a630a8a7767428 7272c135e4202f9592b0c78c9fb75d6f 9008457c297996ced24ee89bb5
+[t=4.781s] SOCK send to 127.0.0.1:443 65B 170303003c0000000000000004114c1e 4c5335ccad0e8ca78c86a92822ab89a8 235da388a6f2fb54ea947b5911f55cde df5f8ff0acc08670cc03d16278d169b8 65 |....<.........L.LS5........("...#].....T..{Y..\.._.....p...bx.i.e|
+[t=4.781s] SOCK CH full 65B 170303003c0000000000000004114c1e 4c5335ccad0e8ca78c86a92822ab89a8 235da388a6f2fb54ea947b5911f55cde df5f8ff0acc08670cc03d16278d169b8 65
+[t=4.781s] HTTP REQ /game/login/readSession
+[t=4.781s] HTTP BODY ack=0&pollNum=0&sessionID=1193810642
+[t=4.781s] HTTP RESP BODY [1]
+[t=4.781s] HTTP RESP: building head
+[t=4.781s] HTTP RESP: sent
+[t=4.781s] WSAIoctl code=0x4004747b
+[t=4.875s] SOCK recv from 127.0.0.1:443 190B 17030300b900000000000000025ac305 1a1778f7c98bb4bc442f50b68d796156 6cea5cce35e58030a7e4d00948995239 3b961e0e20e0582207bb1d552413eec5 8b24942ea2a0a0361ba865ee901d2498 7fe11fe33a4fec6232c584e7954b2aea d1b8248d4ce264ef4f7aec950653128b 0396c7fe2c526c7cfd2fa895c47ea3f1 |.............Z....x.....D/P..yaVl.\.5..0....H.R9;... .X"...U$....$.....6..e...$.....:O.b2....K*...$.L.d.Oz...S......,Rl|./...~..|
+[t=5.000s] HC SET POST https://self.events.data.microsoft.com/OneCollector/1.0/
+[t=5.000s] HC REQBODY-via-readfunction (streamed upload)
+[t=5.000s] HC REQHDR APIKey=1cc8ecb09142448998fee840a1269be8-136c4dca-7c5e-4eff-b721-68018a2ab521-7334
+[t=5.000s] HC REQHDR Client-Id=NO_AUTH
+[t=5.000s] HC REQHDR Content-Encoding=deflate
+[t=5.000s] HC REQHDR Content-Type=application/bond-compact-binary
+[t=5.000s] HC REQHDR Expect=100-continue
+[t=5.000s] HC REQHDR SDK-Version=EVT-Windows-C++-No-3.5.131.1
+[t=5.000s] HC REQHDR Upload-Time=1793810642993
+[t=5.000s] HC REQHDR User-Agent=XAL Win32 2024.02.20240220.000
+[t=5.000s] HC PERFORM (request sent)
+[t=5.344s] SOCK send to 127.0.0.1:443 317B 1703030138000000000000000537bbfd 88fc8c351222c249f78b7a0f65780de7 13f3ab3246731f2cbac63a221a0a6b9f 324d761e6c5937286f4d5e39314c4d8d e50f1f6c3153174d9f534dc18d4e6cf1 2a187a2bace59f38430efda883c1475f 881936fedd9bee5f49e83155b9c56a6c 40edaad3a8c54b3a01701da13d536a2e |....8........7.....5.".I..z.ex.....2Fs.,..:"..k.2Mv.lY7(oM^91LM....l1S.M.SM..Nl.*.z+...8C.....G_..6...._I.1U..jl@.....K:.p..=Sj.|
+[t=5.344s] SOCK CH full 317B 1703030138000000000000000537bbfd 88fc8c351222c249f78b7a0f65780de7 13f3ab3246731f2cbac63a221a0a6b9f 324d761e6c5937286f4d5e39314c4d8d e50f1f6c3153174d9f534dc18d4e6cf1 2a187a2bace59f38430efda883c1475f 881936fedd9bee5f49e83155b9c56a6c 40edaad3a8c54b3a01701da13d536a2e 41f7b72419d5263d95c0a15c4193e385 1707fc52f23bc98448766db2f3e28807 6642b6e5762d988ea682ef6e826b376a a633eaa14953c8a242046c7975af18de 78c0c67c096fb24adfb3928a3eaac721 e2e4d1bd9fee571f45225cd4caca73d4 85e1557541378f968514a5e4ac8222ec 15e5e09041598997f0fbf47e0ee390e5 51f3562f021775117e4301bcfcb91849 12cf80f16bfa229191fe85837b4d8476 45267473b229753b04c169adf76b9d4d be33a94f3c82cd19efe8a42069
+[t=5.344s] SOCK send to 127.0.0.1:443 65B 170303003c00000000000000068a91e0 6fd81134c4a7fb193355e4a8302d6848 085ce79dd0cce7be2652e46cbec4f9fe 26c3f95a0086296324e8452143de4796 d9 |....<...........o..4....3U..0-hH.\......&R.l....&..Z..)c$.E!C.G..|
+[t=5.344s] SOCK CH full 65B 170303003c00000000000000068a91e0 6fd81134c4a7fb193355e4a8302d6848 085ce79dd0cce7be2652e46cbec4f9fe 26c3f95a0086296324e8452143de4796 d9
+[t=5.344s] WSAIoctl code=0x4004747b
+[t=5.344s] HTTP REQ /game/login/readSession
+[t=5.344s] HTTP BODY ack=0&pollNum=1&sessionID=1193810642
+[t=5.344s] HTTP RESP BODY [1]
+[t=5.344s] HTTP RESP: building head
+[t=5.344s] HTTP RESP: sent
+[t=5.422s] SOCK recv from 127.0.0.1:443 190B 17030300b90000000000000003f93c9d 6109145d35cd16e7956bf5715693400a b243a9de8c8df04bb0c44a093a4bbf7e 83ce2c0b09bd4db87b07e030880d8397 2acc4ac4dd1cd3533fec9e770c30f6c9 291ce92924453f2117cefc412cac5ffb 8deb4279f2e9dfafd88888bcdc306e98 8f99c851d9987529bfec3d6bec35ea1d |..............<.a..]5....k.qV.@..C.....K..J.:K.~..,...M.{..0....*.J....S?..w.0..)..)$E?!...A,._...By.........0n....Q..u)..=k.5..|
+[t=5.890s] SOCK send to 127.0.0.1:443 317B 17030301380000000000000007c35d0c 25d57300dd40cc95ae70b5030a13c1be 1e521cf1a885e9a43760a2c5197b032b 98152db9fa070ead488c22f822591256 36be4db7fe5c87a3eb63e50837a5b7ce d9d64bb2bb7bc60db4e03f3b5e3f4bb7 df3032717c52221de5dfc61fdde23320 745cdacb17c59672c92cdbd4e6b78821 |....8.........].%.s..@...p.......R......7`...{.+..-.....H."."Y.V6.M..\...c..7.....K..{....?;^?K..02q|R".......3 t\.....r.,.....!|
+[t=5.890s] SOCK CH full 317B 17030301380000000000000007c35d0c 25d57300dd40cc95ae70b5030a13c1be 1e521cf1a885e9a43760a2c5197b032b 98152db9fa070ead488c22f822591256 36be4db7fe5c87a3eb63e50837a5b7ce d9d64bb2bb7bc60db4e03f3b5e3f4bb7 df3032717c52221de5dfc61fdde23320 745cdacb17c59672c92cdbd4e6b78821 11e3df419c0e321591159fa14b6538ed f51fceb8e14316c2b150bfca4fed3229 a0d5bc9686622536c359d717b413f964 51e7a7315036cb481127856b9e435bc4 c39dbd47b2d2d4b041d395543f28f16f 0f1c0ed13c1c9f93be9310de73415550 25c5464bf1c59420b39ad3f847681545 998e53dbc3899c5d1ed365a6d9275508 53f6da61e2006db702eaaa0922bebaf2 803dd72f24fbdce16116bf216c7cd241 bf3ae4fe63c2b52b1e0ab934d4ae2718 bc185464c6b5032cb90cee1228
+[t=5.890s] SOCK send to 127.0.0.1:443 65B 170303003c000000000000000816876a af62c6d52fc261107545e2c345f195b9 6b56ba216e292f2967427fec02cddcb8 9632b70a0be5be028725273e4bb66c21 f3 |....<..........j.b../.a.uE..E...kV.!n)/)gB.......2.......%'>K.l!.|
+[t=5.890s] SOCK CH full 65B 170303003c000000000000000816876a af62c6d52fc261107545e2c345f195b9 6b56ba216e292f2967427fec02cddcb8 9632b70a0be5be028725273e4bb66c21 f3
+[t=5.890s] HTTP REQ /game/login/readSession
+[t=5.890s] HTTP BODY ack=0&pollNum=2&sessionID=1193810642
+[t=5.890s] HTTP RESP BODY [1]
+[t=5.890s] HTTP RESP: building head
+[t=5.890s] WSAIoctl code=0x4004747b
+[t=5.890s] HTTP RESP: sent
+[t=5.969s] SOCK recv from 127.0.0.1:443 190B 17030300b900000000000000043c0484 60f8966447c971c3271eb012c3d637c7 bb078df1f10d6a94900412aeb6982b3e 0af8419a862221bde145638dc9ac00a1 20e9c28b56c311cde2938dd2539ef46d 0eaed400eec086ef2100f6028f664540 37b85c945d5dcd2d1fc1c65b9a42d011 1336df7d5e230efd8af30c16c9a821ce |.............<..`..dG.q.'.....7.......j.......+>..A.."!..Ec..... ...V.......S..m........!....fE@7.\.]].-...[.B...6.}^#........!.|
+[t=6.250s] HC STATUS 200
+[t=6.250s] HC HDRS: Access-Control-Allow-Credentials=true
+[t=6.250s] HC hdrs+: Access-Control-Allow-Headers=Strict-Transport-Security,time-delta-millis,Content-Type,Content-Length
+[t=6.250s] HC hdrs+: Access-Control-Allow-Methods=POST
+[t=6.250s] HC hdrs+: Access-Control-Allow-Origin=*
+[t=6.250s] HC hdrs+: Access-Control-Expose-Headers=time-delta-millis
+[t=6.250s] HC hdrs+: Content-Length=10
+[t=6.250s] HC hdrs+: Content-Type=application/json
+[t=6.250s] HC hdrs+: Date=Wed, 04 Nov 2026 16:44:03 GMT
+[t=6.250s] HC hdrs+: Server=Microsoft-HTTPAPI/2.0
+[t=6.250s] HC hdrs+: Strict-Transport-Security=max-age=31536000
+[t=6.250s] HC hdrs+: time-delta-millis=1216
+[t=6.437s] SOCK send to 127.0.0.1:443 317B 170303013800000000000000095df282 2382452fd4564ae4677c1ac33ba6a8b7 2ae93eb91c7c6a608797fecc74d50941 260b22cddf8ed0c409c8854eb0033753 c35b2ec7cacd4268376d5c03d7add756 b24adaf03166b50bdccc9b40df59ed25 9c0f22bff9f8ab4bd34ab5ebfabed8cb 0adfb8508889582d755f2424af693717 |....8........]..#.E/.VJ.g|..;...*.>..|j`....t..A&."........N..7S.[....Bh7m\....V.J..1f.....@.Y.%.."....K.J.........P..X-u_$$.i7.|
+[t=6.437s] SOCK CH full 317B 170303013800000000000000095df282 2382452fd4564ae4677c1ac33ba6a8b7 2ae93eb91c7c6a608797fecc74d50941 260b22cddf8ed0c409c8854eb0033753 c35b2ec7cacd4268376d5c03d7add756 b24adaf03166b50bdccc9b40df59ed25 9c0f22bff9f8ab4bd34ab5ebfabed8cb 0adfb8508889582d755f2424af693717 a2ca5e5d29b3a66371ec47efe6ba9e40 16869b906be69a9c6ee5950d06385d6e f86cfbd1c06bc875dedd08e4c09ae3ed 5c044074d42971de6d41fec63fd87871 f39aca625e3c9369ae6e4744b2345855 7b56dde4da66d32e960d284927394af6 42d6a1cec4a043a9905cbe8a1188b508 34b3d6bcb4874b2c36771116beaacea3 23304ca3e9b8b4d14adb80482a1672be 322be10e14c62a6077ea1543d3687f62 15eb8ee64675ddee1d0df134ab48721f ac6cd2616978da6fca1f9e2908
+[t=6.437s] SOCK send to 127.0.0.1:443 65B 170303003c000000000000000ae7bc3a 88ae8491707b75a76b7c2f700db030aa 9a8386a36cab30771e6d98849d5ba55a 3a80805e02dca70b5cfa871560097a96 a4 |....<..........:....p{u.k|/p..0.....l.0w.m...[.Z:..^....\...`.z..|
+[t=6.437s] SOCK CH full 65B 170303003c000000000000000ae7bc3a 88ae8491707b75a76b7c2f700db030aa 9a8386a36cab30771e6d98849d5ba55a 3a80805e02dca70b5cfa871560097a96 a4
+[t=6.437s] HTTP REQ /game/login/readSession
+[t=6.437s] HTTP BODY ack=0&pollNum=3&sessionID=1193810642
+[t=6.437s] HTTP RESP BODY [1]
+[t=6.437s] HTTP RESP: building head
+[t=6.437s] HTTP RESP: sent
+[t=6.437s] WSAIoctl code=0x4004747b
+[t=6.515s] SOCK recv from 127.0.0.1:443 190B 17030300b90000000000000005dc0306 b5be0c0b7acfcda68d0e95ed7fb3dd22 b720833cce0d7fccc9b333078baa88f5 34630369513d334d338c11e56a96148f 8e0614c9a6dae7add03994637f8e1611 6cb131b7a81c3d1cb56c6221f4073b9a 4b8422db5b5e77e1e7ffa25197c24168 83f9d60324cc05ac805bd27e2d724455 |....................z..........". .<......3.....4c.iQ=3M3...j............9.c....l.1...=..lb!..;.K.".[^w....Q..Ah....$....[.~-rDU|
+[t=6.984s] SOCK send to 127.0.0.1:443 317B 1703030138000000000000000b5bdb0c 777ebd67672449485142c39af15f8c3a 7a80a1616e489f1c6ffe3f30eed3fc2b 04da655399e6c3c4e2c1c754370b8c82 589f53e5f7eb838db8ff8f79c5008700 669b624c8d829c9e2bfcf03621d8ff43 8e3f00f7d29e8d3f38fe16ca132bd726 6f3089bdebf3418f064d9f04e75905df |....8........[..w~.gg$IHQB..._.:z..anH..o.?0...+..eS.......T7...X.S........y....f.bL....+..6!..C.?.....?8....+.&o0....A..M...Y..|
+[t=6.984s] SOCK CH full 317B 1703030138000000000000000b5bdb0c 777ebd67672449485142c39af15f8c3a 7a80a1616e489f1c6ffe3f30eed3fc2b 04da655399e6c3c4e2c1c754370b8c82 589f53e5f7eb838db8ff8f79c5008700 669b624c8d829c9e2bfcf03621d8ff43 8e3f00f7d29e8d3f38fe16ca132bd726 6f3089bdebf3418f064d9f04e75905df 0d782129a7ec9c06bbee0ce60ed353fa 8d8dc97936bafdab7737079ded55991f cffe1386250dcd7394d3d27d0e688872 085596d8a16e172e71e4aa3b07987b85 ff95585e249fde13e45905e0780f2b66 6877f756df93616801dac6321f1b4cad 9a4d2b55a806343b8ac7cda6dd760172 66ff9f2dea4fd5ad57f781630eed35b5 c3508aeee3193ee9bf802894b86b837b 752a1b15e0a1e4e5f5318d1f4a1b6d5b 42e802b308828277dbe17e1aea9a6f4a 58cb9c89d04417c3db97c2dce2
+[t=6.984s] SOCK send to 127.0.0.1:443 65B 170303003c000000000000000c0ba1b7 3346e466d7b74868d7a65e7b6a549f61 833e569b0affbc6c9bf7ffe15e49eb65 e7c2d5391363bf2667fa4716a9bfe7cd c2 |....<...........3F.f..Hh..^{jT.a.>V....l....^I.e...9.c.&g.G......|
+[t=6.984s] SOCK CH full 65B 170303003c000000000000000c0ba1b7 3346e466d7b74868d7a65e7b6a549f61 833e569b0affbc6c9bf7ffe15e49eb65 e7c2d5391363bf2667fa4716a9bfe7cd c2
+[t=6.984s] HTTP REQ /game/login/readSession
+[t=6.984s] HTTP BODY ack=0&pollNum=4&sessionID=1193810642
+[t=6.984s] HTTP RESP BODY [1]
+[t=6.984s] WSAIoctl code=0x4004747b
+[t=6.984s] HTTP RESP: building head
+[t=6.984s] HTTP RESP: sent
+[t=7.062s] SOCK recv from 127.0.0.1:443 190B 17030300b90000000000000006c9ce22 9f0a61193df3425ec027ac7f2fe1bba0 ed1d705648a55f193dfcdd7bb40cc9a0 0152b214d7c284ae28b4b33c8779192e bce67209b9eb433f23602f9fff7d7c5a 3fb76b066a1e67d128b387b2ae6d36b5 67f70fb8c3358bcba49f13a732850b9b 34bb86ace65555311b2a6c3a904c3969 |..............."..a.=.B^.'../.....pVH._.=..{.....R......(..<.y....r...C?#`/..}|Z?.k.j.g.(....m6.g....5......2...4....UU1.*l:.L9i|
+[t=7.562s] DNS REDIRECT pb-live-release6-api.worldsedgelink.com -> 127.0.0.1 svc=443
+[t=7.640s] SOCK connect 127.0.0.1:443
+[t=7.640s] srv: connection accepted
+[t=7.656s] SOCK send to 127.0.0.1:443 204B 16030300c7010000c303036aeb60d595 cc27088a6326d0a683a3c044943156e4 8ffb4693671fb6e9adabf7000024c02c c02bc030c02fc024c023c028c027c00a c009c014c013009d009c003d003c0035 002f010000760000002c002a00002770 622d6c6976652d72656c65617365362d 6170692e776f726c6473656467656c69 |...........j.`...'..c&.....D.1V...F.g........$.,.+.0./.$.#.(.'.............=.<.5./...v...,.*..'pb-live-release6-api.worldsedgeli|
+[t=7.656s] SOCK send to 127.0.0.1:443 SNI=pb-live-release6-api.worldsedgelink.com ver=3.3 suites=18
+[t=7.656s] SOCK CH full 204B 16030300c7010000c303036aeb60d595 cc27088a6326d0a683a3c044943156e4 8ffb4693671fb6e9adabf7000024c02c c02bc030c02fc024c023c028c027c00a c009c014c013009d009c003d003c0035 002f010000760000002c002a00002770 622d6c6976652d72656c65617365362d 6170692e776f726c6473656467656c69 6e6b2e636f6d00050005010000000000 0a00080006001d00170018000b000201 00000d001a0018080408050806040105 01020104030503020302020601060300 23000000170000ff01000100
+[t=7.734s] SOCK recv from 127.0.0.1:443 1427B 160303058e0200005103036aeb60d54e 1b996a253d72e10c01289333951a028a edb68de816a87060f0aa0d2053260000 04a7b009f006c646fb42a55a00fc35d1 bf0d6dfa474fe563365809c0c0300000 0900170000ff010001000b0003c40003 c10003be308203ba308202a2a0030201 020210633f35b33a3423924641c70667 |........Q..j.`.N..j%=r...(.3..........p`... S&.........F.B.Z..5...m.GO.c6X...0......................0...0..........c?5.:4#.FA..g|
+[t=7.734s] TLS ServerHello ver=3.03
+[t=7.734s] SOCK send to 127.0.0.1:443 158B 1603030066100000626104b11d67cf7d f5c2bd6c75ea3379b6ce7ecbbc7505aa f51bf65c359ab64e1ca18c1173e7a346 a41e03f53d360890cc1f6e01f3c23161 a332013b959dcf6b40e77fc2d517857f 19f01cc868bde29dc3c2d7efc9af69f2 b18199ebd7272f7e06838e1403030001 0116030300280000000000000000287c |....f...ba...g.}...lu.3y..~..u.....\5..N....s..F....=6....n...1a.2.;...k@...........h.........i......'/~.............(........(||
+[t=7.734s] SOCK CH full 158B 1603030066100000626104b11d67cf7d f5c2bd6c75ea3379b6ce7ecbbc7505aa f51bf65c359ab64e1ca18c1173e7a346 a41e03f53d360890cc1f6e01f3c23161 a332013b959dcf6b40e77fc2d517857f 19f01cc868bde29dc3c2d7efc9af69f2 b18199ebd7272f7e06838e1403030001 0116030300280000000000000000287c a4bc91f8ffef9c17c9985932f7fd0bfd baf7e6136c874dddc986e871ca63
+[t=7.734s] TLS: handshake complete (server side)
+[t=7.812s] SOCK recv from 127.0.0.1:443 51B 14030300010116030300280000000000 0000001bec383be95c06629c36d862ee c3380e7a5daa25b6b78b810805749f63 cb17ef |..........(..........8;.\.b.6.b..8.z].%......t.c...|
+[t=7.812s] SOCK send to 127.0.0.1:443 317B 170303013800000000000000013a4c1b 97d574a4fc800b3d13dc1a274ee629b7 ad02aaa62ebf0f344a2a4085853f5153 8c3bf53551cd064ba3fdb0516fdbafac e98c2f58daefe60b9e4729acaddcfa33 eae91f7558b86d925677ab829d4023a2 77493e93a53ae32ebe4a7e2c9e6fa003 ff10c717fa76a6e20adc7f1d5b48d65c |....8........:L...t....=...'N.)........4J*@..?QS.;.5Q..K...Qo...../X.....G)....3...uX.m.Vw...@#.wI>..:...J~,.o.......v......[H.\|
+[t=7.812s] SOCK CH full 317B 170303013800000000000000013a4c1b 97d574a4fc800b3d13dc1a274ee629b7 ad02aaa62ebf0f344a2a4085853f5153 8c3bf53551cd064ba3fdb0516fdbafac e98c2f58daefe60b9e4729acaddcfa33 eae91f7558b86d925677ab829d4023a2 77493e93a53ae32ebe4a7e2c9e6fa003 ff10c717fa76a6e20adc7f1d5b48d65c 8308d866ba08cec0c6a1875e1c59e5db 3882a8807e0105593f2d2a23e2a9e20f 9cdcc15f5bd4c67a5cafc76df71337ac 176e1676d1d0f045a5486d983cef712e 1eb9a139401dbb83f6a1b9725176eb48 1930236833890c00fe6be29a58bdbb39 0e1ce12b0b90973437d2040f75f3effc 85c6f02722b2825e400315e82cbaba10 3eb1d22994b3747406038046f9430118 a17e2074b513d6eb7d92ef97755acaae e13e93623d943f9ca0a687f8b88ca85a ba9fc5cab07f3379a44f84c057
+[t=7.812s] SOCK send to 127.0.0.1:443 65B 170303003c0000000000000002b5d9c8 fedfdb307913feb32014d0e37915c810 cd69f1925c5e518385561fbcc74b85c6 2ea5011469ae95e16689c7ca6a2014ac 1c |....<..............0y... ...y....i..\^Q..V...K......i...f...j ...|
+[t=7.812s] SOCK CH full 65B 170303003c0000000000000002b5d9c8 fedfdb307913feb32014d0e37915c810 cd69f1925c5e518385561fbcc74b85c6 2ea5011469ae95e16689c7ca6a2014ac 1c
+[t=7.812s] HTTP REQ /game/login/readSession
+[t=7.812s] HTTP BODY ack=0&pollNum=5&sessionID=1193810642
+[t=7.812s] HTTP RESP BODY [1]
+[t=7.812s] HTTP RESP: building head
+[t=7.812s] HTTP RESP: sent
+[t=7.812s] WSAIoctl code=0x4004747b
+[t=7.890s] SOCK recv from 127.0.0.1:443 190B 17030300b90000000000000001ebe4b2 298d1837ee21047e302f13149799d331 03f67e5d02b0c505a07e387f64026d14 dbf58f88b02c701c74035edb88bfa32f 0bbb67667ccfd21d8b2ef0e48f4a53d4 79105d72d063db3321cf7f9331c1dd27 b21e1ebfe8c1ec2a8676eb10d1fd6fc2 a2b8eca9fc09d113852e2b1543d98dae |................)..7.!.~0/.....1..~].....~8.d.m......,p.t.^..../..gf|........JS.y.]r.c.3!...1..'.......*.v....o...........+.C...|
+[t=8.375s] SOCK send to 127.0.0.1:443 317B 1703030138000000000000000336970c 13e0bbb7e9a39bf95184941af59a013f 731e98d0049930c371b26afd08a7c4b4 17fc169117ac10732fc4269b27afcf8f 5129c41e884b1a0b3f29c2cb3be5da78 fe243bf7b741a0d09a3646875c30f2af 8494827a87354318efc7265042cba127 33b93a8f2bcbbe674130455b751dec2c |....8........6..........Q......?s.....0.q.j............s/.&.'...Q)...K..?)..;..x.$;..A...6F.\0.....z.5C...&PB..'3.:.+..gA0E[u..,|
+[t=8.375s] SOCK CH full 317B 1703030138000000000000000336970c 13e0bbb7e9a39bf95184941af59a013f 731e98d0049930c371b26afd08a7c4b4 17fc169117ac10732fc4269b27afcf8f 5129c41e884b1a0b3f29c2cb3be5da78 fe243bf7b741a0d09a3646875c30f2af 8494827a87354318efc7265042cba127 33b93a8f2bcbbe674130455b751dec2c eeae87526847c1668c3fed491af4d10a 9a038061863b38ab5e6001d3df9cfd5f 86702b2bbed10dc2a2073082bedddf04 ac589a9db5d98bd27d62f1fb8a840e90 9ceaa074efdacf509afc34a65822e895 a087b5542aef6252635f446c15940c8e 57248157b606d29a568ae01e0fae1719 cd55da3cb4f2c13b315f6870ad4af92b 3c98b943aebc89a6f5448db0820f2e76 d5ce7eab689174b42842e05007990672 488409e0ce9f008bf5948607bc7215dd a2c74426f724289e59e051fadb
+[t=8.375s] SOCK send to 127.0.0.1:443 65B 170303003c0000000000000004a8092f 122c6e620055ac8107c15c5681eb2597 92e0da708acc9f661e84787b0c16d08a a58e9e122f581001ca08741a5a23bcba ac |....<........../.,nb.U....\V..%....p...f..x{......../X....t.Z#...|
+[t=8.375s] SOCK CH full 65B 170303003c0000000000000004a8092f 122c6e620055ac8107c15c5681eb2597 92e0da708acc9f661e84787b0c16d08a a58e9e122f581001ca08741a5a23bcba ac
+[t=8.375s] HTTP REQ /game/login/readSession
+[t=8.375s] HTTP BODY ack=0&pollNum=6&sessionID=1193810642
+[t=8.375s] HTTP RESP BODY [1]
+[t=8.375s] HTTP RESP: building head
+[t=8.375s] HTTP RESP: sent
+[t=8.375s] WSAIoctl code=0x4004747b
+[t=8.469s] SOCK recv from 127.0.0.1:443 190B 17030300b900000000000000025f430a 1087a55c688bd4a99e31600a76d4acfb 4ae5c7eee4689de9c550b31218320cfb e24ea0556cc58d508ef00ceba709f54a 5a69aa4f5bfed8fc88912b22428ff899 d6bed4ff430ee96232ddc691f957e648 98c43a5b7a47965875723aa1f1266ae4 94d09661bd042ea0c1f1526af96e81fc |............._C....\h....1`.v...J....h...P...2...N.Ul..P.......JZi.O[.....+"B.......C..b2....W.H..:[zG.Xur:..&j....a......Rj.n..|
+[t=8.953s] SOCK send to 127.0.0.1:443 317B 17030301380000000000000005296cd2 446ffbbb1557745def725225bf7a5a27 2854b72e6e6dbdc0040cd401d0ccf34f d0da601fcfe58c897436faed096437e4 5b771a75741da65de0e894599260a417 46a367dcd274b2e65087d1a1860d74ba 0f13104a1ab7bf9a596c71a5df009c28 8926a539de54d3642d9321b91bafb4ab |....8........)l.Do...Wt].rR%.zZ'(T..nm.........O..`.....t6...d7.[w.ut..]...Y.`..F.g..t..P.....t....J....Ylq....(.&.9.T.d-.!.....|
+[t=8.953s] SOCK CH full 317B 17030301380000000000000005296cd2 446ffbbb1557745def725225bf7a5a27 2854b72e6e6dbdc0040cd401d0ccf34f d0da601fcfe58c897436faed096437e4 5b771a75741da65de0e894599260a417 46a367dcd274b2e65087d1a1860d74ba 0f13104a1ab7bf9a596c71a5df009c28 8926a539de54d3642d9321b91bafb4ab fa739241a137cb16f157f243cef9b42a 9bdb8fc571ee1f56400a9525b7c87304 9ea2a61331dea3063d112cea610509e6 e8dd9a3be867b13265bfe3fbc6bb20fa 2b2dc0a23dcf6509946a8aa670976b6a cfe1acf1de2fb91053e92078fba97434 35f2d04bda7cf9a43c47ed48c4a3ddc1 2f32db5a62e098a0f46b5d5056edd4dd 03e9cc9d554977dad501764446400f2d 16d0dc160839db0f0e573a9f93dd73c7 7c426a71fea55def50635ce6f1afcd96 885ccaf407bcd10358914cd8dd
+[t=8.953s] SOCK send to 127.0.0.1:443 65B 170303003c00000000000000066c5631 6bd7c50e340a2a0264341238f9fa6fa5 1abfa53e1ca3299954c94aa07de3877f 86099768aceff3032bbaac6bb942fc9a d7 |....<........lV1k...4.*.d4.8..o....>..).T.J.}......h....+..k.B...|
+[t=8.953s] SOCK CH full 65B 170303003c00000000000000066c5631 6bd7c50e340a2a0264341238f9fa6fa5 1abfa53e1ca3299954c94aa07de3877f 86099768aceff3032bbaac6bb942fc9a d7
+[t=8.953s] HTTP REQ /game/login/readSession
+[t=8.953s] HTTP BODY ack=0&pollNum=7&sessionID=1193810642
+[t=8.953s] HTTP RESP BODY [1]
+[t=8.953s] HTTP RESP: building head
+[t=8.953s] HTTP RESP: sent
+[t=8.953s] WSAIoctl code=0x4004747b
+[t=9.031s] SOCK recv from 127.0.0.1:443 190B 17030300b900000000000000034def4f 928260096cd26113d9e4f2d851c3aed6 906ea2fbfe9efb714f12a75ec98402e3 8f6ff050e5df68e33975f95f1bfe39e5 118c188b326b5f5ed74d4bff05fb5a21 8f2deb13dbba529d67fb96747f983712 3a92a698d4fedccaf46618d072609dab c7ca7589a46a43549504608275e46e1f |.............M.O..`.l.a.....Q....n.....qO..^.....o.P..h.9u._..9.....2k_^.MK...Z!.-....R.g..t..7.:........f..r`....u..jCT..`.u.n.|
+[t=9.312s] DNS resolve cdn.ageofempires.com svc=443
+[t=9.312s] DNS   -> 192.168.0.103:443
+[t=9.359s] SOCK connect 192.168.0.103:443
+[t=9.484s] SOCK send to 127.0.0.1:443 317B 1703030138000000000000000dbda290 4a8f124b1fb01367fc927cfae26eb2b5 943df6b64734cb3c001c147702b6fbcd 1f8c53b43c4dd0a48fe695b90fcec3b2 00481d8911a6cc703f95ded46d52c2ba e9a5fe5c16162bfc706082a47ee273eb 1f7ae49427ed590a2473c3ee31151eb8 b9a24854588c38caca686954ae6bcb99 |....8...........J..K...g..|..n...=..G4.<...w......S.<M...........H.....p?...mR.....\..+.p`..~.s..z..'.Y.$s..1.....HTX.8..hiT.k..|
+[t=9.484s] SOCK CH full 317B 1703030138000000000000000dbda290 4a8f124b1fb01367fc927cfae26eb2b5 943df6b64734cb3c001c147702b6fbcd 1f8c53b43c4dd0a48fe695b90fcec3b2 00481d8911a6cc703f95ded46d52c2ba e9a5fe5c16162bfc706082a47ee273eb 1f7ae49427ed590a2473c3ee31151eb8 b9a24854588c38caca686954ae6bcb99 2d96773900263e92bd8eb883e4424110 1411f053ca066f9bbafe370aefe74782 32d3b3b9cd3030529e38b61b72836401 3fc332455a7bebbc21a9ad37348c01a0 c66fe0ca2e545a21463ccaf2806bafee 34d457aab9a309d3eef036b8963b3a7d fbba7d7f4bd0dd19b5063b67a45422d1 2bb2a6536dfab879b4d635395cad5b5c 3ae44999adec81ec1a3d63de8371359c 6928ed40ab959940af09174f98e590eb 11eb6aa2111ce96b28b134851f359b22 0101cc60ec084d2e72f7c147fa
+[t=9.484s] SOCK send to 127.0.0.1:443 65B 170303003c000000000000000e7b0aee de8d0aac84954ec42e3c7bb505f50b7c ef6e039904f2a5011dc835a4633eee10 d89fe2c9f8cf5f5fa9e99aa6cd27dc67 40 |....<........{........N..<{....|.n........5.c>........__.....'.g@|
+[t=9.484s] SOCK CH full 65B 170303003c000000000000000e7b0aee de8d0aac84954ec42e3c7bb505f50b7c ef6e039904f2a5011dc835a4633eee10 d89fe2c9f8cf5f5fa9e99aa6cd27dc67 40
+[t=9.484s] HTTP REQ /game/login/readSession
+[t=9.484s] HTTP BODY ack=0&pollNum=8&sessionID=1193810642
+[t=9.484s] HTTP RESP BODY [1]
+[t=9.484s] HTTP RESP: building head
+[t=9.484s] WSAIoctl code=0x4004747b
+[t=9.484s] HTTP RESP: sent
+[t=9.562s] SOCK recv from 127.0.0.1:443 190B 17030300b900000000000000071e9795 b1cee012d0deacd4ee78e012af7878fd da58c0686811395870ddd196a26318a5 29d58e239f6e969986711f90694022b3 d6f968f09d42b43f580cb0a2e63129da 6ecf339b1399fd90eaf68f8c5eaf392f f07d027c20cbd2784d5c275e9f2dc9c9 1127714978afcbc2a85b31beb668b968 |.........................x...xx..X.hh.9Xp....c..)..#.n...q..i@"...h..B.?X....1).n.3.........^.9/.}.| ..xM\'^.-...'qIx....[1..h.h|
+[t=10.031s] SOCK send to 127.0.0.1:443 317B 1703030138000000000000000f79ce62 3094f44c84672306d56135f93c0dfcb8 a177014ebc049ea651bbce6de96e1203 48326c47b4b714f82d8e529fc269df65 f40f11927a37afd81989580ba4530a9b 5b4cc591c58b1ca5d2c3b8718243ae5b 1e7229398eb63cfdc82a0c821e309d75 b70481daf104fb10b61de811b4d72452 |....8........y.b0..L.g#..a5.<....w.N....Q..m.n..H2lG....-.R..i.e....z7....X..S..[L.........q.C.[.r)9..<..*...0.u..............$R|
+[t=10.031s] SOCK CH full 317B 1703030138000000000000000f79ce62 3094f44c84672306d56135f93c0dfcb8 a177014ebc049ea651bbce6de96e1203 48326c47b4b714f82d8e529fc269df65 f40f11927a37afd81989580ba4530a9b 5b4cc591c58b1ca5d2c3b8718243ae5b 1e7229398eb63cfdc82a0c821e309d75 b70481daf104fb10b61de811b4d72452 30bc664876cca13e60964996af2d0f79 f1a9f1c572806ea6685419ffd1005cf7 b2620d87eebde3ecef4c0ea4cfc8b1c4 39c02b30e11b8868099fe3f86f6854e0 7f430d299418d78e17fcef44687c5379 c583cc6d9017fde59322b357b8529787 2caeee956c1738a2af725ddbac5413d8 396e6c07c1cd4191dffae174b71a6849 0ba14eafefca2598e7796b61a839471e 5323fce89b4556308dbae2b640b7f4fb fb02bb9a4da15a50be4618c6ca645786 8704047252e238f4bf9b7b0d9f
+[t=10.031s] SOCK send to 127.0.0.1:443 65B 170303003c0000000000000010dfb227 14fe9af069d0a5db0930627ab419e12c 72a1e664ce50ea5f935394ba7c5f71e8 f0b4aa8bd605820ebe9593b23b29c484 27 |....<..........'....i....0bz...,r..d.P._.S..|_q.............;)..'|
+[t=10.031s] SOCK CH full 65B 170303003c0000000000000010dfb227 14fe9af069d0a5db0930627ab419e12c 72a1e664ce50ea5f935394ba7c5f71e8 f0b4aa8bd605820ebe9593b23b29c484 27
+[t=10.031s] HTTP REQ /game/login/readSession
+[t=10.031s] HTTP BODY ack=0&pollNum=9&sessionID=1193810642
+[t=10.031s] HTTP RESP BODY [1]
+[t=10.031s] HTTP RESP: building head
+[t=10.031s] HTTP RESP: sent
+[t=10.031s] WSAIoctl code=0x4004747b
+[t=10.125s] SOCK recv from 127.0.0.1:443 190B 17030300b90000000000000008485d3f 7d177ddbda274b0aca6fbbf3f67c4753 51a19ce98dcea625ba22f4aae1748aac f5d313f2d77aa1ca444d0983c24d2119 0ce543aef08be689850f82ce245e19d3 536cd36a11d0ad233724f98f02d40ffc e2eaeea518bb603d0864ae30e0047368 b0ac19e0aa5cd95f4362653bc266f633 |.............H]?}.}..'K..o...|GSQ......%."...t.......z..DM...M!...C.........$^..Sl.j...#7$............`=.d.0..sh.....\._Cbe;.f.3|
+[t=10.625s] SOCK send to 127.0.0.1:443 317B 170303013800000000000000110e3807 3bd8e106823fe8b1c7a2691a20d4fcdd a62632aa02bbe9545fa54242d289db2e 7b2d1f294165f6f9f12c21cdd255078a 1b049df42ec641c45d37cc20d011a4f8 cb48ef767c76abd63d9f3018b069afe9 5370445664df200b9ebd2e3203909694 865d974735b65d8e05d547184cb95c71 |....8.........8.;....?....i. ....&2....T_.BB....{-.)Ae...,!..U........A.]7. .....H.v|v..=.0..i..SpDVd. ....2.....].G5.]...G.L.\q|
+[t=10.625s] SOCK CH full 317B 170303013800000000000000110e3807 3bd8e106823fe8b1c7a2691a20d4fcdd a62632aa02bbe9545fa54242d289db2e 7b2d1f294165f6f9f12c21cdd255078a 1b049df42ec641c45d37cc20d011a4f8 cb48ef767c76abd63d9f3018b069afe9 5370445664df200b9ebd2e3203909694 865d974735b65d8e05d547184cb95c71 5574a65dfe9dd300388e7f48e86c7dc3 adbd909521db48ac605ec79e8e1b608b 8479c5e646aa50aaf7dc060b5aba5f5c 4a92d4175a5b2319e2227819ebf20d38 d3dd9b8cf2deb94ad317e1f68c215a38 552357ff501afb7c3b8233fb84c80255 797cb0024c31769c61a08e107802b961 a8c32b646e8e3eb88f5631aac85330d0 99ff869b02e276a3c2a26f23a357fcaf c2c34b9fc0ca5f942a8ccb94c660bad4 3e4726e50913e54967686e8d2c9718a1 2631ff71a991fa303cfd5be7d9
+[t=10.625s] SOCK send to 127.0.0.1:443 66B 170303003d000000000000001222dd33 f5fe1ad843a64a0d214c228e7b3666c7 b950fbe7a975014bf5f9c1abc17326aa 2094bc7c9c25f67b62811706c673c3ec 962a |....=........".3....C.J.!L".{6f..P...u.K.....s&. ..|.%.{b....s...*|
+[t=10.625s] SOCK CH full 66B 170303003d000000000000001222dd33 f5fe1ad843a64a0d214c228e7b3666c7 b950fbe7a975014bf5f9c1abc17326aa 2094bc7c9c25f67b62811706c673c3ec 962a
+[t=10.625s] HTTP REQ /game/login/readSession
+[t=10.625s] HTTP BODY ack=0&pollNum=10&sessionID=1193810642
+[t=10.625s] HTTP RESP BODY [1]
+[t=10.625s] HTTP RESP: building head
+[t=10.625s] HTTP RESP: sent
+[t=10.625s] WSAIoctl code=0x4004747b
+[t=10.703s] SOCK recv from 127.0.0.1:443 190B 17030300b900000000000000099a7713 c2a436e801343d15465538dbd41d5fdf b002103f6111ef0381d7b30c361f435b c65ce379f5fad31fa7f680c5289eb5db 68599874dbcf74f4a1ab9dc2c2915c90 8eccf7ff6a52bff1b034691b38f22b4a 5b2fafc15ec6d0a4dc01b4390f38c47f 2bdfc00f4f5bc2144400284eb2e5fcf3 |..............w...6..4=.FU8..._....?a.......6.C[.\.y........(...hY.t..t.......\.....jR...4i.8.+J[/..^......9.8..+...O[..D.(N....|
+[t=11.172s] SOCK send to 127.0.0.1:443 317B 1703030138000000000000001358b934 cf5339a938212124da9244288a62e4c7 f93ca5cea9f76544860e3d51bf7b65be c71c646bebc0d8ec62c312da384cea5d 8892c0e93187d89c90d6b7158b9762de 627ea470953bdafaea6284165a7a12c5 1467c1dcb65a423b1a8b6e9a7e7ae208 1d1b5a4dfa7d777f5b909f7731f46de0 |....8........X.4.S9.8!!$..D(.b...<....eD..=Q.{e...dk....b...8L.]....1.........b.b~.p.;...b..Zz...g...ZB;..n.~z....ZM.}w.[..w1.m.|
+[t=11.172s] SOCK CH full 317B 1703030138000000000000001358b934 cf5339a938212124da9244288a62e4c7 f93ca5cea9f76544860e3d51bf7b65be c71c646bebc0d8ec62c312da384cea5d 8892c0e93187d89c90d6b7158b9762de 627ea470953bdafaea6284165a7a12c5 1467c1dcb65a423b1a8b6e9a7e7ae208 1d1b5a4dfa7d777f5b909f7731f46de0 34b3b662d001387bce144d6977e9935b 1cce9f4208e285fbb643829d14c9f5cd ffc749225129fba1eea737439dc98878 218af88dd86fa6153aa2c2bd6393e7e3 0b627819f1078149c21d6fd18af2b9ff 6bec813d420c02fdeee8802c96251a06 22f8e2b1b2e85d5490e9201145bc0e48 8094c4e4a4ed92ed670319a106c1b6d7 778e94121d8ece83b4a253924e946ceb bf9384e22a72e0d39ebf01fd25357165 fe66dfbb9dc0f9e71b2ab2dcdcddd03a 5c52d93a06d40dd2e6876f8f1d
+[t=11.172s] SOCK send to 127.0.0.1:443 66B 170303003d00000000000000148abffc 9374ed506e70fb654b71b0075baaee2e 5136e2fff03c6f50eafddc9690a154af 97d53aac9ccc210ef368f888a335ab95 93e9 |....=............t.Pnp.eKq..[...Q6...<oP......T...:...!..h...5....|
+[t=11.172s] SOCK CH full 66B 170303003d00000000000000148abffc 9374ed506e70fb654b71b0075baaee2e 5136e2fff03c6f50eafddc9690a154af 97d53aac9ccc210ef368f888a335ab95 93e9
+[t=11.172s] HTTP REQ /game/login/readSession
+[t=11.172s] HTTP BODY ack=0&pollNum=11&sessionID=1193810642
+[t=11.172s] HTTP RESP BODY [1]
+[t=11.172s] HTTP RESP: building head
+[t=11.172s] WSAIoctl code=0x4004747b
+[t=11.172s] HTTP RESP: sent
+[t=11.250s] SOCK recv from 127.0.0.1:443 190B 17030300b9000000000000000a1e41af a65b52dd8c4ab1f2af35583b2e0f5f93 908c6a34dc21ed0e233a29642b586d7a d0e2c23912c87e5bcd7b9c1a237bf1cc 3a60c5db291a9aaa5dc3fdb3dbfd92f1 3669d6bcd66de19422bddd6d88d0a41a 9e5473a8ac5f63d95cf388811bfd5116 2df491cb56fde3cf99b894af4edfd2ad |..............A..[R..J...5X;.._...j4.!..#:)d+Xmz...9..~[.{..#{..:`..)...].......6i...m.."..m.....Ts.._c.\.....Q.-...V.......N...|
+[t=11.719s] SOCK send to 127.0.0.1:443 317B 17030301380000000000000015ce01bc e7ea43d0502b8708ff6fe9f5a7c27a0e e9301666d9e9eca1595a299fb2e1f727 6242cc7e142651ce4ecb37197154641f 81975fd9b764d020188ac560758eaa33 e0f84e599bed8a39155d5b6fcab511d2 bd981941986b48e3cfd65aff5f2979aa c2204faa2ced7c2cfdb1ab8572c675ca |....8.............C.P+...o....z..0.f....YZ)....'bB.~.&Q.N.7.qTd..._..d. ...`u..3..NY...9.][o.......A.kH...Z._)y.. O.,.|,....r.u.|
+[t=11.719s] SOCK CH full 317B 17030301380000000000000015ce01bc e7ea43d0502b8708ff6fe9f5a7c27a0e e9301666d9e9eca1595a299fb2e1f727 6242cc7e142651ce4ecb37197154641f 81975fd9b764d020188ac560758eaa33 e0f84e599bed8a39155d5b6fcab511d2 bd981941986b48e3cfd65aff5f2979aa c2204faa2ced7c2cfdb1ab8572c675ca 9410b5ac4188070aee1d50dbea55b97e d8731220729c61405a30f095b43f4fae 12cc304efb427494ee88b96f6ae7d726 95d435cd933f27d8ba24677ddb9966fe d18b73097f53cabdc0fd358d323f2e04 afa664a498d05565ecb00c9fb3a97c85 4225d945f1eb42d7cc3f4f05da9df853 f1700e7bc0885e43f3622b3cc4a4b917 6c7a2959fec2b8e5cb518d3b83a3474d 217c6076cf952a136ab628be7e8c0db7 cfae3ddf885c3115bbbdbdcdc62785ef b6f5e3b30a107ddc3dc4672f5b
+[t=11.719s] SOCK send to 127.0.0.1:443 66B 170303003d0000000000000016dccb48 b9801ab72efdf4ebf61bcbf29160dafb 1eb8c9594bd2466d2ec9fb50598522d2 ce72cb1840b7aa6506ce190e8d5c3e0f 1bd3 |....=..........H.............`.....YK.Fm...PY."..r..@..e.....\>...|
+[t=11.719s] SOCK CH full 66B 170303003d0000000000000016dccb48 b9801ab72efdf4ebf61bcbf29160dafb 1eb8c9594bd2466d2ec9fb50598522d2 ce72cb1840b7aa6506ce190e8d5c3e0f 1bd3
+[t=11.719s] HTTP REQ /game/login/readSession
+[t=11.719s] HTTP BODY ack=0&pollNum=12&sessionID=1193810642
+[t=11.719s] HTTP RESP BODY [1]
+[t=11.719s] HTTP RESP: building head
+[t=11.719s] HTTP RESP: sent
+[t=11.719s] WSAIoctl code=0x4004747b
+[t=11.797s] SOCK recv from 127.0.0.1:443 190B 17030300b9000000000000000b3b4ce0 5b50429cdc8edced20487bcc49ce935a 606b8e042e762dc267cae057aa163baf 65d652099ccbfe40095778627751c684 5aeacfb5bdfb54ee71a4880e1a3efa63 6096cb5876bba3495e89c7c2a1a3c540 4d9c019d4ae99b2a891e706a6e1cf530 a61890160240f460ebdec72d0def5504 |.............;L.[PB..... H{.I..Z`k...v-.g..W..;.e.R....@.WxbwQ..Z.....T.q....>.c`..Xv..I^......@M...J..*..pjn..0.....@.`...-..U.|
+[t=12.000s] SOCK WSASocketA af=23 type=1 flags=0x00000081
+[t=12.000s] SOCK WSASocketA af=23 type=1 flags=0x00000081
+[t=12.000s] HIT CTXSetVerify #1 rcx=0x000002127207c0d0 rdx=0x0000000000000003 r9=0x00007ff6d955e300 ret=0x00007ff6d93706d1
+[t=12.000s] DNS resolve localhost svc=4341
+[t=12.000s] DNS   -> [v6]:4341
+[t=12.000s] DNS   -> 127.0.0.1:4341
+[t=12.000s] SOCK WSASocketA af=23 type=1 flags=0x00000081
+[t=12.000s] WSAIoctl: ext-fn GUID f17d36b5accbcf1195ca00805f48a192
+[t=12.000s] WSAIoctl code=0x8004667e
+[t=12.000s] SOCK WSASocketA af=23 type=1 flags=0x00000081
+[t=12.000s] WSAIoctl: ext-fn GUID f17d36b5accbcf1195ca00805f48a192
+[t=12.000s] WSAIoctl code=0x8004667e
+[t=12.000s] SOCK WSASocketA af=23 type=1 flags=0x00000081
+[t=12.000s] WSAIoctl code=0x8004667e
+[t=12.000s] SOCK WSASocketA af=23 type=1 flags=0x00000081
+[t=12.000s] WSAIoctl code=0x8004667e
+[t=12.078s] DNS resolve api.ageofempires.com svc=443
+[t=12.078s] DNS   -> 192.168.0.103:443
+[t=12.109s] SOCK connect 192.168.0.103:443
+[t=12.297s] DNS REDIRECT pb-live-release6-api.worldsedgelink.com -> 127.0.0.1 svc=443
+[t=12.375s] SOCK connect 127.0.0.1:443
+[t=12.375s] srv: connection accepted
+[t=12.375s] SOCK send to 127.0.0.1:443 204B 16030300c7010000c303036aeb60da98 2194530d87483142fbc1b9a0d418bc9d 4a4d5289bd00ae77dc5431000024c02c c02bc030c02fc024c023c028c027c00a c009c014c013009d009c003d003c0035 002f010000760000002c002a00002770 622d6c6976652d72656c65617365362d 6170692e776f726c6473656467656c69 |...........j.`..!.S..H1B........JMR....w.T1..$.,.+.0./.$.#.(.'.............=.<.5./...v...,.*..'pb-live-release6-api.worldsedgeli|
+[t=12.375s] SOCK send to 127.0.0.1:443 SNI=pb-live-release6-api.worldsedgelink.com ver=3.3 suites=18
+[t=12.375s] SOCK CH full 204B 16030300c7010000c303036aeb60da98 2194530d87483142fbc1b9a0d418bc9d 4a4d5289bd00ae77dc5431000024c02c c02bc030c02fc024c023c028c027c00a c009c014c013009d009c003d003c0035 002f010000760000002c002a00002770 622d6c6976652d72656c65617365362d 6170692e776f726c6473656467656c69 6e6b2e636f6d00050005010000000000 0a00080006001d00170018000b000201 00000d001a0018080408050806040105 01020104030503020302020601060300 23000000170000ff01000100
+[t=12.469s] SOCK recv from 127.0.0.1:443 1427B 160303058e0200005103036aeb60da66 63fb6758b679e5a45889f86a45afede2 b2ab729e943e074c5c190d20d6330000 79dcebdc643896d32814ea331e139a6e 61a216baebb90299f362744ec0300000 0900170000ff010001000b0003c40003 c10003be308203ba308202a2a0030201 020210633f35b33a3423924641c70667 |........Q..j.`.fc.gX.y..X..jE.....r..>.L\.. .3..y...d8..(..3...na........btN.0......................0...0..........c?5.:4#.FA..g|
+[t=12.469s] TLS ServerHello ver=3.03
+[t=12.469s] SOCK send to 127.0.0.1:443 158B 160303006610000062610436a88abab3 db05e545fdf39d7bca50e6388142f3e5 5db790bf980eeb918b2d1f3e05089ead 4453be83c1021a27e31d6b739989a872 d1cabd0187ced394c9efa4beb1a83dab 3792fb934104d742b523c07791065a44 f93f158e7d551551fd81f81403030001 0116030300280000000000000000ff32 |....f...ba.6.......E...{.P.8.B..]........-.>....DS.....'..ks...r..............=.7...A..B.#.w..ZD.?..}U.Q.............(.........2|
+[t=12.469s] SOCK CH full 158B 160303006610000062610436a88abab3 db05e545fdf39d7bca50e6388142f3e5 5db790bf980eeb918b2d1f3e05089ead 4453be83c1021a27e31d6b739989a872 d1cabd0187ced394c9efa4beb1a83dab 3792fb934104d742b523c07791065a44 f93f158e7d551551fd81f81403030001 0116030300280000000000000000ff32 8a6748a2443d76e47b8c4e018860316e a5917bf1fca4648642958c5cfba8
+[t=12.469s] TLS: handshake complete (server side)
+[t=12.531s] SOCK recv from 127.0.0.1:443 51B 14030300010116030300280000000000 0000004f1316fcb53b7da392e6061111 c83570b520ab2dfa02b6868aa977b7ae a08d1a |..........(........O....;}.......5p. .-......w.....|
+[t=12.531s] SOCK send to 127.0.0.1:443 317B 17030301380000000000000001d80bf3 317f0f8e02cf329978dad1f148d37874 ddb3fc1ea7b98193a3fc9041469f2d39 822c13c206933cb0281b104d31c5246a 0be291690369ec6db6d4c77d44b0b8f7 843e81f567000f573b5c90f7bf098c4a 5e85bd408b6138f341ab9c100b2be130 11a018cdd750e33c0d56323985fc418b |....8...........1.....2.x...H.xt...........AF.-9.,....<.(..M1.$j...i.i.m...}D....>..g..W;\.....J^..@.a8.A....+.0.....P.<.V29..A.|
+[t=12.531s] SOCK CH full 317B 17030301380000000000000001d80bf3 317f0f8e02cf329978dad1f148d37874 ddb3fc1ea7b98193a3fc9041469f2d39 822c13c206933cb0281b104d31c5246a 0be291690369ec6db6d4c77d44b0b8f7 843e81f567000f573b5c90f7bf098c4a 5e85bd408b6138f341ab9c100b2be130 11a018cdd750e33c0d56323985fc418b 5cc7ba6d0bd7738f8778a93b7b6b0aa0 0b70037f6213028106d39c5ee20a7355 2fb03a50258e9efa23cabbf5c51ccf45 7640ca59ec3819b0cc643ca961737046 197d8cfab20065bf174e013ccf2a7c7a bc2374ebf2dc420369bec633a3297e7e f76d567ea981f232d18f817729d26590 2b6def49e24995e6cbc40157fb3e99da bacd9757a89e4e25f6ae8d6e594c8562 bdeba4974df1518513825b1fae9a4391 708d7c468d9df9342810807a36687401 b1c0794e2d5265467246c02c6b
+[t=12.531s] SOCK send to 127.0.0.1:443 66B 170303003d0000000000000002ef0e35 3fbacc7a2d8e852c48e815ea7b9d8e99 f6e5908746574a748eac04d72d315897 097f40648c67efbfaa63a872d842eaa5 4680 |....=..........5?..z-..,H...{.......FWJt....-1X...@d.g...c.r.B..F.|
+[t=12.531s] SOCK CH full 66B 170303003d0000000000000002ef0e35 3fbacc7a2d8e852c48e815ea7b9d8e99 f6e5908746574a748eac04d72d315897 097f40648c67efbfaa63a872d842eaa5 4680
+[t=12.531s] HTTP REQ /game/login/readSession
+[t=12.531s] HTTP BODY ack=0&pollNum=13&sessionID=1193810642
+[t=12.531s] HTTP RESP BODY [1]
+[t=12.531s] HTTP RESP: building head
+[t=12.531s] WSAIoctl code=0x4004747b
+[t=12.531s] HTTP RESP: sent
+[t=12.609s] SOCK recv from 127.0.0.1:443 190B 17030300b9000000000000000178881a ab723708ca59650556c8e163385e3b81 fe0c7a48ec77aca56c3be4a0c890d468 21061034106371d105702f28891d1832 71191cfc9de804be8e3faa588c39b46c c5d000727f7a71f4e3f4adb2669a111e e6db7ac8a78ebf0aca1bcaf5d3ec2faf fa51cae19713f926aac6c7669ba722cc |.............x...r7..Ye.V..c8^;...zH.w..l;.....h!..4.cq..p/(...2q........?.X.9.l...r.zq.....f.....z.........../..Q.....&...f..".|
+[t=12.859s] DNS resolve api.ageofempires.com svc=443
+[t=12.859s] DNS REDIRECT pb-live-release6-api.worldsedgelink.com -> 127.0.0.1 svc=443
+[t=12.859s] DNS   -> 192.168.0.103:443
+[t=12.875s] SOCK connect 192.168.0.103:443
+[t=12.875s] SOCK connect 127.0.0.1:443
+[t=12.875s] srv: connection accepted
+[t=12.875s] SOCK send to 127.0.0.1:443 204B 16030300c7010000c303036aeb60daad 5ef3c7a4e11f1292ce9945922714501b dd303171a69b869df9fa47000024c02c c02bc030c02fc024c023c028c027c00a c009c014c013009d009c003d003c0035 002f010000760000002c002a00002770 622d6c6976652d72656c65617365362d 6170692e776f726c6473656467656c69 |...........j.`..^.........E.'.P..01q......G..$.,.+.0./.$.#.(.'.............=.<.5./...v...,.*..'pb-live-release6-api.worldsedgeli|
+[t=12.875s] SOCK send to 127.0.0.1:443 SNI=pb-live-release6-api.worldsedgelink.com ver=3.3 suites=18
+[t=12.875s] SOCK CH full 204B 16030300c7010000c303036aeb60daad 5ef3c7a4e11f1292ce9945922714501b dd303171a69b869df9fa47000024c02c c02bc030c02fc024c023c028c027c00a c009c014c013009d009c003d003c0035 002f010000760000002c002a00002770 622d6c6976652d72656c65617365362d 6170692e776f726c6473656467656c69 6e6b2e636f6d00050005010000000000 0a00080006001d00170018000b000201 00000d001a0018080408050806040105 01020104030503020302020601060300 23000000170000ff01000100
+[t=12.937s] SOCK recv from 127.0.0.1:443 1427B 160303058e0200005103036aeb60da35 0ac0a91596231790be3581695f8fc26d 1d093bee23441667645355202f4c0000 706501bfa263e6fe9c14b10d9bf0d66f bedeba9b82ad9558c2d1aa77c0300000 0900170000ff010001000b0003c40003 c10003be308203ba308202a2a0030201 020210633f35b33a3423924641c70667 |........Q..j.`.5.....#...5.i_..m..;.#D.gdSU /L..pe...c.........o.......X...w.0......................0...0..........c?5.:4#.FA..g|
+[t=12.937s] TLS ServerHello ver=3.03
+[t=12.937s] SOCK send to 127.0.0.1:443 158B 1603030066100000626104e60bee28f5 3adaee6fedadb16d412e45274309e49c cfbdb7f784bae93f507f4622a5598626 8bc7a943ecbb28d653a1a78b900a7a2c f8c9aab1a3988528532469cb3675067a 2daaf9a941b720256acb029cb98e0510 30a980898e7cb7bbc2c7281403030001 0116030300280000000000000000e63a |....f...ba....(.:..o...mA.E'C..........?P.F".Y.&...C..(.S.....z,.......(S$i.6u.z-...A. %j.......0....|....(..........(.........:|
+[t=12.937s] SOCK CH full 158B 1603030066100000626104e60bee28f5 3adaee6fedadb16d412e45274309e49c cfbdb7f784bae93f507f4622a5598626 8bc7a943ecbb28d653a1a78b900a7a2c f8c9aab1a3988528532469cb3675067a 2daaf9a941b720256acb029cb98e0510 30a980898e7cb7bbc2c7281403030001 0116030300280000000000000000e63a 59b88972eea7dfa6a129eca512cb08c1 244ef54edbd94698d5e7d772903d
+[t=12.937s] TLS: handshake complete (server side)
+[t=12.984s] SOCK recv from 127.0.0.1:443 51B 14030300010116030300280000000000 000000fa11ae99eaa705866a5825993d a4e0de271d989e4be5a6db90b3d6c5de 58adc4 |..........(................jX%.=...'...K........X..|
+[t=12.984s] SOCK send to 127.0.0.1:443 3561B 1703030de400000000000000018c4cab e86657735ebe0d9db6563d10f0000331 1a8dcf18feb05eb2a03dc168d400782b aa7f59ada31b667a34c1471cd0066cde af6d70c2277d0ba339da0d6fb75b03b2 44df2b6e5422b69334f2b8252473cde8 a1b1963373e5045f78c06e284c6c48f0 ecc420348802619d31aced1f1334c5e4 |..............L..fWs^....V=....1......^..=.h..x+..Y...fz4.G...l..mp.'}..9..o.[..D.+nT"..4..%$s.....3s.._x.n(LlH... 4..a.1....4..|
+[t=12.984s] SOCK send to 127.0.0.1:443 104B 170303006300000000000000024db5df b94a8c1419136b210c7bfc56ccffb665 75c6debc42f54832e39754a83cb0cbe7 fb5912520a2cfd6b4fa71a88a2f1b68b ebb28f819ae5a4d67155d7221a550e02 c8f5bb76787170c6af6d0c4697c78248 3bfc3a4bfeb12482 |....c........M...J....k!.{.V...eu...B.H2..T.<....Y.R.,.kO...............qU.".U.....vxqp..m.F...H;.:K..$.|
+[t=12.984s] SOCK CH full 104B 170303006300000000000000024db5df b94a8c1419136b210c7bfc56ccffb665 75c6debc42f54832e39754a83cb0cbe7 fb5912520a2cfd6b4fa71a88a2f1b68b ebb28f819ae5a4d67155d7221a550e02 c8f5bb76787170c6af6d0c4697c78248 3bfc3a4bfeb12482
+[t=12.984s] HTTP REQ /game/account/setLanguage
+[t=12.984s] HTTP BODY callNum=1&connect_id=1193810642&language=en&sessionID=1193810642&title=age2
+[t=12.984s] HTTP RESP BODY [0,[]
+[t=12.984s] HTTP RESP: building head
+[t=12.984s] HTTP RESP: sent
+[t=12.984s] WSAIoctl code=0x4004747b
+[t=13.031s] SOCK recv from 127.0.0.1:443 193B 17030300bc0000000000000001437855 1e2c232f4c9b1eddcfefcaee3a707436 380cb5d5a77f02fa5c25e0d18c208a10 04f6270cc51087e32a762085f51b1968 a565816648404173794c710852bf11fc 8f99e503fbbfb4e9cc67e99e4e6e90dc 7b6fb2ba6ee7ab83cb7ac16f29b5b19e 1c83c7c0b8c1aa27341b186188fae525 |.............CxU.,#/L.......:pt68.......\%... ....'.....*v ....h.e.fH@AsyLq.R............g..Nn..{o..n....z.o)..........'4..a...%|
+[t=13.125s] DNS REDIRECT pb-live-release6-api.worldsedgelink.com -> 127.0.0.1 svc=443
+[t=13.203s] SOCK connect 127.0.0.1:443
+[t=13.203s] srv: connection accepted
+[t=13.219s] SOCK send to 127.0.0.1:443 204B 16030300c7010000c303036aeb60db6f 012434c56f777fe914c54055cadd4a37 1532a23f251b4f5874887a000024c02c c02bc030c02fc024c023c028c027c00a c009c014c013009d009c003d003c0035 002f010000760000002c002a00002770 622d6c6976652d72656c65617365362d 6170692e776f726c6473656467656c69 |...........j.`.o.$4.ow....@U..J7.2.?%.OXt.z..$.,.+.0./.$.#.(.'.............=.<.5./...v...,.*..'pb-live-release6-api.worldsedgeli|
+[t=13.219s] SOCK send to 127.0.0.1:443 SNI=pb-live-release6-api.worldsedgelink.com ver=3.3 suites=18
+[t=13.219s] SOCK CH full 204B 16030300c7010000c303036aeb60db6f 012434c56f777fe914c54055cadd4a37 1532a23f251b4f5874887a000024c02c c02bc030c02fc024c023c028c027c00a c009c014c013009d009c003d003c0035 002f010000760000002c002a00002770 622d6c6976652d72656c65617365362d 6170692e776f726c6473656467656c69 6e6b2e636f6d00050005010000000000 0a00080006001d00170018000b000201 00000d001a0018080408050806040105 01020104030503020302020601060300 23000000170000ff01000100
+[t=13.297s] SOCK recv from 127.0.0.1:443 1427B 160303058e0200005103036aeb60db16 bf3b9356fdcd7e34c31967b2c584c98b fdfb974272412dfcb1682020173d0000 f0ed4568dc2ebd195a32b35fac31a8df 3422be9233e5110b06ba2d68c0300000 0900170000ff010001000b0003c40003 c10003be308203ba308202a2a0030201 020210633f35b33a3423924641c70667 |........Q..j.`...;.V..~4..g........BrA-..h  .=....Eh....Z2._.1..4"..3.....-h.0......................0...0..........c?5.:4#.FA..g|
+[t=13.297s] TLS ServerHello ver=3.03
+[t=13.297s] SOCK send to 127.0.0.1:443 158B 160303006610000062610454a5d31569 70e8892c52f753a258a701cba9fba927 384e8d23963814245aa6126f0f1874a3 0bd780ae12e5aba88d845a56bb4e7108 123a1e1e6a65b4c24efa0c5de2f3443f e6d57910c2cda23e7311b9dbac732a54 8afc26a4faed8abe51a3db1403030001 011603030028000000000000000044a3 |....f...ba.T...ip..,R.S.X......'8N.#.8.$Z..o..t...........ZV.Nq..:..je..N..]..D?..y....>s....s*T..&.....Q............(........D.|
+[t=13.297s] SOCK CH full 158B 160303006610000062610454a5d31569 70e8892c52f753a258a701cba9fba927 384e8d23963814245aa6126f0f1874a3 0bd780ae12e5aba88d845a56bb4e7108 123a1e1e6a65b4c24efa0c5de2f3443f e6d57910c2cda23e7311b9dbac732a54 8afc26a4faed8abe51a3db1403030001 011603030028000000000000000044a3 20ecfe6822d2ca4cf81dc8cb3ae89525 da268a54150c7b7bbec75abc6ae3
+[t=13.297s] TLS: handshake complete (server side)
+[t=13.344s] SOCK send to 127.0.0.1:443 5598B 17030315d90000000000000003f69342 439d2fe7a2f97e274485f1b5be493bff 79d4dca0dcf412710b35848649dffc3d 4e286277aea04f4a5211732db03729cc 6cce0d333c646698a5410a8d30600767 8be3abbc928de58522690f27eec3dd1e 772c593f5380a90c468566abc3a057fe 874f5415656007ed3acaddf9909f860d |...............BC./...~'D....I;.y......q.5..I..=N(bw..OJR.s-.7).l..3<df..A..0`.g........"i.'....w,Y?S...F.f...W..OT.e`..:.......|
+[t=13.344s] HTTP REQ /game/news/getNews
+[t=13.344s] HTTP RESP BODY [0,[]
+[t=13.344s] HTTP RESP: building head
+[t=13.344s] HTTP RESP: sent
+[t=13.390s] SOCK recv from 127.0.0.1:443 193B 17030300bc000000000000000276259e 12a88fa0d87ae157a628ca3199364e8b 89fa3de1f01e25c5405d6ed8ddd946c7 d122922a7a4c3e196497c858e500d87b 851506dd93893c4e30ff4c6590177bd9 5771346dcb308b4f48d5e401f06d37df a0ce052fb2f3a23e20da5e5c6cbfab66 331c416ddee3f9a234160083f08ae620 |.............v%......z.W.(.1.6N...=...%.@]n...F..".*zL>.d..X...{......<N0.Le..{.Wq4m.0.OH....m7..../...> .^\l..f3.Am....4...... |
+[t=13.390s] SOCK recv from 127.0.0.1:443 51B 14030300010116030300280000000000 000000cb828abb088530c60e00a3c6d0 9f93553f08f2b14d6861bd0ae81fff4a b9a58c |..........(..............0........U?...Mha.....J...|
+[t=13.390s] SOCK send to 127.0.0.1:443 317B 17030301380000000000000001591d9c c0aa8e56f00107955a707ddc4ac3519e 81abec186df1a42ab71a0abdd7667244 3e9e240bc6bd21a2426579d77c70c324 d71c6e726fc66626b4236fac2924b243 af8bb63808697eda8f65e0c3064ccecb c8ed30048bddc94d4a37820898a60896 72b68754a682d7d0507178587ca66ec4 |....8........Y.....V....Zp}.J.Q.....m..*.....frD>.$...!.Bey.|p.$..nro.f&.#o.)$.C...8.i~..e...L....0....MJ7......r..T....PqxX|.n.|
+[t=13.390s] SOCK CH full 317B 17030301380000000000000001591d9c c0aa8e56f00107955a707ddc4ac3519e 81abec186df1a42ab71a0abdd7667244 3e9e240bc6bd21a2426579d77c70c324 d71c6e726fc66626b4236fac2924b243 af8bb63808697eda8f65e0c3064ccecb c8ed30048bddc94d4a37820898a60896 72b68754a682d7d0507178587ca66ec4 1eade342ca1fbbb6f52dc3f559070705 ddfe5fdbf5b747d3e128ab621dcb7c36 e3e47edcfed62d3fd20ef50877237574 ccb6adf244c95c7215c284d6b4585d43 ae5c9534cfee73be1518ae7eb8348198 53d3f7265f34b84ebb004aa81d290293 fa1e822c1cc3dd280eac2a45be6c57c2 deec5d5680736d297cb6ba51c6eb76e9 a7937de407aea0c561df47d406a2b31c 21feec73582e7173f2153b41f27d104c 64c55d9b7e051fff6c5f89f289c5f41b a81272a6ec7d2512c2ca5d3c01
+[t=13.390s] SOCK send to 127.0.0.1:443 66B 170303003d00000000000000029403df 3192be6a1a4a069761972c51e1a3c94b 04d03c009bdfd74d2bb2a4c5fcb28b38 390960aa3f5b3bfa3b5f41b939071fdc 050a |....=...........1..j.J..a.,Q...K..<....M+......89.`.?[;.;_A.9.....|
+[t=13.390s] SOCK CH full 66B 170303003d00000000000000029403df 3192be6a1a4a069761972c51e1a3c94b 04d03c009bdfd74d2bb2a4c5fcb28b38 390960aa3f5b3bfa3b5f41b939071fdc 050a
+[t=13.390s] HTTP REQ /game/login/readSession
+[t=13.390s] HTTP BODY ack=0&pollNum=14&sessionID=1193810642
+[t=13.390s] HTTP RESP BODY [1]
+[t=13.390s] HTTP RESP: building head
+[t=13.390s] HTTP RESP: sent
+[t=13.390s] WSAIoctl code=0x4004747b
+[t=13.500s] SOCK recv from 127.0.0.1:443 190B 17030300b900000000000000011c34e4 91be6b9c53e63d107704d7d253ecb707 835c7b03f5c86bde4bf0d877c5b3198f 350ce9a2e522509f0f1ba80087b65233 c8e95d1fda96ed7b8ec4be4b977c2e7a 0c34749412130282074bf5b2dd9d9e4f 93d94777f4071f4ea2b916338345bea4 9be36000c172a32dac102e67d30a9aed |..............4...k.S.=.w...S....\{...k.K..w....5...."P.......R3..]....{...K.|.z.4t......K.....O..Gw...N...3.E....`..r.-...g....|
+[t=14.000s] SOCK send to 127.0.0.1:443 317B 1703030138000000000000000368a645 dfe17640624fa9fbe379fd67651635e1 a2cce00ae1754ca4684fd973b335e2ac e12bd12ac33f178a60b76752d99f6ffa 0bb1f6c2bb7a194dca674d6f06bee438 55d9162743f27012375a51f7bfdc70f1 cd55a757801d7b72b3e243916335bd42 681f25f40d497519c9a1f6ce8ad230d6 |....8........h.E..v@bO...y.ge.5......uL.hO.s.5...+.*.?..`.gR..o......z.M.gMo...8U..'C.p.7ZQ...p..U.W..{r..C.c5.Bh.%..Iu.......0.|
+[t=14.015s] SOCK CH full 317B 1703030138000000000000000368a645 dfe17640624fa9fbe379fd67651635e1 a2cce00ae1754ca4684fd973b335e2ac e12bd12ac33f178a60b76752d99f6ffa 0bb1f6c2bb7a194dca674d6f06bee438 55d9162743f27012375a51f7bfdc70f1 cd55a757801d7b72b3e243916335bd42 681f25f40d497519c9a1f6ce8ad230d6 a1c6fd80730ae099f520431ecce9703c 70290751b4d42870df38eb53e0677a11 1eb5f5121cdaf2aeb6ea6b6ae3bdcac2 c2c39cf08674cbadb6d691b35dc4b299 1ae80e867ed96a9cf90d72bdf4a9d34d bd7e9e6f3540a38b16161128438f2858 08a7a7a7ad50cd38b4dea88739747855 44fb1bd196d2abd6511099462e985912 65550220d6dcd39fcc9a83445052be04 a6ef59722da947a27496721b7cccaf80 fe8abbb942c658d0cad3c1b9d2e14363 8cefad5a61ba08b223a2055a37
+[t=14.015s] SOCK send to 127.0.0.1:443 66B 170303003d0000000000000004853668 bd257f3111e0e095b47013302b3879ab 0781e5de2f64e7555e585862694ea281 8b615416b28f8750d1dae28d18d24801 b5c6 |....=.........6h.%.1.....p.0+8y...../d.U^XXbiN...aT....P......H...|
+[t=14.015s] SOCK CH full 66B 170303003d0000000000000004853668 bd257f3111e0e095b47013302b3879ab 0781e5de2f64e7555e585862694ea281 8b615416b28f8750d1dae28d18d24801 b5c6
+[t=14.015s] HTTP REQ /game/login/readSession
+[t=14.015s] HTTP BODY ack=0&pollNum=15&sessionID=1193810642
+[t=14.015s] HTTP RESP BODY [1]
+[t=14.015s] HTTP RESP: building head
+[t=14.015s] HTTP RESP: sent
+[t=14.015s] WSAIoctl code=0x4004747b
+[t=14.094s] SOCK recv from 127.0.0.1:443 190B 17030300b90000000000000002e2fbbb ac98bcd86370d1185b6fbec875c1d3c6 5b9f7edc14249e07a507ecda4ec586ab f50f51a7dcd376542f32ecd1cb18ef89 2a254c299c4628159caf1f6661339e99 bb0f3941c0a2825e25bf6a1a3aae87ab bc8970560ca57b3164e7981d368ba4e4 ffedc1bca401419786244943f1195bf0 |....................cp..[o..u...[.~..$......N.....Q...vT/2......*%L).F(....fa3....9A...^%.j.:.....pV..{1d...6.........A..$IC..[.|
+[t=14.109s] SOCK recvfrom 192.168.0.104:62077 56B 21240030613437653366632d37613561 2d343431312d393536622d3731666361 3161396434306209004d792053657276 |!$.0a47e3fc-7a5a-4411-956b-71fca1a9d40b..My Serv|
+[t=14.109s] HIT LogHelper #94: "Adding LAN relay server: %s, GUID %s" r8=0x000000a5a10ff3d0 s8="192.168.0.104" r9=0x000002111e8480e0 s9="0a47e3fc-7a5a-4411-956b-71fca1a9d40b" a5=0x00000211ec311b30 a6=0x0000000000000000 ret=0x00007ff6d6f39857
+[t=14.562s] SOCK send to 127.0.0.1:443 317B 170303013800000000000000075bcece e3dae257da26f9daf3e0bdf5056a1df7 7ce59b65743a1d359f82b99ad3396344 c4d92633d817c5358eca9f7b7d4d4e80 d83dc5d491d8c9247b5e6f32bf28b39c 59476bc650f0535fbcf552e79ce2ca88 ce4e4a1c97c04bdc070985fb0fc2b019 d43d2764e28781284d9a9e84d7c87a9d |....8........[.....W.&.......j..|..et:.5.....9cD..&3...5...{}MN..=.....${^o2.(..YGk.P.S_..R......NJ...K..........='d...(M.....z.|
+[t=14.562s] SOCK CH full 317B 170303013800000000000000075bcece e3dae257da26f9daf3e0bdf5056a1df7 7ce59b65743a1d359f82b99ad3396344 c4d92633d817c5358eca9f7b7d4d4e80 d83dc5d491d8c9247b5e6f32bf28b39c 59476bc650f0535fbcf552e79ce2ca88 ce4e4a1c97c04bdc070985fb0fc2b019 d43d2764e28781284d9a9e84d7c87a9d ff052072f5ffabe63593a6e093c2ec50 15252ae81562d51a2fa8a8b9d0e785a8 e52c1beb6a35414a42205d235b17f1e2 f257ab5cf0801ccbb7568fd4f9d1ae5b 6c8dfeacc28bd069d68430d93832c3cb bb1f88741d8d9f1fea53063ad1d1f1f0 1e9c88e9e09a8211ce981b9870de561d 47aee28fe510c0700801e70f60035eeb b866bc94ea3db84e658897848e15bd12 1ada92c7841dc61a54dcb5ddb8027518 52092daee55d277b36f3cc8c02169943 4b6512ffb4baf39993aaf147af
+[t=14.562s] SOCK send to 127.0.0.1:443 66B 170303003d000000000000000831dc38 48c9112de068280a9cfb6fa581c76711 d1c32a17ea7b962660c4863bf97b4672 caa9ab0143e82a1949902caeee95a636 b1d4 |....=........1.8H..-.h(...o...g...*..{.&`..;.{Fr....C.*.I.,....6..|
+[t=14.562s] SOCK CH full 66B 170303003d000000000000000831dc38 48c9112de068280a9cfb6fa581c76711 d1c32a17ea7b962660c4863bf97b4672 caa9ab0143e82a1949902caeee95a636 b1d4
+[t=14.562s] HTTP REQ /game/login/readSession
+[t=14.562s] HTTP BODY ack=0&pollNum=16&sessionID=1193810642
+[t=14.562s] HTTP RESP BODY [1]
+[t=14.562s] HTTP RESP: building head
+[t=14.562s] HTTP RESP: sent
+[t=14.562s] WSAIoctl code=0x4004747b
+[t=14.640s] SOCK recv from 127.0.0.1:443 190B 17030300b9000000000000000415c38f 40b1a03ee3d2798a3dc2348e10fd417d 022567876881c133d4b3eccb551f7776 7f7ea3b5e4e0738c1c80ba120e35d8ea 5fc2435ef3712dfeab434035b375b119 a587bddc92483308a5ee072a282c41f0 40a0915bdf1022762cb400cfbabc9448 fcc72d3a00a69dd88dc8ac6a0779ec5b |................@..>..y.=.4...A}.%g.h..3....U.wv.~....s......5.._.C^.q-..C@5.u.......H3....*(,A.@..[.."v,......H..-:.......j.y.[|
+[t=15.109s] SOCK send to 127.0.0.1:443 317B 170303013800000000000000093bcf86 feb9cd5aa1a2a5fa273cf2bf2c10e665 ddf796f0bdece417bb6abc24388c9be1 83c162b74468c178521320fe70e43115 d1190c5a753447f93c53806e4281c407 ac53b2278aad6f071e165936a7c7348d 44b5404ce6e042e6b42864b13255c786 7156d5a272eecc1fd80be395c6df0dd7 |....8........;.....Z....'<..,..e.........j.$8.....b.Dh.xR. .p.1....Zu4G.<S.nB....S.'..o...Y6..4.D.@L..B..(d.2U..qV..r...........|
+[t=15.109s] SOCK CH full 317B 170303013800000000000000093bcf86 feb9cd5aa1a2a5fa273cf2bf2c10e665 ddf796f0bdece417bb6abc24388c9be1 83c162b74468c178521320fe70e43115 d1190c5a753447f93c53806e4281c407 ac53b2278aad6f071e165936a7c7348d 44b5404ce6e042e6b42864b13255c786 7156d5a272eecc1fd80be395c6df0dd7 0e16800849e0809310791eeeb9460282 7c49115d45c9fe487fe6b0a036162253 ef4587aa01191112c15a2321ce2dc76f 119e5ff10537b081cc3eda7ccaba925d 72c4a17af04bf38e16b89ec23a739f99 fcee5bf70401a54206b930ea8ea0da6e 220b2efee35ed16c1c7f77a47bd62bf5 65489054a0264f6095364bc24b087137 9dab2df9700852490d57839012cdc6de 49ddea2a4616e5350666401a3da08e8b bacb702574c636f3e9421f6c4b5e90f7 7dd469644a01ae4d215ddaf069
+[t=15.109s] SOCK send to 127.0.0.1:443 66B 170303003d000000000000000a2732be c7f36b40524c19b4d78cf72a598b4c27 e747386617adc2ce56dbfd64f57c3851 c5d7593d5b593d123a1f9a78d7693f58 d772 |....=........'2...k@RL.....*Y.L'.G8f....V..d.|8Q..Y=[Y=.:..x.i?X.r|
+[t=15.109s] SOCK CH full 66B 170303003d000000000000000a2732be c7f36b40524c19b4d78cf72a598b4c27 e747386617adc2ce56dbfd64f57c3851 c5d7593d5b593d123a1f9a78d7693f58 d772
+[t=15.109s] WSAIoctl code=0x4004747b
+[t=15.109s] HTTP REQ /game/login/readSession
+[t=15.109s] HTTP BODY ack=0&pollNum=17&sessionID=1193810642
+[t=15.109s] HTTP RESP BODY [1]
+[t=15.109s] HTTP RESP: building head
+[t=15.109s] HTTP RESP: sent
+[t=15.187s] SOCK recv from 127.0.0.1:443 190B 17030300b900000000000000050670ad ab2499e46a180f21be23fdc846fa76f0 71300000228fbca712ce42b67c5c828d 3decf8c83013640899dddb8648b8aa2b 15ad3ed0d21fb45f051eedfa03377931 6d44cb2b5584b489de1382a4148e5d24 34f247eb0a3db96f1fc210bfd6246af3 e96eb22cd6958bd8d03a3e1acee86a4f |..............p..$..j..!.#..F.v.q0..".....B.|\..=...0.d.....H..+..>...._.....7y1mD.+U.........]$4.G..=.o.....$j..n.,.....:>...jO|
+[t=15.687s] SOCK send to 127.0.0.1:443 317B 1703030138000000000000000b7046b6 a37a9d7a1c448854ae971a2e7c2b8139 92c72d9e895023bd979aee7abb78452d 30a341708d0b4e403d44732f7eeb4b3c 71d88c04cc399f97cb3a15de7fe5fa99 b9296494dfe83d6c4d3f92f9226ec507 38465e3187c87ead58eb4fc58954ace2 4c4cb9247c92da08f6132a259cbf825b |....8........pF..z.z.D.T....|+.9..-..P#....z.xE-0.Ap..N@=Ds/~.K<q....9...:.......)d...=lM?.."n..8F^1..~.X.O..T..LL.$|.....*%...[|
+[t=15.687s] SOCK CH full 317B 1703030138000000000000000b7046b6 a37a9d7a1c448854ae971a2e7c2b8139 92c72d9e895023bd979aee7abb78452d 30a341708d0b4e403d44732f7eeb4b3c 71d88c04cc399f97cb3a15de7fe5fa99 b9296494dfe83d6c4d3f92f9226ec507 38465e3187c87ead58eb4fc58954ace2 4c4cb9247c92da08f6132a259cbf825b 0862055db5a69f524e766d3950004b54 0efdb22cda8cfc3188a0a28e8bb82f3c bc90f3bb2bde402836303edaeeec2a23 49f6e7c96931788254c20917b6f41203 d3cf2a94d02e31a85058753079bc202f 1290efa0079bcfbc7ac397f02bab7bde e6b202f64220fc460904e63401e81d04 468b52b935e31432f2830df5f624f443 4c08dbaf97e7a4dbb9a207cfef5ef01a cdf1a04495e38539f31e4d07a8bb9aa4 4bcc17f02db4869d36bb94b71dadc946 5d84174083bf42812afe7d73f4
+[t=15.687s] SOCK send to 127.0.0.1:443 66B 170303003d000000000000000ca0afb5 567a2d70e747405f8d9265dbddebd2d3 18ae6b12feed9eb7760d28371dbba0c5 1ede578544d2f9445f7b0d24d85706ba 3359 |....=...........Vz-p.G@_..e.......k.....v.(7......W.D..D_{.$.W..3Y|
+[t=15.687s] SOCK CH full 66B 170303003d000000000000000ca0afb5 567a2d70e747405f8d9265dbddebd2d3 18ae6b12feed9eb7760d28371dbba0c5 1ede578544d2f9445f7b0d24d85706ba 3359
+[t=15.687s] HTTP REQ /game/login/readSession
+[t=15.687s] HTTP BODY ack=0&pollNum=18&sessionID=1193810642
+[t=15.687s] HTTP RESP BODY [1]
+[t=15.687s] HTTP RESP: building head
+[t=15.687s] HTTP RESP: sent
+[t=15.687s] WSAIoctl code=0x4004747b
+[t=15.781s] SOCK recv from 127.0.0.1:443 190B 17030300b90000000000000006d31b59 36dabfba9932e247336d49f8b4519b68 bb2c629b07c64ce93a255556e2a42ca0 fccb79f1c2179b42c2b4d4fe4290f71a f900c1157d54e1022c5ef6c8e10d8f22 bb3b63f4250d70653f1d273a06e611ce d44ccaed08fe09947434241760266883 ac4e99b02cbbf423a601cc68e26d104c |...............Y6....2.G3mI..Q.h.,b...L.:%UV..,...y....B....B.......}T..,^.....".;c.%.pe?.':.....L......t4$.`&h..N..,..#...h.m.L|
+[t=15.906s] SOCK connect 192.168.0.103:443
+[t=16.250s] SOCK send to 127.0.0.1:443 317B 1703030138000000000000000d3d2799 7aeafd7fd7f8d5d071c9f7f093b28be4 73ca6d17cc521f9c1d3d03c96dc7046e 18d8c4bda7ccfeb2a9eec59c11b60443 2ccd9ae298032bda71fa72a8218ef8c2 ba63bcad3c61e0099c19d4625545654b efe7f95f44aa84a03bbe212705227f75 418e617f2a48343d4db18bf9a03ca564 |....8........='.z.......q.......s.m..R...=..m..n...............C,.....+.q.r.!....c..<a.....bUEeK..._D...;.!'.".uA.a.*H4=M....<.d|
+[t=16.250s] SOCK CH full 317B 1703030138000000000000000d3d2799 7aeafd7fd7f8d5d071c9f7f093b28be4 73ca6d17cc521f9c1d3d03c96dc7046e 18d8c4bda7ccfeb2a9eec59c11b60443 2ccd9ae298032bda71fa72a8218ef8c2 ba63bcad3c61e0099c19d4625545654b efe7f95f44aa84a03bbe212705227f75 418e617f2a48343d4db18bf9a03ca564 76b14537b4bd87116a8f229f22cc8ef5 6ec2a3dd1199b95b613638ab68d9a6fd bca4b8fffb958609f66e8db23228109b 2996fc48ff2365333b43fe208c56183b d10e021f0fe31afd93deee06b71a4052 cf28f0bc2cf1b4ff429edb6fc65dae6e 411a405251def4272ae92d4d2784092e 3902997124127e4ae2d5400890c60a0b d4b417637c0b624a80827d17efa7b7ea 50145e5da9223c819244f98997c546c4 1fdaede61497d34165b72ec10fad9002 68cdfdc0a3b160f9d5609f0e0f
+[t=16.250s] SOCK send to 127.0.0.1:443 66B 170303003d000000000000000e85cc49 6e40f457c2e77dd85784800f031d70c0 606fee0bca1ff17edb4da54d39e5aa66 d616844a705e065b73d1a4b1962d6f91 ef7c |....=..........In@.W..}.W.....p.`o.....~.M.M9..f...Jp^.[s....-o..||
+[t=16.250s] SOCK CH full 66B 170303003d000000000000000e85cc49 6e40f457c2e77dd85784800f031d70c0 606fee0bca1ff17edb4da54d39e5aa66 d616844a705e065b73d1a4b1962d6f91 ef7c
+[t=16.250s] WSAIoctl code=0x4004747b
+[t=16.250s] HTTP REQ /game/login/readSession
+[t=16.250s] HTTP BODY ack=0&pollNum=19&sessionID=1193810642
+[t=16.250s] HTTP RESP BODY [1]
+[t=16.250s] HTTP RESP: building head
+[t=16.250s] HTTP RESP: sent
+[t=16.328s] SOCK recv from 127.0.0.1:443 190B 17030300b90000000000000007c8f15e 28ef32878d642aa32119c3e0b24dac00 255c9b5aa5617e9259081403bf7f6a7b 41103dd734f442e2921a51fc5d295143 1de4908afe53b277a1950154f2ddde24 1afa20d88f009c5c64bf6b74e59a7fa5 f939f7fd588b1bf2c5ead88a23869466 9c7db7c23dcca5465e4274e265cc9efb |...............^(.2..d*.!....M..%\.Z.a~.Y.....j{A.=.4.B...Q.])QC.....S.w...T...$.. ....\d.kt.....9..X.......#..f.}..=..F^Bt.e...|
+[t=16.781s] SOCK send to 127.0.0.1:443 317B 1703030138000000000000000fc1defd 30578ff3c493d359c04721e5edc5d37b 392a013175d20aa59e14bd26fdcc67c3 c60e8703715cae391c4672976137dcc9 8b937f17fcc36b0bfbce86ab293752ed 8a11f6555a75476c1631ab94830d845b 9da4c2de540a9aa46ad3bfe1e0a0fc37 b55ed872940fd11b346997611e1bb016 |....8...........0W.....Y.G!....{9*.1u......&..g.....q\.9.Fr.a7........k.....)7R....UZuGl.1.....[....T...j......7.^.r....4i.a....|
+[t=16.781s] SOCK CH full 317B 1703030138000000000000000fc1defd 30578ff3c493d359c04721e5edc5d37b 392a013175d20aa59e14bd26fdcc67c3 c60e8703715cae391c4672976137dcc9 8b937f17fcc36b0bfbce86ab293752ed 8a11f6555a75476c1631ab94830d845b 9da4c2de540a9aa46ad3bfe1e0a0fc37 b55ed872940fd11b346997611e1bb016 13fe276c22f926a13c2726b507f4c9c3 a763d6507c495f13a67e55454dfe3bfd 4f522fad0d7eaaa312149cfe433e0e8a 98f37d742b118dfc94cd5826f58af162 622532a72ff8d085a092d01c3f0f8962 e6c84fdff636ea4af5d6b010476b0afb 91a10ffa057c89ce2a037b5d86e8041e c0441e2a358fcc05fdc5e473e8d49635 e08851c30776bd02627a95a926b878a9 e3053f64905e51dbcd464c8ef1a23810 464aca0a508f4db9393d52d681446677 042fc652d1f2ef846318bf009d
+[t=16.781s] SOCK send to 127.0.0.1:443 66B 170303003d0000000000000010218887 505f13920ced0db845674abbd0428474 134118d48adafb5e39cfb914244a98b9 1b5f9f2f2bb1d9ebf945cc3fc1cb4011 7976 |....=........!..P_......EgJ..B.t.A.....^9...$J..._./+....E.?..@.yv|
+[t=16.781s] SOCK CH full 66B 170303003d0000000000000010218887 505f13920ced0db845674abbd0428474 134118d48adafb5e39cfb914244a98b9 1b5f9f2f2bb1d9ebf945cc3fc1cb4011 7976
+[t=16.781s] WSAIoctl code=0x4004747b
+[t=16.781s] HTTP REQ /game/login/readSession
+[t=16.781s] HTTP BODY ack=0&pollNum=20&sessionID=1193810642
+[t=16.781s] HTTP RESP BODY [1]
+[t=16.781s] HTTP RESP: building head
+[t=16.781s] HTTP RESP: sent
+[t=16.859s] SOCK recv from 127.0.0.1:443 190B 17030300b900000000000000088f7864 03200e741c5f60989bcee5893fc29bd1 72a85dfa8554d845d698f6d7a2c73f07 3deb393180eadf28f71e25fddfaa1752 17b3d1b36a22dc749ed1f40cb3d14fb2 7da4b8a1c45ce75e1bb3535644ff04a9 c318161f1ffc9ef3a1382dc7e089c441 b686f4a94baf9fe294a4f31bc158a3a6 |..............xd. .t._`.....?...r.]..T.E......?.=.91...(..%....R....j".t......O.}....\.^..SVD............8-....A....K........X..|
+[t=17.328s] SOCK send to 127.0.0.1:443 317B 170303013800000000000000111450c7 e9ce45c33c906aa91f5290c065046c11 a87c6d5533d0d73481d51b07128d483e e6374078697199070257d2d2a9103bc8 c362945a38a343d657969de03b9c513f f75aa0200a616071766d4e882b35d7c7 84ca4aa29b8f0b879626f034cbb3fc0f d16dcf65650b49a3857a4bc63f89a4db |....8.........P...E.<.j..R..e.l..|mU3..4......H>.7@xiq...W....;..b.Z8.C.W...;.Q?.Z. .a`qvmN.+5....J......&.4.....m.ee.I..zK.?...|
+[t=17.328s] SOCK CH full 317B 170303013800000000000000111450c7 e9ce45c33c906aa91f5290c065046c11 a87c6d5533d0d73481d51b07128d483e e6374078697199070257d2d2a9103bc8 c362945a38a343d657969de03b9c513f f75aa0200a616071766d4e882b35d7c7 84ca4aa29b8f0b879626f034cbb3fc0f d16dcf65650b49a3857a4bc63f89a4db 4f4599f0b515e9be5446991dd8729624 f705e30c319c4eb8ec3bf7851ed316c1 2c8c1c0b19cae2fdc22b67adf5371581 9a0308b9c882cdc72f14934203bfa803 cc551b7a8a9076a498f755a8dc27fa7c 35debaa8fb27ad8ad09ab0c0ad74db54 7a1d07aad4b8ea8ba490ffc04c57ac45 5959768a10ef2971c0fac77968667971 7a7716c9eaf068160f204b06c2dd7e5c eac6d07223b4f61fb458a1b82e768195 b736b29df82466ec4cf7007bfc8b23c6 1ee2d51e6b202a7d9505a9527e
+[t=17.328s] SOCK send to 127.0.0.1:443 66B 170303003d0000000000000012a506a1 81b4a388adbe0ceeca15863e2e5377d8 fb2dea3c5cb5ec2ee5d2326f496a1920 343a9e678f9f4229c8d111fae5bab4b8 f745 |....=......................>.Sw..-.<\.....2oIj. 4:.g..B).........E|
+[t=17.328s] SOCK CH full 66B 170303003d0000000000000012a506a1 81b4a388adbe0ceeca15863e2e5377d8 fb2dea3c5cb5ec2ee5d2326f496a1920 343a9e678f9f4229c8d111fae5bab4b8 f745
+[t=17.328s] HTTP REQ /game/login/readSession
+[t=17.328s] HTTP BODY ack=0&pollNum=21&sessionID=1193810642
+[t=17.328s] HTTP RESP BODY [1]
+[t=17.328s] HTTP RESP: building head
+[t=17.328s] WSAIoctl code=0x4004747b
+[t=17.328s] HTTP RESP: sent
+[t=17.390s] SOCK recv from 127.0.0.1:443 190B 17030300b90000000000000009b6e3d2 52df980a0e21ff784129a1923fa6ef36 53390819ff90d3bdfa22fc03ffc28218 a98f1e8c301e3fc4f8834cdddfe358ee b64995148b22c2d1829adbe9cf29cba9 26e16cddf7a4abcf01861d1560013983 519c1ec3fe0c6261aa602fd20385a27d 92940d8a6a6fce86dcbc9533f1c554a2 |................R....!.xA)..?..6S9......."..........0.?...L...X..I...".......)..&.l.........`.9.Q.....ba.`/....}....jo.....3..T.|
+[t=17.859s] SOCK send to 127.0.0.1:443 317B 170303013800000000000000131f72e4 9a2ad0c9cfaf9454cf2f823d78ce2fb0 4d073a20a86a15db4b110e06b1fc0f80 53506a96b126e01a12d315e9caa33f98 5d42fe832bba52fbd71acd70ae1f4d66 0b8aa8c9bc78d9cf43a520d27506591a 4060b4c0a8ddb7b43b83a6ce01bf19ad 21f4e2a5a234898f2de3e433b50615fc |....8.........r..*.....T./.=x./.M.: .j..K.......SPj..&........?.]B..+.R....p..Mf.....x..C. .u.Y.@`......;.......!....4..-..3....|
+[t=17.859s] SOCK CH full 317B 170303013800000000000000131f72e4 9a2ad0c9cfaf9454cf2f823d78ce2fb0 4d073a20a86a15db4b110e06b1fc0f80 53506a96b126e01a12d315e9caa33f98 5d42fe832bba52fbd71acd70ae1f4d66 0b8aa8c9bc78d9cf43a520d27506591a 4060b4c0a8ddb7b43b83a6ce01bf19ad 21f4e2a5a234898f2de3e433b50615fc 9035e3f34980e8466993466bf375805a 816100a3e0b339c9108c3a9a1f54b4de 3f95d1cc5b135767ca2d20c92b2ad273 df5797ee28d42f62828769dcb7192a52 19b3c16774033e46f1f38ba3e73128fe 138469f02f8865da8b1e046dcee0eb4b 6d0fb73992bf650584a8b4d3d2364afb 8d7e06793fc555d4ef5c1bf066b3566f 9a21d2f6d1e52388879ef3c9dacdca29 915dc0adce80360e362f149223f30cdf 21e29b831912ee507871108c8ab37a9e c67a8803ca86cf790ee33cc288
+[t=17.859s] SOCK send to 127.0.0.1:443 66B 170303003d00000000000000148551b1 07c4fd34c0aa502dee71fb34a21bdace 598d3268e1aa00c6a39129ecd3368ebc b81ae18afa3a6f4d7e33fb3ef6380936 5a52 |....=.........Q....4..P-.q.4....Y.2h......)..6.......:oM~3.>.8.6ZR|
+[t=17.859s] SOCK CH full 66B 170303003d00000000000000148551b1 07c4fd34c0aa502dee71fb34a21bdace 598d3268e1aa00c6a39129ecd3368ebc b81ae18afa3a6f4d7e33fb3ef6380936 5a52
+[t=17.859s] HTTP REQ /game/login/readSession
+[t=17.859s] HTTP BODY ack=0&pollNum=22&sessionID=1193810642
+[t=17.859s] HTTP RESP BODY [1]
+[t=17.859s] HTTP RESP: building head
+[t=17.859s] HTTP RESP: sent
+[t=17.859s] WSAIoctl code=0x4004747b
+[t=17.937s] SOCK recv from 127.0.0.1:443 190B 17030300b9000000000000000ae5e905 9c69a140a42ab8bcf5eb497b1006e6de 35f3545ff221bf4e247304271d80267e 4158c19da3c7751a08514203ce63e3e5 48849115749449e776021985ae4e65d5 1a618a6a4824e50ce4a8b941af280b3f b512b445cf07750375b4032e10c0a38a c4f9ce72617f6fb76383347258c3dc18 |.................i.@.*....I{....5.T_.!.N$s.'..&~AX....u..QB..c..H...t.I.v....Ne..a.jH$.....A.(.?...E..u.u..........ra.o.c.4rX...|
+[t=18.390s] SOCK send to 127.0.0.1:443 317B 170303013800000000000000152a33ee 064e0e5cb0eafe6bf0e8b62e8c1f3738 48e13409742f5b3a70f672f4d8ec9d03 695f14a409834a1ede577bea32feb0cc d26dfbb98775e4dd5eb5d3a78853125d be87247863c11c0e65d67ab2fbcebf59 d25e87bb06bf33365599116d81547caf 2b74016726c9f41d175b3823f9dfba16 |....8........*3..N.\...k......78H.4.t/[:p.r.....i_....J..W{.2....m...u..^....S.]..$xc...e.z....Y.^....36U..m.T|.+t.g&....[8#....|
+[t=18.390s] SOCK CH full 317B 170303013800000000000000152a33ee 064e0e5cb0eafe6bf0e8b62e8c1f3738 48e13409742f5b3a70f672f4d8ec9d03 695f14a409834a1ede577bea32feb0cc d26dfbb98775e4dd5eb5d3a78853125d be87247863c11c0e65d67ab2fbcebf59 d25e87bb06bf33365599116d81547caf 2b74016726c9f41d175b3823f9dfba16 dd962a6b01326e511365ca6cc8fad74d 0193e6e4006cca778cda957b6de9dc73 1423022e22c64fd4fa4ca208cb1a08ff 87ce9fd8bdca6de43a629954fa692144 77ed785b4c13eaf4e74b5664dc60c5ad 78606ad38c03d2af3c9a91f5f6021d19 233b1a5909413046624b564c3bc5a650 5155af2b8bc8f11d1da7babd0fef4905 9dca1a24d37273b740f0d42855f7bf69 9d3e3dc312aa7b628b8ffd44c8451cd1 806973fda056c413a3c8b73389f1bb29 434f9cc13a97d27e0dc23fe0ba
+[t=18.390s] SOCK send to 127.0.0.1:443 66B 170303003d0000000000000016c8623f 4e3a171c13c55bdd73b6148063b55237 525d0a7317502dd8bb56102efed6c66c abf67dcc43992acc0c7430c00dea102f b048 |....=.........b?N:....[.s...c.R7R].s.P-..V.....l..}.C.*..t0..../.H|
+[t=18.390s] SOCK CH full 66B 170303003d0000000000000016c8623f 4e3a171c13c55bdd73b6148063b55237 525d0a7317502dd8bb56102efed6c66c abf67dcc43992acc0c7430c00dea102f b048
+[t=18.390s] HTTP REQ /game/login/readSession
+[t=18.390s] HTTP BODY ack=0&pollNum=23&sessionID=1193810642
+[t=18.390s] HTTP RESP BODY [1]
+[t=18.390s] HTTP RESP: building head
+[t=18.390s] WSAIoctl code=0x4004747b
+[t=18.390s] HTTP RESP: sent
+[t=18.453s] SOCK recv from 127.0.0.1:443 190B 17030300b9000000000000000b7e8e88 b10b8167d5cd71a08157e3896f4362ae 26326688c96d0992ca7f54f2d59af939 fcaa1cb039ee3349bf4fdfa7b28afd20 f118f85342b12e332eb4d9c18e1351dc 633987df399f69ffda00732dc29480fe 4fe7b04c139655cfe2b45823f3cb3a0b 60186dc8046348eebbe6dd4c712278ba |.............~.....g..q..W..oCb.&2f..m....T....9....9.3I.O..... ...SB..3......Q.c9..9.i...s-....O..L..U...X#..:.`.m..cH....Lq"x.|
+[t=18.484s] SOCK connect 192.168.0.103:443
+[t=18.922s] SOCK send to 127.0.0.1:443 317B 1703030138000000000000001743b025 a7453373fc05298d6d6f8b6c367e2840 32185fba94a90ea5c38fa17985ada3df 00798362fabdc6ef88b347b5a1bd8002 127dd050cabc6be1c4acf6a23120e470 2743dac6b04267103f9f095284af7208 7f73e7c6c66fa011613410752c78f754 1543bdc557878c45bbab54203e581055 |....8........C.%.E3s..).mo.l6~(@2._........y.....y.b......G......}.P..k.....1 .p'C...Bg.?..R..r..s...o..a4.u,x.T.C..W..E..T >X.U|
+[t=18.922s] SOCK CH full 317B 1703030138000000000000001743b025 a7453373fc05298d6d6f8b6c367e2840 32185fba94a90ea5c38fa17985ada3df 00798362fabdc6ef88b347b5a1bd8002 127dd050cabc6be1c4acf6a23120e470 2743dac6b04267103f9f095284af7208 7f73e7c6c66fa011613410752c78f754 1543bdc557878c45bbab54203e581055 33dde4d41063ca09bb3b5f05c2bc43dd 5138618ced07b6aa1be4e1cc454f13c4 257ddc225cb660e83b2f10e05f8000f1 56a808569c10a77fe9334b8d0e6bcd68 7b260d4b5455bb1365af093201ebf4b0 d5542654514c7d4656e8f1d70cf61562 e085459f7bbf1cb843b8082efd9d1e5c 722c1e06fa2983a458fbe73c9732e344 8372827644585cc820fb4fb2093d8cc5 662b6732a14f7ce5c6e51f60a99e5e38 1425e0f30c989496dab26a7bd21bc414 8193eb73faf3eca911365b5d5e
+[t=18.922s] SOCK send to 127.0.0.1:443 66B 170303003d0000000000000018a988fa ba795f162c96055f1d1a0a20fd5088b2 10affa52c235cb22a4e0e48e4f2807d9 f0c972cacd108cc7ca0abdc70f60d8a6 9871 |....=............y_.,.._... .P.....R.5."....O(....r..........`...q|
+[t=18.922s] SOCK CH full 66B 170303003d0000000000000018a988fa ba795f162c96055f1d1a0a20fd5088b2 10affa52c235cb22a4e0e48e4f2807d9 f0c972cacd108cc7ca0abdc70f60d8a6 9871
+[t=18.922s] HTTP REQ /game/login/readSession
+[t=18.922s] HTTP BODY ack=0&pollNum=24&sessionID=1193810642
+[t=18.922s] HTTP RESP BODY [1]
+[t=18.922s] HTTP RESP: building head
+[t=18.922s] WSAIoctl code=0x4004747b
+[t=18.922s] HTTP RESP: sent
+[t=18.984s] SOCK recv from 127.0.0.1:443 190B 17030300b9000000000000000c5b2add e9475df6ff4a9fdd82c9cbd4fddbdcbc 6424a29450d670ca4e955b1efe22ffcf 6d15487c7ec3438c15d9511030a93cb3 b9a5cdd7675b8b1894c20e15932f866c 80ac1f59ac056c41fdc887946112409f ad2dec663c343c59fd9d9aeba1d8e9e7 5fb5edf793a6080b31c8fb686df0857a |.............[*..G]..J..........d$..P.p.N.[.."..m.H|~.C...Q.0.<.....g[......./.l...Y..lA....a.@..-.f<4<Y........_.......1..hm..z|
+[t=19.437s] SOCK send to 127.0.0.1:443 317B 17030301380000000000000019d1f29e 824232ef46b6f61cbdae78a3255e7ee8 337a0700e140c1898c71cd37b445d892 7dc7c519417c229c9b9f81529a4b4029 5a34715690ff405e390f91f28d3db5bf b45117839b1f4481e4e04dbbe9253818 cf5dc72d13a843cf2436f9aa22970a97 b9744de86a4c133dc508ee4194b93fda |....8............B2.F.....x.%^~.3z...@...q.7.E..}...A|"....R.K@)Z4qV..@^9....=...Q....D...M..%8..].-..C.$6.."....tM.jL.=...A..?.|
+[t=19.437s] SOCK CH full 317B 17030301380000000000000019d1f29e 824232ef46b6f61cbdae78a3255e7ee8 337a0700e140c1898c71cd37b445d892 7dc7c519417c229c9b9f81529a4b4029 5a34715690ff405e390f91f28d3db5bf b45117839b1f4481e4e04dbbe9253818 cf5dc72d13a843cf2436f9aa22970a97 b9744de86a4c133dc508ee4194b93fda 3f46b933061febd5e576d916b89c024b 64be3094005e2ef9a6cfcb20f847e019 47a85de884970f1f94aad0efb1d0dd4e f321f01c1fba2d1db4bb41388547789b 82e9c8734d883e1c5d9cd097ce88e5d7 d69f629989fa386be040e33c59b9e1ee 54226244758f0e0e09ad6b57f390030c c2bc1d518090c7256d092b05c89444fc 721a5c770ba86912706723ade671a4b5 dc870a664b9c0de1dd23ce1d07308ef9 e724017aea0bffe7a31a315172fa199b 7be270b62ba7905a1fcae00077
+[t=19.437s] SOCK send to 127.0.0.1:443 66B 170303003d000000000000001ae23734 a5669d0fc2151de224028018f84b1e02 582a1244f133923232e327728ffb23ad e70425674177d2a8544e90c5f27d1d4e 83ea |....=.........74.f......$....K..X*.D.3.22.'r..#...%gAw..TN...}.N..|
+[t=19.437s] SOCK CH full 66B 170303003d000000000000001ae23734 a5669d0fc2151de224028018f84b1e02 582a1244f133923232e327728ffb23ad e70425674177d2a8544e90c5f27d1d4e 83ea
+[t=19.437s] HTTP REQ /game/login/readSession
+[t=19.437s] WSAIoctl code=0x4004747b
+[t=19.437s] HTTP BODY ack=0&pollNum=25&sessionID=1193810642
+[t=19.437s] HTTP RESP BODY [1]
+[t=19.437s] HTTP RESP: building head
+[t=19.437s] HTTP RESP: sent
+[t=19.515s] SOCK recv from 127.0.0.1:443 190B 17030300b9000000000000000dc73297 d093700f49330d9a809c013a80344687 52af8715fe078f8780ace4da64debcfa 5ec0eca64f2f7888ea950e16c41f8d74 5d6b2a42167267491faf8f072b5d208b fd029ef1d571891b1d0ecf3ede2b1206 38de900dcca30e9155ca49e565ea3819 a98db0d18092e31afd9416f5ec80964f |..............2...p.I3.....:.4F.R...........d...^...O/x........t]k*B.rgI....+] ......q.....>.+..8.......U.I.e.8................O|
+[t=19.969s] SOCK send to 127.0.0.1:443 317B 1703030138000000000000001b386c4d 2f73c027dbca0ce6e703c17eb53eb3d5 17c8673615434cccfdf37c5ac68d0410 f86ed05c0dd99b5b8a38c47c07566d99 c869f5cd51b942cb914646ae7671ef42 e23dedb6edea5e37a0596f13d9af11ba fb8c8f578deb5bf1cce58bfd44d717e8 7059d94f6a4036266339797777134e29 |....8........8lM/s.'.......~.>....g6.CL...|Z.....n.\...[.8.|.Vm..i..Q.B..FF.vq.B.=....^7.Yo........W..[.....D...pY.Oj@6&c9yww.N)|
+[t=19.969s] SOCK CH full 317B 1703030138000000000000001b386c4d 2f73c027dbca0ce6e703c17eb53eb3d5 17c8673615434cccfdf37c5ac68d0410 f86ed05c0dd99b5b8a38c47c07566d99 c869f5cd51b942cb914646ae7671ef42 e23dedb6edea5e37a0596f13d9af11ba fb8c8f578deb5bf1cce58bfd44d717e8 7059d94f6a4036266339797777134e29 66cf030c5af138b4752369f881fca4dd d221a118af4f920c324ae10c4a84ec31 09711f974a8a07bdd5bacc3e9741d173 efa861ba947b0f18f4a83acae6385fbb be45d8f1922c551bbf3e071bf3dcb274 ccfe91459f9518aad43920126ac81339 dd7e4a1d826ad923566f02131ff58a69 b252cd310aa312d8bca4a5b13e475164 d147a8986b26b8c07fb48e9dc12030fa 8cce7641bc6247724877898998c04370 368487a14701d3defb4b846f120282e6 1afd7c46151ecd3f56edae102c
+[t=19.969s] SOCK send to 127.0.0.1:443 66B 170303003d000000000000001cf787ff 71e8ca56de6d963e1813c8a978f87b69 081d83626acf646bc2a749505eb01ea7 842dfc7bd2d0c08ac42312ea1f7415fd 9515 |....=...........q..V.m.>....x.{i...bj.dk..IP^....-.{.....#...t....|
+[t=19.969s] SOCK CH full 66B 170303003d000000000000001cf787ff 71e8ca56de6d963e1813c8a978f87b69 081d83626acf646bc2a749505eb01ea7 842dfc7bd2d0c08ac42312ea1f7415fd 9515
+[t=19.969s] HTTP REQ /game/login/readSession
+[t=19.969s] HTTP BODY ack=0&pollNum=26&sessionID=1193810642
+[t=19.969s] HTTP RESP BODY [1]
+[t=19.969s] HTTP RESP: building head
+[t=19.969s] WSAIoctl code=0x4004747b
+[t=19.969s] HTTP RESP: sent
+[t=20.047s] SOCK recv from 127.0.0.1:443 190B 17030300b9000000000000000ee0a995 d97fa0b7325af19f95c3094d68aa5a50 378e3857252208231482e946eff06410 76e45c66e641553e09b82eb4ab7b7a13 faefb0883a8a92e761633f0efb5e21cc 088b6f8ed74ab6123d6bb83064bbc5e5 0c03bac4de3345d25a3bbe8356639deb e8d47ebba7be9016d7dcf857512e61d7 |....................2Z.....Mh.ZP7.8W%".#...F..d.v.\f.AU>.....{z.....:...ac?..^!...o..J..=k.0d........3E.Z;..Vc....~........WQ.a.|
+[t=20.719s] SOCK send to 127.0.0.1:443 317B 1703030138000000000000001d0ac3dc 82d85bdb78a8dcf6bb74515b6a695a78 506e4a51c5fe34ab0eaa74f557b8d3e0 faf6de60048613b1fea29b1d1a9b961a ac86be8d4859d598e566afa1d5b14b4e fcb48462bac4eeda062d01369e1804bd fb72dfa3c61eeafe868c209c66b1dd73 005fab427f6635033565a4cb92f815b9 |....8.............[.x....tQ[jiZxPnJQ..4...t.W......`................HY...f....KN...b.....-.6.....r........ .f..s._.B.f5.5e......|
+[t=20.719s] SOCK CH full 317B 1703030138000000000000001d0ac3dc 82d85bdb78a8dcf6bb74515b6a695a78 506e4a51c5fe34ab0eaa74f557b8d3e0 faf6de60048613b1fea29b1d1a9b961a ac86be8d4859d598e566afa1d5b14b4e fcb48462bac4eeda062d01369e1804bd fb72dfa3c61eeafe868c209c66b1dd73 005fab427f6635033565a4cb92f815b9 305532571d9139e5493a3a24a402af8b 0648ac96eac2b327f04ebe35862d224f 079ec3f59da0e9ede364d535352b31cf 68cf498d1101d78eff90486bcd2a50b8 1dbdf38c4a1daebaa6ac3092e92a31fd 7d3d5ffe69a5a357c9decb0cbe2aaf07 2e4c79a142d984538e4cd0b8b274d209 f7c5f972947bb410ee05a589a4fb58ec c10b3b7a17f69941e722af46977b714d fe95dcf71094888995e6ea819604322a 64be42a4bad5d6eae7eb4ab146a7081d 62d658190dae20fe747615998d
+[t=20.719s] SOCK send to 127.0.0.1:443 66B 170303003d000000000000001e3367a8 19e67aeb7036c7bd55fafc37b35bb95d 8c61b51641c230984c047f1cdd814e2a 1dfaccaf22e2b2ce7cd85bf79762da8b 27c5 |....=........3g...z.p6..U..7.[.].a..A.0.L.....N*...."...|.[..b..'.|
+[t=20.719s] SOCK CH full 66B 170303003d000000000000001e3367a8 19e67aeb7036c7bd55fafc37b35bb95d 8c61b51641c230984c047f1cdd814e2a 1dfaccaf22e2b2ce7cd85bf79762da8b 27c5
+[t=20.719s] HTTP REQ /game/login/readSession
+[t=20.719s] WSAIoctl code=0x4004747b
+[t=20.719s] HTTP BODY ack=0&pollNum=27&sessionID=1193810642
+[t=20.719s] HTTP RESP BODY [1]
+[t=20.719s] HTTP RESP: building head
+[t=20.719s] HTTP RESP: sent
+[t=20.797s] SOCK recv from 127.0.0.1:443 190B 17030300b9000000000000000f7cf680 acd14af3a0eea49e1983ec122c14c6c5 4308d21dffe44d9e93259b7bd7ecc53b eb64452b19bfcc9c5f7bdaaca82021da 1458630394136ddc085d79d5aeccb0e5 98709858fc50e57bd70a7e1406b85c40 3f1f95215fb3fdabb02ae648fd71f48e 1ba8a32ac002a1b9f7b13c9a0bdd202b |.............|....J.........,...C.....M..%.{...;.dE+...._{... !..Xc...m..]y......p.X.P.{..~...\@?..!_....*.H.q.....*......<... +|
+[t=21.250s] SOCK send to 127.0.0.1:443 317B 1703030138000000000000001fdb49e9 61243a1fdd507d5856d487b095f18d5b 80a4ec51b12f52a30761f47b66a05ddd 8141af15774da8ec627d16566171f03d b4d0fdc02a9c5813b0bbb4d29740512b 54a9b181f80d12b31c891658c27f3d96 a28e0696932b3c9f767d317101239599 3aee4944e49eb3e41063d1b7302bc665 |....8.........I.a$:..P}XV......[...Q./R..a.{f.]..A..wM..b}.Vaq.=....*.X......@Q+T..........X..=......+<.v}1q.#..:.ID.....c..0+.e|
+[t=21.250s] SOCK CH full 317B 1703030138000000000000001fdb49e9 61243a1fdd507d5856d487b095f18d5b 80a4ec51b12f52a30761f47b66a05ddd 8141af15774da8ec627d16566171f03d b4d0fdc02a9c5813b0bbb4d29740512b 54a9b181f80d12b31c891658c27f3d96 a28e0696932b3c9f767d317101239599 3aee4944e49eb3e41063d1b7302bc665 7310f1ab0c706d065e3b0e788be79a13 d5a8e647a966e977f2affae7da4dbef4 bfb7f1a6f1ff1eb7d102a92ba1ce4924 0927d97e48805409759b89f41f314aa5 455a218f79516dad40802af631ff346d bd16665d97a058020e2e7856a65ec0c6 ce48840f72804e3a0e5f999db5cdfc3c 825eeaf9199327687695c1bdd2a794df fbf3fe6039e74a90dc8acc4d28719498 086d46b10c306c74e933062c2ddb0d61 404121ea61b76df199ff56e73719184d e80677d927659bc2c59018c56f
+[t=21.250s] SOCK send to 127.0.0.1:443 66B 170303003d000000000000002068a5f3 1aa372a1479e6f3a9b2fcc8fb8748241 4f5274bbb98ffcc253e9251382dc76cb 27df826aa67274d6b301873d6d2ad649 ca6b |....=....... h....r.G.o:./...t.AORt.....S.%...v.'..j.rt....=m*.I.k|
+[t=21.250s] SOCK CH full 66B 170303003d000000000000002068a5f3 1aa372a1479e6f3a9b2fcc8fb8748241 4f5274bbb98ffcc253e9251382dc76cb 27df826aa67274d6b301873d6d2ad649 ca6b
+[t=21.250s] HTTP REQ /game/login/readSession
+[t=21.250s] HTTP BODY ack=0&pollNum=28&sessionID=1193810642
+[t=21.250s] HTTP RESP BODY [1]
+[t=21.250s] HTTP RESP: building head
+[t=21.250s] WSAIoctl code=0x4004747b
+[t=21.250s] HTTP RESP: sent
+[t=21.312s] SOCK recv from 127.0.0.1:443 190B 17030300b900000000000000107c87c9 fa1735def6d2fd54577692ae2235e7de 2f93b591ccca0be575c7bcf5ce339489 57d618c4d06463e72369bd597cdbdea3 89ef1baf255f327a5f33ab4f01bdaa6e 5ac68a0bb087dcba3f28574f7bf4542e b73a4df1f295d293aa91992fedcc97a5 686b83220fc2f2ecea6af6c767ee14f2 |.............|....5....TWv.."5../.......u....3..W....dc.#i.Y|.......%_2z_3.O...nZ.......?(WO{.T..:M......../....hk.".....j..g...|

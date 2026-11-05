@@ -1,0 +1,39 @@
+[t=0.000s] lanhook v2 boot in D:\Age of Empires II Definitive Edition\dbghelp.dll
+[t=0.000s] lanhook boot: dbghelp proxy attached
+[t=0.000s] game base=0x00007ff75ab00000
+[t=0.000s] real dbghelp resolved
+[t=0.000s] LanHookThread stage=7
+[t=0.000s] iathook: swapped 40 IAT slots (winhttp+wininet+libHC)
+[t=4.015s] HC SET GET https://title.mgt.xboxlive.com/titles/default/endpoints?type=1
+[t=4.015s] HC REQHDR Connection=Keep-Alive
+[t=4.015s] HC REQHDR x-xbl-contract-version=1
+[t=4.015s] HC REQHDR MS-CV=WokzKnDexFjbQ2mQ.1.0
+[t=4.015s] HC REQHDR User-Agent=XAL Win32 2024.02.20240220.000
+[t=4.015s] HC PERFORM (request sent)
+[t=4.531s] HC STATUS 200
+[t=4.531s] HC STATUS 200
+[t=4.531s] HC RSPHDR MS-CV=WokzKnDexFjbQ2mQ.1.0.0
+[t=4.531s] HC STATUS 200
+[t=5.015s] HC SET POST https://self.events.data.microsoft.com/OneCollector/1.0/
+[t=5.015s] HC REQBODY-via-readfunction (streamed upload)
+[t=5.015s] HC REQHDR APIKey=1cc8ecb09142448998fee840a1269be8-136c4dca-7c5e-4eff-b721-68018a2ab521-7334
+[t=5.015s] HC REQHDR Client-Id=NO_AUTH
+[t=5.015s] HC REQHDR Content-Encoding=deflate
+[t=5.015s] HC REQHDR Content-Type=application/bond-compact-binary
+[t=5.015s] HC REQHDR Expect=100-continue
+[t=5.015s] HC REQHDR SDK-Version=EVT-Windows-C++-No-3.5.131.1
+[t=5.015s] HC REQHDR Upload-Time=1793643851186
+[t=5.015s] HC REQHDR User-Agent=XAL Win32 2024.02.20240220.000
+[t=5.015s] HC PERFORM (request sent)
+[t=6.125s] HC STATUS 200
+[t=6.125s] HC HDRS: Access-Control-Allow-Credentials=true
+[t=6.125s] HC hdrs+: Access-Control-Allow-Headers=Strict-Transport-Security,time-delta-millis,Content-Type,Content-Length
+[t=6.125s] HC hdrs+: Access-Control-Allow-Methods=POST
+[t=6.125s] HC hdrs+: Access-Control-Allow-Origin=*
+[t=6.125s] HC hdrs+: Access-Control-Expose-Headers=time-delta-millis
+[t=6.125s] HC hdrs+: Content-Length=10
+[t=6.125s] HC hdrs+: Content-Type=application/json
+[t=6.125s] HC hdrs+: Date=Mon, 02 Nov 2026 18:24:16 GMT
+[t=6.125s] HC hdrs+: Server=Microsoft-HTTPAPI/2.0
+[t=6.125s] HC hdrs+: Strict-Transport-Security=max-age=31536000
+[t=6.125s] HC hdrs+: time-delta-millis=5328

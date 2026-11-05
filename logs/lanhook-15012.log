@@ -1,0 +1,9 @@
+[t=0.000s] lanhook v2 boot in D:\Age of Empires II Definitive Edition\dbghelp.dll
+[t=0.000s] lanhook boot: dbghelp proxy attached
+[t=0.000s] game base=0x00007ff7608e0000
+[t=0.000s] real dbghelp resolved
+[t=0.000s] crash filter installed, prev=0x0000000000000000
+[t=0.000s] LanHookThread stage=1
+[t=0.000s] stage1: safe idle, no game-code patches
+[t=5.016s] hb alive sec=5
+[t=10.016s] hb alive sec=10

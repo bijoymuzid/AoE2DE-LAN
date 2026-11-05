@@ -1,0 +1,298 @@
+[t=0.000s] lanhook v2 boot in D:\Age of Empires II Definitive Edition\dbghelp.dll
+[t=0.000s] lanhook boot: dbghelp proxy attached
+[t=0.000s] game base=0x00007ff6b12a0000
+[t=0.000s] real dbghelp resolved
+[t=0.015s] LanHookThread stage=8
+[t=0.015s] IAT+ libHttpClient.Win32.dll!HCHttpCallPerformAsync
+[t=0.015s] IAT+ libHttpClient.Win32.dll!HCHttpCallRequestSetUrl
+[t=0.015s] IAT+ libHttpClient.Win32.dll!HCHttpCallRequestSetRequestBodyBytes
+[t=0.015s] IAT+ libHttpClient.Win32.dll!HCHttpCallRequestSetRequestBodyString
+[t=0.015s] IAT+ libHttpClient.Win32.dll!HCHttpCallRequestSetHeader
+[t=0.015s] IAT+ libHttpClient.Win32.dll!HCHttpCallResponseGetResponseString
+[t=0.015s] IAT+ libHttpClient.Win32.dll!HCHttpCallResponseGetResponseBodyBytesSize
+[t=0.015s] IAT+ libHttpClient.Win32.dll!HCHttpCallResponseGetResponseBodyBytes
+[t=0.015s] IAT+ libHttpClient.Win32.dll!HCHttpCallResponseGetStatusCode
+[t=0.015s] IAT+ libHttpClient.Win32.dll!HCHttpCallResponseGetNetworkErrorCode
+[t=0.015s] IAT+ libHttpClient.Win32.dll!HCHttpCallResponseGetHeader
+[t=0.015s] IAT+ libHttpClient.Win32.dll!HCHttpCallResponseGetNumHeaders
+[t=0.015s] IAT+ libHttpClient.Win32.dll!HCHttpCallResponseGetHeaderAtIndex
+[t=0.015s] IAT+ libHttpClient.Win32.dll!HCWebSocketConnectAsync
+[t=0.015s] IAT+ libHttpClient.Win32.dll!HCWebSocketSendMessageAsync
+[t=0.015s] IAT+ libHttpClient.Win32.dll!HCHttpCallRequestSetRequestBodyReadFunction
+[t=0.015s] IAT+ WSOCK32.dll!connect
+[t=0.015s] IAT+ WSOCK32.dll!socket
+[t=0.015s] IAT+ WSOCK32.dll!closesocket
+[t=0.015s] IAT+ WSOCK32.dll!recvfrom
+[t=0.015s] IAT+ WSOCK32.dll!send
+[t=0.015s] IAT+ WSOCK32.dll!recv
+[t=0.015s] IAT+ WS2_32.dll!WSAConnect
+[t=0.015s] IAT+ WS2_32.dll!WSASend
+[t=0.015s] IAT+ WS2_32.dll!WSARecv
+[t=0.015s] IAT+ WS2_32.dll!WSARecvFrom
+[t=0.015s] IAT+ WS2_32.dll!WSAGetOverlappedResult
+[t=0.015s] IAT+ WS2_32.dll!WSASocketA
+[t=0.015s] IAT+ WS2_32.dll!WSAIoctl
+[t=0.015s] IAT+ WS2_32.dll!getaddrinfo
+[t=0.015s] IAT+ CRYPT32.dll!CertAddCertificateContextToStore
+[t=0.015s] IAT+ CRYPT32.dll!CryptStringToBinaryA
+[t=0.015s] IAT+ CRYPT32.dll!CertEnumCertificatesInStore
+[t=0.015s] IAT+ CRYPT32.dll!CertOpenStore
+[t=0.015s] IAT+ CRYPT32.dll!CryptQueryObject
+[t=0.015s] IAT+ CRYPT32.dll!CertGetNameStringW
+[t=0.015s] IAT+ CRYPT32.dll!CertFreeCertificateContext
+[t=0.015s] IAT+ CRYPT32.dll!CertGetNameStringA
+[t=0.015s] IAT+ CRYPT32.dll!CertCreateCertificateChainEngine
+[t=0.015s] IAT+ CRYPT32.dll!CertGetCertificateChain
+[t=0.015s] IAT+ CRYPT32.dll!CertVerifyCertificateChainPolicy
+[t=0.015s] IAT+ CRYPT32.dll!CertFindCertificateInStore
+[t=0.015s] IAT+ CRYPT32.dll!CertCloseStore
+[t=0.015s] IAT+ WINHTTP.dll!WinHttpReceiveResponse
+[t=0.015s] IAT+ WINHTTP.dll!WinHttpReadData
+[t=0.015s] IAT+ WINHTTP.dll!WinHttpCrackUrl
+[t=0.015s] IAT+ WINHTTP.dll!WinHttpAddRequestHeaders
+[t=0.015s] IAT+ WINHTTP.dll!WinHttpQueryDataAvailable
+[t=0.015s] IAT+ WINHTTP.dll!WinHttpSendRequest
+[t=0.015s] IAT+ WINHTTP.dll!WinHttpQueryHeaders
+[t=0.015s] IAT+ WINHTTP.dll!WinHttpCloseHandle
+[t=0.015s] IAT+ WINHTTP.dll!WinHttpOpen
+[t=0.015s] IAT+ WINHTTP.dll!WinHttpOpenRequest
+[t=0.015s] IAT+ WINHTTP.dll!WinHttpSetStatusCallback
+[t=0.015s] IAT+ WINHTTP.dll!WinHttpConnect
+[t=0.015s] IAT+ WINHTTP.dll!WinHttpSetOption
+[t=0.015s] IAT+ KERNEL32.dll!GetQueuedCompletionStatus
+[t=0.015s] IAT+ WININET.dll!InternetCloseHandle
+[t=0.015s] IAT+ WININET.dll!InternetConnectA
+[t=0.015s] IAT+ WININET.dll!InternetReadFile
+[t=0.015s] IAT+ WININET.dll!InternetQueryOptionW
+[t=0.015s] IAT+ WININET.dll!InternetSetStatusCallbackW
+[t=0.015s] IAT+ WININET.dll!HttpOpenRequestA
+[t=0.015s] IAT+ WININET.dll!HttpAddRequestHeadersA
+[t=0.015s] IAT+ WININET.dll!InternetCrackUrlA
+[t=0.015s] IAT+ WININET.dll!HttpQueryInfoA
+[t=0.015s] IAT+ WININET.dll!InternetOpenW
+[t=0.015s] IAT+ WININET.dll!HttpSendRequestW
+[t=0.015s] iathook: swapped 68 IAT slots (winhttp+wininet+libHC+ws2+wsock+crypt32+k32)
+[t=0.015s] dbg: ws2 loaded
+[t=0.015s] dbg: ssp loaded
+[t=0.015s] dbg: crypt loaded
+[t=0.015s] dbg: adv loaded
+[t=0.015s] cert: fns ok
+[t=0.046s] cert: CSP RSA 2048 key ready (silent)
+[t=0.062s] cert: CACPK o ks=2 le=0x00000000
+[t=0.062s] cert: selfsigned der=958
+[t=0.062s] cert: user-Root deferred to first connection
+[t=0.062s] dbg: cert ok
+[t=0.062s] probe anon cred st=0x00000000
+[t=0.062s] probe pkg name starts M (wide ok)
+[t=0.062s] dbg: cred ok
+[t=0.062s] LanHookThread stage=8 (H1): redirect+server live, installing LogHelpers
+[t=0.062s] hook filter: only 4:LogHelper,5:LogHelper2
+[t=0.062s] LanHookThread: enter
+[t=0.062s] srv: H1 login server listening on 127.0.0.1:443 (TLS)
+[t=0.062s] self pid=0x00000000000035c0
+[t=0.062s] self ppid=0x000000000000218c
+[t=0.062s] cmdline=AoE2DE_s.exe
+[t=0.062s] exepath=D:\Age of Empires II Definitive Edition\AoE2DE_s.exe
+[t=0.062s] near page=0x00007ff6921b0000
+[t=0.062s] probe: OnAppSuspending byte readable =0x0000000000000040
+[t=0.062s] target clean, installing 0x00000001402bcb30
+[t=0.062s] installed LogHelper n=5 slot=0x00007ff6921b0000
+[t=0.062s] target clean, installing 0x00000001402abc80
+[t=0.062s] installed LogHelper2 n=5 slot=0x00007ff6921b0040
+[t=0.062s] LanHookThread: install loop done
+[t=1.062s] HIT LogHelper #1: "WorldwideLoginService::WorldwideLoginService - initializing" r8=0x0000020a94c22640 s8=" " r9=0x0000000000000010 a5=0x0000020aa2e295a0 a6=0x0000020aa3502350 ret=0x00007ff6b1920062
+[t=1.062s] CRYPT32 OpenStore prov= Root
+[t=1.062s] HIT LogHelper #2: "SystemCertsWin: Opened the CA system store." r8=0x0000001a068fdb98 s8="m" r9=0x0000000000000000 a5=0x0000020aa3502350 a6=0x0000020aa35016d8 ret=0x00007ff6b1a1ea21
+[t=1.062s] CRYPT32 enum cert #1 enc=1 head=30820306
+[t=1.062s] CRYPT32 cert name=Titanium Root Certificate Authority
+[t=1.062s] HIT LogHelper #3: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/CN=Titanium Root Certificate Authority" r9=0x0000001a068fda90 s9="/CN=Titanium Root Certificate Authority" a5=0x0000020aa32e1fd0 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=Amazon Root CA 4
+[t=1.062s] HIT LogHelper #4: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=US/O=Amazon/CN=Amazon Root CA 4" r9=0x0000001a068fda90 s9="/C=US/O=Amazon/CN=Amazon Root CA 4" a5=0x0000020aa32e1520 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=Baltimore CyberTrust Root
+[t=1.062s] HIT LogHelper #5: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=IE/O=Baltimore/OU=CyberTrust/CN=Baltimore CyberTrust Root" r9=0x0000001a068fda90 s9="/C=IE/O=Baltimore/OU=CyberTrust/CN=Baltimore CyberTrust Root" a5=0x0000020aa32e1be0 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=AAA Certificate Services
+[t=1.062s] HIT LogHelper #6: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=GB/ST=Greater Manchester/L=Salford/O=Comodo CA Limited/CN=AAA Certif" r9=0x0000001a068fda90 s9="/C=GB/ST=Greater Manchester/L=Salford/O=Comodo CA Limited/CN=AAA Certif" a5=0x0000020aa32e22d0 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=Microsoft Root Certificate Authority
+[t=1.062s] HIT LogHelper #7: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/DC=com/DC=microsoft/CN=Microsoft Root Certificate Authority" r9=0x0000001a068fda90 s9="/DC=com/DC=microsoft/CN=Microsoft Root Certificate Authority" a5=0x0000020aa3bf6ff0 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=Thawte Timestamping CA
+[t=1.062s] HIT LogHelper #8: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=ZA/ST=Western Cape/L=Durbanville/O=Thawte/OU=Thawte Certification/CN" r9=0x0000001a068fda90 s9="/C=ZA/ST=Western Cape/L=Durbanville/O=Thawte/OU=Thawte Certification/CN" a5=0x0000020aa3bf6ed0 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=Starfield Class 2 Certification Authority
+[t=1.062s] HIT LogHelper #9: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=US/O=Starfield Technologies, Inc./OU=Starfield Class 2 Certification" r9=0x0000001a068fda90 s9="/C=US/O=Starfield Technologies, Inc./OU=Starfield Class 2 Certification" a5=0x0000020aa3bf6f30 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=DigiCert Global Root CA
+[t=1.062s] HIT LogHelper #10: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert Global Root CA" r9=0x0000001a068fda90 s9="/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert Global Root CA" a5=0x0000020aa3bf71d0 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=Microsoft Root Authority
+[t=1.062s] HIT LogHelper #11: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/OU=Copyright (c) 1997 Microsoft Corp./OU=Microsoft Corporation/CN=Micr" r9=0x0000001a068fda90 s9="/OU=Copyright (c) 1997 Microsoft Corp./OU=Microsoft Corporation/CN=Micr" a5=0x0000020aa3bf7740 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=Symantec Enterprise Mobile Root for Microsoft
+[t=1.062s] HIT LogHelper #12: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=US/O=Symantec Corporation/CN=Symantec Enterprise Mobile Root for Mic" r9=0x0000001a068fda90 s9="/C=US/O=Symantec Corporation/CN=Symantec Enterprise Mobile Root for Mic" a5=0x0000000000000000 a6=0x0000001a068fd6c0 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=Microsoft Root Certificate Authority 2011
+[t=1.062s] HIT LogHelper #13: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=US/ST=Washington/L=Redmond/O=Microsoft Corporation/CN=Microsoft Root" r9=0x0000001a068fda90 s9="/C=US/ST=Washington/L=Redmond/O=Microsoft Corporation/CN=Microsoft Root" a5=0x0000020aa3bf7620 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=Amazon Root CA 1
+[t=1.062s] HIT LogHelper #14: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=US/O=Amazon/CN=Amazon Root CA 1" r9=0x0000001a068fda90 s9="/C=US/O=Amazon/CN=Amazon Root CA 1" a5=0x0000020aa3bf89d0 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=Microsoft Authenticode(tm) Root Authority
+[t=1.062s] HIT LogHelper #15: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=US/O=MSFT/CN=Microsoft Authenticode(tm) Root Authority" r9=0x0000001a068fda90 s9="/C=US/O=MSFT/CN=Microsoft Authenticode(tm) Root Authority" a5=0x0000020aa3bf85b0 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=DigiCert High Assurance EV Root CA
+[t=1.062s] HIT LogHelper #16: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert High Assurance EV " r9=0x0000001a068fda90 s9="/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert High Assurance EV " a5=0x0000020aa3bf8a90 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=Amazon Root CA 2
+[t=1.062s] HIT LogHelper #17: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=US/O=Amazon/CN=Amazon Root CA 2" r9=0x0000001a068fda90 s9="/C=US/O=Amazon/CN=Amazon Root CA 2" a5=0x0000020aa3bf8280 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=Microsoft Root Certificate Authority 2010
+[t=1.062s] HIT LogHelper #18: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=US/ST=Washington/L=Redmond/O=Microsoft Corporation/CN=Microsoft Root" r9=0x0000001a068fda90 s9="/C=US/ST=Washington/L=Redmond/O=Microsoft Corporation/CN=Microsoft Root" a5=0x0000020aa3bf8fa0 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=Microsoft ECC TS Root Certificate Authority 2018
+[t=1.062s] HIT LogHelper #19: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=US/ST=Washington/L=Redmond/O=Microsoft Corporation/CN=Microsoft ECC " r9=0x0000001a068fda90 s9="/C=US/ST=Washington/L=Redmond/O=Microsoft Corporation/CN=Microsoft ECC " a5=0x0000020aa3bf5930 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=Copyright (c) 1997 Microsoft Corp.
+[t=1.062s] HIT LogHelper #20: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/O=Microsoft Trust Network/OU=Microsoft Corporation/OU=Microsoft Time S" r9=0x0000001a068fda90 s9="/O=Microsoft Trust Network/OU=Microsoft Corporation/OU=Microsoft Time S" a5=0x00000000ffffffff a6=0x00007ff900000000 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=NO LIABILITY ACCEPTED, (c)97 VeriSign, Inc.
+[t=1.062s] HIT LogHelper #21: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/O=VeriSign Trust Network/OU=VeriSign, Inc./OU=VeriSign Time Stamping S" r9=0x0000001a068fda90 s9="/O=VeriSign Trust Network/OU=VeriSign, Inc./OU=VeriSign Time Stamping S" a5=0x00000000ffffffff a6=0x00007ff900000000 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=ageLANServer Self-signed
+[t=1.062s] HIT LogHelper #22: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/O=github.com/luskaner/ageLANServer/CN=ageLANServer Self-signed" r9=0x0000001a068fda90 s9="/O=github.com/luskaner/ageLANServer/CN=ageLANServer Self-signed" a5=0x0000020aa3bf51e0 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=Amazon Root CA 3
+[t=1.062s] HIT LogHelper #23: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=US/O=Amazon/CN=Amazon Root CA 3" r9=0x0000001a068fda90 s9="/C=US/O=Amazon/CN=Amazon Root CA 3" a5=0x0000020aa3bf6630 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=Microsoft ECC Product Root Certificate Authority 2018
+[t=1.062s] HIT LogHelper #24: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=US/ST=Washington/L=Redmond/O=Microsoft Corporation/CN=Microsoft ECC " r9=0x0000001a068fda90 s9="/C=US/ST=Washington/L=Redmond/O=Microsoft Corporation/CN=Microsoft ECC " a5=0x0000020aa3bf6830 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=Microsoft Time Stamp Root Certificate Authority 2014
+[t=1.062s] HIT LogHelper #25: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=US/ST=Washington/L=Redmond/O=Microsoft Corporation/CN=Microsoft Time" r9=0x0000001a068fda90 s9="/C=US/ST=Washington/L=Redmond/O=Microsoft Corporation/CN=Microsoft Time" a5=0x0000020aa3bf5f40 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=Microsoft Identity Verification Root Certificate Authority 2
+[t=1.062s] HIT LogHelper #26: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=US/O=Microsoft Corporation/CN=Microsoft Identity Verification Root C" r9=0x0000001a068fda90 s9="/C=US/O=Microsoft Corporation/CN=Microsoft Identity Verification Root C" a5=0x0000020aa3e95540 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=Sectigo Public Server Authentication Root E46
+[t=1.062s] HIT LogHelper #27: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=GB/O=Sectigo Limited/CN=Sectigo Public Server Authentication Root E4" r9=0x0000001a068fda90 s9="/C=GB/O=Sectigo Limited/CN=Sectigo Public Server Authentication Root E4" a5=0x0000020aa3e95c60 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=SSL.com TLS RSA Root CA 2022
+[t=1.062s] HIT LogHelper #28: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=US/O=SSL Corporation/CN=SSL.com TLS RSA Root CA 2022" r9=0x0000001a068fda90 s9="/C=US/O=SSL Corporation/CN=SSL.com TLS RSA Root CA 2022" a5=0x0000020aa3e95a50 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=UTN-USERFirst-Object
+[t=1.062s] HIT LogHelper #29: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=US/ST=UT/L=Salt Lake City/O=The USERTRUST Network/OU=http://www.user" r9=0x0000001a068fda90 s9="/C=US/ST=UT/L=Salt Lake City/O=The USERTRUST Network/OU=http://www.user" a5=0x0000020aa3e95ec0 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=IdenTrust Commercial Root CA 1
+[t=1.062s] HIT LogHelper #30: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=US/O=IdenTrust/CN=IdenTrust Commercial Root CA 1" r9=0x0000001a068fda90 s9="/C=US/O=IdenTrust/CN=IdenTrust Commercial Root CA 1" a5=0x0000020aa3e963e0 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=DigiCert Global Root G2
+[t=1.062s] HIT LogHelper #31: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert Global Root G2" r9=0x0000001a068fda90 s9="/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert Global Root G2" a5=0x0000020aa3e95f90 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=QuoVadis Root Certification Authority
+[t=1.062s] HIT LogHelper #32: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=BM/O=QuoVadis Limited/OU=Root Certification Authority/CN=QuoVadis Ro" r9=0x0000001a068fda90 s9="/C=BM/O=QuoVadis Limited/OU=Root Certification Authority/CN=QuoVadis Ro" a5=0x0000020aa3e96170 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=DigiCert Trusted Root G4
+[t=1.062s] HIT LogHelper #33: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert Trusted Root G4" r9=0x0000001a068fda90 s9="/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert Trusted Root G4" a5=0x0000020aa3e96ad0 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=GlobalSign
+[t=1.062s] HIT LogHelper #34: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/OU=GlobalSign Root CA - R3/O=GlobalSign/CN=GlobalSign" r9=0x0000001a068fda90 s9="/OU=GlobalSign Root CA - R3/O=GlobalSign/CN=GlobalSign" a5=0x0000020aa3e96f80 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=Certum Trusted Network CA 2
+[t=1.062s] HIT LogHelper #35: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=PL/O=Unizeto Technologies S.A./OU=Certum Certification Authority/CN=" r9=0x0000001a068fda90 s9="/C=PL/O=Unizeto Technologies S.A./OU=Certum Certification Authority/CN=" a5=0x0000020aa3e97490 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=USERTrust ECC Certification Authority
+[t=1.062s] HIT LogHelper #36: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=US/ST=New Jersey/L=Jersey City/O=The USERTRUST Network/CN=USERTrust " r9=0x0000001a068fda90 s9="/C=US/ST=New Jersey/L=Jersey City/O=The USERTRUST Network/CN=USERTrust " a5=0x0000020aa3e975e0 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=Sectigo Public Code Signing Root R46
+[t=1.062s] HIT LogHelper #37: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=GB/O=Sectigo Limited/CN=Sectigo Public Code Signing Root R46" r9=0x0000001a068fda90 s9="/C=GB/O=Sectigo Limited/CN=Sectigo Public Code Signing Root R46" a5=0x0000020aa3e97d30 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=ISRG Root X1
+[t=1.062s] HIT LogHelper #38: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=US/O=Internet Security Research Group/CN=ISRG Root X1" r9=0x0000001a068fda90 s9="/C=US/O=Internet Security Research Group/CN=ISRG Root X1" a5=0x0000020aa3e97e80 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=SSL.com Root Certification Authority ECC
+[t=1.062s] HIT LogHelper #39: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=US/ST=Texas/L=Houston/O=SSL Corporation/CN=SSL.com Root Certificatio" r9=0x0000001a068fda90 s9="/C=US/ST=Texas/L=Houston/O=SSL Corporation/CN=SSL.com Root Certificatio" a5=0x0000020aa3e975b0 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=SSL.com Root Certification Authority RSA
+[t=1.062s] HIT LogHelper #40: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=US/ST=Texas/L=Houston/O=SSL Corporation/CN=SSL.com Root Certificatio" r9=0x0000001a068fda90 s9="/C=US/ST=Texas/L=Houston/O=SSL Corporation/CN=SSL.com Root Certificatio" a5=0x0000020aa3e98900 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=Starfield Root Certificate Authority - G2
+[t=1.062s] HIT LogHelper #41: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=US/ST=Arizona/L=Scottsdale/O=Starfield Technologies, Inc./CN=Starfie" r9=0x0000001a068fda90 s9="/C=US/ST=Arizona/L=Scottsdale/O=Starfield Technologies, Inc./CN=Starfie" a5=0x0000020aa3e98a80 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=GlobalSign Root CA
+[t=1.062s] HIT LogHelper #42: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=BE/O=GlobalSign nv-sa/OU=Root CA/CN=GlobalSign Root CA" r9=0x0000001a068fda90 s9="/C=BE/O=GlobalSign nv-sa/OU=Root CA/CN=GlobalSign Root CA" a5=0x0000020aa3e98990 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=COMODO RSA Certification Authority
+[t=1.062s] HIT LogHelper #43: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=GB/ST=Greater Manchester/L=Salford/O=COMODO CA Limited/CN=COMODO RSA" r9=0x0000001a068fda90 s9="/C=GB/ST=Greater Manchester/L=Salford/O=COMODO CA Limited/CN=COMODO RSA" a5=0x0000020aa3e98120 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=Sectigo Public Server Authentication Root R46
+[t=1.062s] HIT LogHelper #44: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=GB/O=Sectigo Limited/CN=Sectigo Public Server Authentication Root R4" r9=0x0000001a068fda90 s9="/C=GB/O=Sectigo Limited/CN=Sectigo Public Server Authentication Root R4" a5=0x0000020aa32e2090 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=Starfield Services Root Certificate Authority - G2
+[t=1.062s] HIT LogHelper #45: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=US/ST=Arizona/L=Scottsdale/O=Starfield Technologies, Inc./CN=Starfie" r9=0x0000001a068fda90 s9="/C=US/ST=Arizona/L=Scottsdale/O=Starfield Technologies, Inc./CN=Starfie" a5=0x0000020aa3e98f00 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=thawte Primary Root CA
+[t=1.062s] HIT LogHelper #46: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=US/O=thawte, Inc./OU=Certification Services Division/OU=(c) 2006 tha" r9=0x0000001a068fda90 s9="/C=US/O=thawte, Inc./OU=Certification Services Division/OU=(c) 2006 tha" a5=0x0000020aa3c643b0 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=SecureTrust CA
+[t=1.062s] HIT LogHelper #47: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=US/O=SecureTrust Corporation/CN=SecureTrust CA" r9=0x0000001a068fda90 s9="/C=US/O=SecureTrust Corporation/CN=SecureTrust CA" a5=0x0000020aa3c63c30 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=DigiCert CS ECC P384 Root G5
+[t=1.062s] HIT LogHelper #48: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=US/O=DigiCert, Inc./CN=DigiCert CS ECC P384 Root G5" r9=0x0000001a068fda90 s9="/C=US/O=DigiCert, Inc./CN=DigiCert CS ECC P384 Root G5" a5=0x0000020aa3c643e0 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=GlobalSign
+[t=1.062s] HIT LogHelper #49: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/OU=GlobalSign Root CA - R6/O=GlobalSign/CN=GlobalSign" r9=0x0000001a068fda90 s9="/OU=GlobalSign Root CA - R6/O=GlobalSign/CN=GlobalSign" a5=0x0000020aa3c64830 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=DigiCert Global Root G3
+[t=1.062s] HIT LogHelper #50: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert Global Root G3" r9=0x0000001a068fda90 s9="/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert Global Root G3" a5=0x0000020aa3c64bc0 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=SSL.com EV Root Certification Authority RSA R2
+[t=1.062s] HIT LogHelper #51: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=US/ST=Texas/L=Houston/O=SSL Corporation/CN=SSL.com EV Root Certifica" r9=0x0000001a068fda90 s9="/C=US/ST=Texas/L=Houston/O=SSL Corporation/CN=SSL.com EV Root Certifica" a5=0x0000020aa3c64980 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=Class 3 Public Primary Certification Authority
+[t=1.062s] HIT LogHelper #52: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=US/O=VeriSign, Inc./OU=Class 3 Public Primary Certification Authorit" r9=0x0000001a068fda90 s9="/C=US/O=VeriSign, Inc./OU=Class 3 Public Primary Certification Authorit" a5=0x00000000ffffffff a6=0x00007ff900000000 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=Security Communication RootCA2
+[t=1.062s] HIT LogHelper #53: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=JP/O=SECOM Trust Systems CO.,LTD./OU=Security Communication RootCA2" r9=0x0000001a068fda90 s9="/C=JP/O=SECOM Trust Systems CO.,LTD./OU=Security Communication RootCA2" a5=0x0000020aa3c65400 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=DigiCert CS RSA4096 Root G5
+[t=1.062s] HIT LogHelper #54: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=US/O=DigiCert, Inc./CN=DigiCert CS RSA4096 Root G5" r9=0x0000001a068fda90 s9="/C=US/O=DigiCert, Inc./CN=DigiCert CS RSA4096 Root G5" a5=0x0000020aa3c656a0 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=Hotspot 2.0 Trust Root CA - 03
+[t=1.062s] HIT LogHelper #55: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=US/O=WFA Hotspot 2.0/CN=Hotspot 2.0 Trust Root CA - 03" r9=0x0000001a068fda90 s9="/C=US/O=WFA Hotspot 2.0/CN=Hotspot 2.0 Trust Root CA - 03" a5=0x0000020aa3c65670 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=Entrust.net Certification Authority (2048)
+[t=1.062s] HIT LogHelper #56: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/O=Entrust.net/OU=www.entrust.net/CPS_2048 incorp. by ref. (limits liab" r9=0x0000001a068fda90 s9="/O=Entrust.net/OU=www.entrust.net/CPS_2048 incorp. by ref. (limits liab" a5=0x0000020aa3bb4e90 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=GlobalSign Code Signing Root R45
+[t=1.062s] HIT LogHelper #57: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=BE/O=GlobalSign nv-sa/CN=GlobalSign Code Signing Root R45" r9=0x0000001a068fda90 s9="/C=BE/O=GlobalSign nv-sa/CN=GlobalSign Code Signing Root R45" a5=0x0000020aa3bb4f50 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=VeriSign Class 3 Public Primary Certification Authority - G5
+[t=1.062s] HIT LogHelper #58: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=US/O=VeriSign, Inc./OU=VeriSign Trust Network/OU=(c) 2006 VeriSign, " r9=0x0000001a068fda90 s9="/C=US/O=VeriSign, Inc./OU=VeriSign Trust Network/OU=(c) 2006 VeriSign, " a5=0x0000020aa3bb5850 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=Go Daddy Root Certificate Authority - G2
+[t=1.062s] HIT LogHelper #59: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=US/ST=Arizona/L=Scottsdale/O=GoDaddy.com, Inc./CN=Go Daddy Root Cert" r9=0x0000001a068fda90 s9="/C=US/ST=Arizona/L=Scottsdale/O=GoDaddy.com, Inc./CN=Go Daddy Root Cert" a5=0x0000020aa3bb58b0 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=VeriSign Universal Root Certification Authority
+[t=1.062s] HIT LogHelper #60: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=US/O=VeriSign, Inc./OU=VeriSign Trust Network/OU=(c) 2008 VeriSign, " r9=0x0000001a068fda90 s9="/C=US/O=VeriSign, Inc./OU=VeriSign Trust Network/OU=(c) 2008 VeriSign, " a5=0x0000020aa3bb6330 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=USERTrust RSA Certification Authority
+[t=1.062s] HIT LogHelper #61: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=US/ST=New Jersey/L=Jersey City/O=The USERTRUST Network/CN=USERTrust " r9=0x0000001a068fda90 s9="/C=US/ST=New Jersey/L=Jersey City/O=The USERTRUST Network/CN=USERTrust " a5=0x0000020aa3bb6150 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=Go Daddy Class 2 Certification Authority
+[t=1.062s] HIT LogHelper #62: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=US/O=The Go Daddy Group, Inc./OU=Go Daddy Class 2 Certification Auth" r9=0x0000001a068fda90 s9="/C=US/O=The Go Daddy Group, Inc./OU=Go Daddy Class 2 Certification Auth" a5=0x0000000000000000 a6=0x0000001a068fd6c0 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=Certum Trusted Network CA
+[t=1.062s] HIT LogHelper #63: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=PL/O=Unizeto Technologies S.A./OU=Certum Certification Authority/CN=" r9=0x0000001a068fda90 s9="/C=PL/O=Unizeto Technologies S.A./OU=Certum Certification Authority/CN=" a5=0x0000020aa3bb6d20 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=DigiCert Assured ID Root CA
+[t=1.062s] HIT LogHelper #64: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert Assured ID Root CA" r9=0x0000001a068fda90 s9="/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert Assured ID Root CA" a5=0x0000020aa3bb6870 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=AddTrust External CA Root
+[t=1.062s] HIT LogHelper #65: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=SE/O=AddTrust AB/OU=AddTrust External TTP Network/CN=AddTrust Extern" r9=0x0000001a068fda90 s9="/C=SE/O=AddTrust AB/OU=AddTrust External TTP Network/CN=AddTrust Extern" a5=0x0000020aa3bb6ab0 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=HARICA TLS RSA Root CA 2021
+[t=1.062s] HIT LogHelper #66: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=GR/O=Hellenic Academic and Research Institutions CA/CN=HARICA TLS RS" r9=0x0000001a068fda90 s9="/C=GR/O=Hellenic Academic and Research Institutions CA/CN=HARICA TLS RS" a5=0x0000020aa3bb6570 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 cert name=Hellenic Academic and Research Institutions RootCA 2015
+[t=1.062s] HIT LogHelper #67: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/C=GR/L=Athens/O=Hellenic Academic and Research Institutions Cert. Auth" r9=0x0000001a068fda90 s9="/C=GR/L=Athens/O=Hellenic Academic and Research Institutions Cert. Auth" a5=0x0000020aa3bb7350 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] CRYPT32 INJECT: own cert appended to store enum
+[t=1.062s] CRYPT32 cert name=pb-live-release6-api.worldsedgelink.com
+[t=1.062s] HIT LogHelper #68: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fd690 s8="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" r9=0x0000001a068fda90 s9="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" a5=0x0000020aa3bb77a0 a6=0x0000000000000004 ret=0x00007ff6b1a1dd33
+[t=1.062s] HIT LogHelper #69: "SystemCertsWin: %zd certificates loaded" r8=0x0000000000000042 r9=0x000000018001d66b a5=0x0000020a96d199e0 a6=0x0000000000000000 ret=0x00007ff6b1a1ed18
+[t=1.062s] HIT LogHelper #70: "AutomatchInternal: Instantiating" r8=0xffffffffe7ff1f67 r9=0x0000000000000010 a5=0x0000020aa2e1ab30 a6=0x0000020aa2e1a978 ret=0x00007ff6b17dbd9d
+[t=1.062s] HIT LogHelper #71: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x0000001a068fda20 s8="/C=CA/ST=British Columbia/L=Vancouver/O=Relic Entertainment/CN=RelicLin" r9=0x0000001a068fde20 s9="/C=CA/ST=British Columbia/L=Vancouver/O=Relic Entertainment/CN=RelicLin" a5=0x0000001a00000005 a6=0x0000020a94c20d20 ret=0x00007ff6b1a1dd33
+[t=3.515s] HC SET GET https://title.mgt.xboxlive.com/titles/default/endpoints?type=1
+[t=3.515s] HC REQHDR Connection=Keep-Alive
+[t=3.515s] HC REQHDR x-xbl-contract-version=1
+[t=3.515s] HC REQHDR MS-CV=IbWOA6DrgQFFwOY7.1.0
+[t=3.515s] HC REQHDR User-Agent=XAL Win32 2024.02.20240220.000
+[t=3.515s] HC PERFORM (request sent)
+[t=3.531s] HIT LogHelper #72: "Requesting ticket" r8=0x0000000000000083 r9=0x000000007ffeb000 s9="HalT" a5=0x0000001759a61e48 a6=0x0000000000000000 ret=0x00007ff6b1a0f59a
+[t=3.546s] HIT LogHelper #73: "OnRequest app ticket returned %c" r8=0x000000000000004e r9=0x0000000000000003 a5=0x0000000000000004 a6=0x00007ff85aec325f ret=0x00007ff6b1a0eef4
+[t=3.546s] HIT LogHelper #74: "SteamAuth received ticket at t=%I64u" r8=0x0000000000990728 r9=0x000000007ffeb000 s9="HalT" a5=0x0000001759a7a82e a6=0x0000020aa3ba7640 ret=0x00007ff6b1a0f18f
+[t=3.625s] DNS REDIRECT pb-live-release6-api.worldsedgelink.com -> 127.0.0.1 svc=443
+[t=3.687s] SOCK connect 127.0.0.1:443
+[t=3.687s] srv: connection accepted
+[t=3.687s] SOCK send to 127.0.0.1:443 204B 16030300c7010000c303036ae9cee60b c38dc856f3dbf402d527eb0a210b1a01 f742855e58cf3588a7bd60000024c02c c02bc030c02fc024c023c028c027c00a c009c014c013009d009c003d003c0035 002f010000760000002c002a00002770 622d6c6976652d72656c65617365362d 6170692e776f726c6473656467656c69 |...........j.......V.....'..!....B.^X.5...`..$.,.+.0./.$.#.(.'.............=.<.5./...v...,.*..'pb-live-release6-api.worldsedgeli|
+[t=3.687s] SOCK send to 127.0.0.1:443 SNI=pb-live-release6-api.worldsedgelink.com ver=3.3 suites=18
+[t=3.734s] SOCK recv from 127.0.0.1:443 1427B 160303058e0200005103036ae9cee60b 63f566579c05cc3d9db3f3e37e3fd30d 35d5103e698a866aef469620fa3e0000 57dfbf3291f156ab006b0f388cc435fb c9f298c8bd6f75f4d7d2f08cc0300000 0900170000ff010001000b0003c40003 c10003be308203ba308202a2a0030201 0202107cb60eef839061a14c60d188d6 |........Q..j....c.fW...=....~?..5..>i..j.F. .>..W..2..V..k.8..5......ou......0......................0...0..........|.....a.L`...|
+[t=3.734s] TLS ServerHello ver=3.03
+[t=3.734s] SOCK send to 127.0.0.1:443 7B 15030300020100 |.......|
+[t=3.734s] TLS: handshake failed st=0x00090317
+[t=3.734s] DNS resolve api.ageofempires.com svc=443
+[t=3.734s] DNS   -> 192.168.0.103:443
+[t=3.781s] IAT WinHttpOpen agent="WinHttp request to force windows trusted root 			certificate program to downloa" from=0x00007ff6b18870f8
+[t=3.781s] SOCK connect 192.168.0.103:443
+[t=3.781s] IAT WinHttpOpen -> handle=0x0x0000020abd68c7b0
+[t=3.781s] IAT WinHttpSetStatusCallback h=0x0000020abd68c7b0 cb=0x00007ff6b1886dc0
+[t=3.796s] IAT WinHttpConnect host="pb-live-release6-api.worldsedgelink.com" port=443 h=0x0000020abd6654f0
+[t=3.796s] IAT WinHttpOpenRequest GET /statistics h=0x0000020abd6f51f0
+[t=3.796s] IAT WinHttpSendRequest GET pb-live-release6-api.worldsedgelink.com/statistics
+[t=3.984s] HC STATUS 200
+[t=3.984s] HC STATUS 200
+[t=3.984s] HC RSPHDR MS-CV=IbWOA6DrgQFFwOY7.1.0.0
+[t=3.984s] HC STATUS 200
+[t=4.515s] HC SET POST https://self.events.data.microsoft.com/OneCollector/1.0/
+[t=4.515s] HC REQBODY-via-readfunction (streamed upload)
+[t=4.515s] HC REQHDR APIKey=1cc8ecb09142448998fee840a1269be8-136c4dca-7c5e-4eff-b721-68018a2ab521-7334
+[t=4.515s] HC REQHDR Client-Id=NO_AUTH
+[t=4.515s] HC REQHDR Content-Encoding=deflate
+[t=4.515s] HC REQHDR Content-Type=application/bond-compact-binary
+[t=4.515s] HC REQHDR Expect=100-continue
+[t=4.515s] HC REQHDR SDK-Version=EVT-Windows-C++-No-3.5.131.1
+[t=4.515s] HC REQHDR Upload-Time=1793707751776
+[t=4.515s] HC REQHDR User-Agent=XAL Win32 2024.02.20240220.000
+[t=4.515s] HC PERFORM (request sent)
+[t=5.281s] HC STATUS 200
+[t=5.281s] HC HDRS: Access-Control-Allow-Credentials=true
+[t=5.281s] HC hdrs+: Access-Control-Allow-Headers=Strict-Transport-Security,time-delta-millis,Content-Type,Content-Length
+[t=5.281s] HC hdrs+: Access-Control-Allow-Methods=POST
+[t=5.281s] HC hdrs+: Access-Control-Allow-Origin=*
+[t=5.281s] HC hdrs+: Access-Control-Expose-Headers=time-delta-millis
+[t=5.281s] HC hdrs+: Content-Length=10
+[t=5.281s] HC hdrs+: Content-Type=application/json
+[t=5.281s] HC hdrs+: Date=Tue, 03 Nov 2026 12:09:17 GMT
+[t=5.281s] HC hdrs+: Server=Microsoft-HTTPAPI/2.0
+[t=5.281s] HC hdrs+: Strict-Transport-Security=max-age=31536000
+[t=5.281s] HC hdrs+: time-delta-millis=6542
+[t=13.546s] SOCK recvfrom 192.168.0.104:61396 56B 21240035346330663430612d64623761 2d343432652d623033362d3439376363 3834613264656309004d792053657276 |!$.54c0f40a-db7a-442e-b036-497cc84a2dec..My Serv|
+[t=13.546s] HIT LogHelper #75: "Adding LAN relay server: %s, GUID %s" r8=0x0000001a0a5ff560 s8="192.168.0.104" r9=0x0000020abd69cb40 s9="54c0f40a-db7a-442e-b036-497cc84a2dec" a5=0x0000020a971db870 a6=0x0000000000000000 ret=0x00007ff6b15f9857

@@ -1,0 +1,14 @@
+[t=0.000s] lanhook v2 boot in D:\Age of Empires II Definitive Edition\dbghelp.dll
+[t=0.000s] lanhook boot: dbghelp proxy attached
+[t=0.000s] game base=0x00007ff75ab00000
+[t=0.000s] real dbghelp resolved
+[t=0.031s] LanHookThread stage=7
+[t=0.031s] iathook: swapped 33 IAT slots (winhttp+wininet+libHC)
+[t=12.062s] HC SET GET https://title.mgt.xboxlive.com/titles/default/endpoints?type=1
+[t=12.062s] HC PERFORM (request sent)
+[t=12.609s] HC STATUS 200
+[t=12.609s] HC STATUS 200
+[t=12.609s] HC STATUS 200
+[t=13.062s] HC SET POST https://self.events.data.microsoft.com/OneCollector/1.0/
+[t=13.062s] HC PERFORM (request sent)
+[t=13.937s] HC STATUS 200
