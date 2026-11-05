@@ -1,0 +1,772 @@
+[t=0.000s] lanhook v2 boot in D:\Age of Empires II Definitive Edition\dbghelp.dll
+[t=0.000s] lanhook boot: dbghelp proxy attached
+[t=0.000s] game base=0x00007ff65cf10000
+[t=0.000s] real dbghelp resolved
+[t=0.000s] crash filter installed, prev=0x0000000000000000
+[t=0.000s] LanHookThread stage=8
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallPerformAsync
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallRequestSetUrl
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallRequestSetRequestBodyBytes
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallRequestSetRequestBodyString
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallRequestSetHeader
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallResponseGetResponseString
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallResponseGetResponseBodyBytesSize
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallResponseGetResponseBodyBytes
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallResponseGetStatusCode
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallResponseGetNetworkErrorCode
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallResponseGetHeader
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallResponseGetNumHeaders
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallResponseGetHeaderAtIndex
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCWebSocketConnectAsync
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCWebSocketSendMessageAsync
+[t=0.000s] IAT+ libHttpClient.Win32.dll!HCHttpCallRequestSetRequestBodyReadFunction
+[t=0.000s] IAT+ WSOCK32.dll!connect
+[t=0.000s] IAT+ WSOCK32.dll!socket
+[t=0.000s] IAT+ WSOCK32.dll!closesocket
+[t=0.000s] IAT+ WSOCK32.dll!recvfrom
+[t=0.000s] IAT+ WSOCK32.dll!send
+[t=0.000s] IAT+ WSOCK32.dll!recv
+[t=0.000s] IAT+ WS2_32.dll!WSAConnect
+[t=0.000s] IAT+ WS2_32.dll!WSASend
+[t=0.000s] IAT+ WS2_32.dll!WSARecv
+[t=0.000s] IAT+ WS2_32.dll!WSARecvFrom
+[t=0.000s] IAT+ WS2_32.dll!WSAGetOverlappedResult
+[t=0.000s] IAT+ WS2_32.dll!WSASocketA
+[t=0.000s] IAT+ WS2_32.dll!WSAIoctl
+[t=0.000s] IAT+ WS2_32.dll!getaddrinfo
+[t=0.000s] IAT+ CRYPT32.dll!CertAddCertificateContextToStore
+[t=0.000s] IAT+ CRYPT32.dll!CryptStringToBinaryA
+[t=0.000s] IAT+ CRYPT32.dll!CertEnumCertificatesInStore
+[t=0.000s] IAT+ CRYPT32.dll!CertOpenStore
+[t=0.000s] IAT+ CRYPT32.dll!CryptQueryObject
+[t=0.000s] IAT+ CRYPT32.dll!CertGetNameStringW
+[t=0.000s] IAT+ CRYPT32.dll!CertFreeCertificateContext
+[t=0.000s] IAT+ CRYPT32.dll!CertGetNameStringA
+[t=0.000s] IAT+ CRYPT32.dll!CertCreateCertificateChainEngine
+[t=0.000s] IAT+ CRYPT32.dll!CertGetCertificateChain
+[t=0.000s] IAT+ CRYPT32.dll!CertVerifyCertificateChainPolicy
+[t=0.000s] IAT+ CRYPT32.dll!CertFindCertificateInStore
+[t=0.000s] IAT+ CRYPT32.dll!CertCloseStore
+[t=0.000s] IAT+ WINHTTP.dll!WinHttpReceiveResponse
+[t=0.000s] IAT+ WINHTTP.dll!WinHttpReadData
+[t=0.000s] IAT+ WINHTTP.dll!WinHttpCrackUrl
+[t=0.000s] IAT+ WINHTTP.dll!WinHttpAddRequestHeaders
+[t=0.000s] IAT+ WINHTTP.dll!WinHttpQueryDataAvailable
+[t=0.000s] IAT+ WINHTTP.dll!WinHttpSendRequest
+[t=0.000s] IAT+ WINHTTP.dll!WinHttpQueryHeaders
+[t=0.000s] IAT+ WINHTTP.dll!WinHttpCloseHandle
+[t=0.000s] IAT+ WINHTTP.dll!WinHttpOpen
+[t=0.000s] IAT+ WINHTTP.dll!WinHttpOpenRequest
+[t=0.000s] IAT+ WINHTTP.dll!WinHttpSetStatusCallback
+[t=0.000s] IAT+ WINHTTP.dll!WinHttpConnect
+[t=0.000s] IAT+ WINHTTP.dll!WinHttpSetOption
+[t=0.000s] IAT+ KERNEL32.dll!GetQueuedCompletionStatus
+[t=0.000s] IAT+ WININET.dll!InternetCloseHandle
+[t=0.000s] IAT+ WININET.dll!InternetConnectA
+[t=0.000s] IAT+ WININET.dll!InternetReadFile
+[t=0.000s] IAT+ WININET.dll!InternetQueryOptionW
+[t=0.000s] IAT+ WININET.dll!InternetSetStatusCallbackW
+[t=0.000s] IAT+ WININET.dll!HttpOpenRequestA
+[t=0.000s] IAT+ WININET.dll!HttpAddRequestHeadersA
+[t=0.000s] IAT+ WININET.dll!InternetCrackUrlA
+[t=0.000s] IAT+ WININET.dll!HttpQueryInfoA
+[t=0.000s] IAT+ WININET.dll!InternetOpenW
+[t=0.000s] IAT+ WININET.dll!HttpSendRequestW
+[t=0.000s] iathook: swapped 68 IAT slots (winhttp+wininet+libHC+ws2+wsock+crypt32+k32)
+[t=0.000s] dbg: ws2 loaded
+[t=0.000s] dbg: ssp loaded
+[t=0.000s] dbg: crypt loaded
+[t=0.000s] dbg: adv loaded
+[t=0.000s] cert: fns ok
+[t=0.062s] cert: CSP RSA 2048 key ready (silent)
+[t=0.078s] cert: CACPK o ks=2 le=0x00000000
+[t=0.078s] cert: selfsigned der=958
+[t=0.078s] cert: user-Root deferred to first connection
+[t=0.078s] dbg: cert ok
+[t=0.078s] probe anon cred st=0x00000000
+[t=0.078s] probe pkg name starts M (wide ok)
+[t=0.078s] dbg: cred ok
+[t=0.078s] LanHookThread stage=8 (H1): redirect+server live, installing LogHelpers
+[t=0.078s] hook filter: log sinks (grp2) + TLS set (grp3)
+[t=0.078s] LanHookThread: enter
+[t=0.078s] srv: H1 login server listening on 127.0.0.1:443 (TLS)
+[t=0.093s] self pid=0x00000000000008f8
+[t=0.093s] self ppid=0x00000000000035ac
+[t=0.093s] cmdline="AoE2DE_s.exe" 
+[t=0.093s] exepath=D:\Age of Empires II Definitive Edition\AoE2DE_s.exe
+[t=0.093s] near page=0x00007ff63de20000
+[t=0.093s] probe: OnAppSuspending byte readable =0x0000000000000040
+[t=0.093s] target clean, installing 0x00000001402bcb30
+[t=0.093s] installed LogHelper n=5 slot=0x00007ff63de20000
+[t=0.093s] target clean, installing 0x00000001402abc80
+[t=0.093s] installed LogHelper2 n=5 slot=0x00007ff63de20040
+[t=0.093s] target clean, installing 0x000000014292bc30
+[t=0.093s] installed CTXSetVerify n=6 slot=0x00007ff63de20080
+[t=0.093s] target clean, installing 0x000000014292ba40
+[t=0.093s] installed CTXSetStore n=5 slot=0x00007ff63de200c0
+[t=0.093s] target clean, installing 0x000000014297d450
+[t=0.093s] installed StoreAddCert n=5 slot=0x00007ff63de20100
+[t=0.093s] target clean, installing 0x00000001402bcc00
+[t=0.093s] installed LogWarn n=5 slot=0x00007ff63de20140
+[t=0.093s] mpunlock: patched slot 0xb8 user-signed-in OK
+[t=0.093s] mpunlock: patched slot 0xc0 HasPrivilege OK
+[t=0.093s] mpunlock: patched slot 0xc8 privilege state OK
+[t=0.093s] mpunlock: platform vtable re-pointed (in-memory only)
+[t=0.093s] LanHookThread: install loop done
+[t=1.046s] HIT LogHelper #1: "WorldwideLoginService::WorldwideLoginService - initializing" r8=0x000001ae63a91140 r9=0x0000000000000091 a5=0x000001ae71276e10 a6=0x000001ae719ad340 ret=0x00007ff65d590062
+[t=1.046s] CRYPT32 OpenStore prov= Root
+[t=1.046s] HIT LogHelper #2: "SystemCertsWin: Opened the CA system store." r8=0x00000004ceb5d948 s8="m" r9=0x0000000000000000 a5=0x000001ae719ad340 a6=0x000001ae719ac6c8 ret=0x00007ff65d68ea21
+[t=1.046s] CRYPT32 enum cert #1 enc=1 head=30820306
+[t=1.046s] CRYPT32 cert name=Titanium Root Certificate Authority
+[t=1.046s] HIT StoreAddCert #1 rcx=0x000001ae72a4a670 rdx=0x000001ae714dab40 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #2 rcx=0x000001ae72a49da0 rdx=0x000001ae72a4a670 r9=0x000001ae72a4a340 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #3 rcx=0x000001ae72a4a760 rdx=0x000001ae714dab40 r9=0x0000000000000040 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #4 rcx=0x000001ae72a4a370 rdx=0x000001ae72a49e60 r9=0x000001ae72a49e60 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #5 rcx=0x000001ae72a49e60 rdx=0x000001ae714dad40 r9=0x0000000000000040 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #6 rcx=0x000001ae72a4a8e0 rdx=0x000001ae714dac80 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #7 rcx=0x000001ae72a4a130 rdx=0x000001ae72a4a8e0 r9=0x000001ae72a4a520 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #8 rcx=0x000001ae72a49ef0 rdx=0x000001ae714dac80 r9=0x0000000000000040 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #9 rcx=0x000001ae72a49d10 rdx=0x000001ae72a49d40 r9=0x000001ae72a49d40 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #10 rcx=0x000001ae72a49d40 rdx=0x000001ae714db040 r9=0x0000000000000040 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #11 rcx=0x000001ae72a4a130 rdx=0x000001ae72a4a2e0 r9=0x00007ff6604e19c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #12 rcx=0x000001ae72a4a130 rdx=0x000001ae72a4a820 r9=0x00007ff6604e19c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT LogHelper #3: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/CN=Titanium Root Certificate Authority" r9=0x00000004ceb5d840 s9="/CN=Titanium Root Certificate Authority" a5=0x3063393165343036 a6=0x3078303d74657220 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=pb-live-release6-api.worldsedgelink.com
+[t=1.046s] HIT StoreAddCert #13 rcx=0x000001ae72a4a8e0 rdx=0x000001ae71810620 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #14 rcx=0x000001ae72a4a7f0 rdx=0x000001ae72a4a8e0 r9=0x000001ae72a49d40 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #15 rcx=0x000001ae72a49e00 rdx=0x000001ae718106a0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #16 rcx=0x000001ae72a4a7f0 rdx=0x000001ae72a49e00 r9=0x000001ae72a4a430 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #17 rcx=0x000001ae72a49e30 rdx=0x000001ae71810620 r9=0x0000000000000060 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #18 rcx=0x000001ae72a49e30 rdx=0x000001ae718106a0 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #19 rcx=0x000001ae72a4a490 rdx=0x000001ae72a49f80 r9=0x000001ae72a49f80 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #20 rcx=0x000001ae72a49f80 rdx=0x000001ae71810aa0 r9=0x000001ae72a4a546 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #21 rcx=0x000001ae72a4a490 rdx=0x000001ae72a49f20 r9=0x000001ae72a49f20 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #22 rcx=0x000001ae72a49f20 rdx=0x000001ae71810780 r9=0x000001ae7169a4f6 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #23 rcx=0x000001ae72a4a5e0 rdx=0x000001ae71810a80 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #24 rcx=0x000001ae72a4a520 rdx=0x000001ae72a4a5e0 r9=0x000001ae72a4a580 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #25 rcx=0x000001ae72a4a040 rdx=0x000001ae71810aa0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #26 rcx=0x000001ae72a4a520 rdx=0x000001ae72a4a040 r9=0x000001ae72a49e90 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #27 rcx=0x000001ae72a49fb0 rdx=0x000001ae71810a80 r9=0x0000000000000060 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #28 rcx=0x000001ae72a49fb0 rdx=0x000001ae71810aa0 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #29 rcx=0x000001ae72a4a0a0 rdx=0x000001ae72a4a3d0 r9=0x000001ae72a4a3d0 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #30 rcx=0x000001ae72a4a3d0 rdx=0x000001ae71810b00 r9=0x000001ae72a4a816 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #31 rcx=0x000001ae72a4a0a0 rdx=0x000001ae72a4a490 r9=0x000001ae72a4a490 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #32 rcx=0x000001ae72a4a490 rdx=0x000001ae719d8610 r9=0x000001ae7169a5c6 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #33 rcx=0x000001ae72a4a3d0 rdx=0x000001ae72a4a4c0 r9=0x00007ff6604e19c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #34 rcx=0x000001ae72a4a3d0 rdx=0x000001ae72a4a040 r9=0x00007ff6604e19c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #35 rcx=0x000001ae72a4a3d0 rdx=0x000001ae72a4a0a0 r9=0x00007ff6604e19c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #36 rcx=0x000001ae72a4a3d0 rdx=0x000001ae72a49dd0 r9=0x00007ff6604e19c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT LogHelper #4: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" r9=0x00000004ceb5d840 s9="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" a5=0x3063393165343036 a6=0x3078303d74657220 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=Amazon Root CA 4
+[t=1.046s] HIT StoreAddCert #37 rcx=0x000001ae72a4a670 rdx=0x000001ae719d9b90 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #38 rcx=0x000001ae72a49f20 rdx=0x000001ae72a4a670 r9=0x000001ae72a4a6a0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #39 rcx=0x000001ae72a49d40 rdx=0x000001ae719da010 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #40 rcx=0x000001ae72a49f20 rdx=0x000001ae72a49d40 r9=0x000001ae72a4afd0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #41 rcx=0x000001ae72a4abe0 rdx=0x000001ae719d9e90 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #42 rcx=0x000001ae72a49f20 rdx=0x000001ae72a4abe0 r9=0x000001ae72a4af70 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #43 rcx=0x000001ae72a4a8e0 rdx=0x000001ae719d9b90 r9=0x0000000000000040 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #44 rcx=0x000001ae72a4a8e0 rdx=0x000001ae719da010 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #45 rcx=0x000001ae72a4a8e0 rdx=0x000001ae719d9e90 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #46 rcx=0x000001ae72a4ab50 rdx=0x000001ae72a4a910 r9=0x000001ae72a4a910 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #47 rcx=0x000001ae72a4a910 rdx=0x000001ae719d9d30 r9=0x000001ae7169a5c1 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #48 rcx=0x000001ae72a4ab50 rdx=0x000001ae72a4ac70 r9=0x000001ae72a4ac70 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #49 rcx=0x000001ae72a4ac70 rdx=0x000001ae719d9a30 r9=0x000001ae7169a5d5 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #50 rcx=0x000001ae72a4ab50 rdx=0x000001ae72a4a940 r9=0x000001ae72a4a940 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #51 rcx=0x000001ae72a4a940 rdx=0x000001ae719da0f0 r9=0x000001ae719d9f5f ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #52 rcx=0x000001ae72a4a7f0 rdx=0x000001ae719d9fb0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #53 rcx=0x000001ae72a49f20 rdx=0x000001ae72a4a7f0 r9=0x000001ae72a4a670 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #54 rcx=0x000001ae72a49d40 rdx=0x000001ae719da0b0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #55 rcx=0x000001ae72a49f20 rdx=0x000001ae72a49d40 r9=0x000001ae72a4aeb0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #56 rcx=0x000001ae72a4ad00 rdx=0x000001ae719d9a10 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #57 rcx=0x000001ae72a49f20 rdx=0x000001ae72a4ad00 r9=0x000001ae72a4af40 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #58 rcx=0x000001ae72a4a700 rdx=0x000001ae719d9fb0 r9=0x0000000000000040 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #59 rcx=0x000001ae72a4a700 rdx=0x000001ae719da0b0 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #60 rcx=0x000001ae72a4a700 rdx=0x000001ae719d9a10 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #61 rcx=0x000001ae72a4ab20 rdx=0x000001ae72a4acd0 r9=0x000001ae72a4acd0 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #62 rcx=0x000001ae72a4acd0 rdx=0x000001ae719d9bd0 r9=0x000001ae7169a5e1 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #63 rcx=0x000001ae72a4ab20 rdx=0x000001ae72a4aac0 r9=0x000001ae72a4aac0 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #64 rcx=0x000001ae72a4aac0 rdx=0x000001ae719d9f50 r9=0x000001ae7169a3b5 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #65 rcx=0x000001ae72a4ab20 rdx=0x000001ae72a4a910 r9=0x000001ae72a4a910 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #66 rcx=0x000001ae72a4a910 rdx=0x000001ae719da090 r9=0x000001ae719d9e5f ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #67 rcx=0x000001ae72a4a670 rdx=0x000001ae72a4a6a0 r9=0x00007ff6604e19c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #68 rcx=0x000001ae72a4a670 rdx=0x000001ae72a4a9d0 r9=0x00007ff6604e19c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #69 rcx=0x000001ae72a4a670 rdx=0x000001ae72a4aac0 r9=0x00007ff6604e19c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT LogHelper #5: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=US/O=Amazon/CN=Amazon Root CA 4" r9=0x00000004ceb5d840 s9="/C=US/O=Amazon/CN=Amazon Root CA 4" a5=0x3063393165343036 a6=0x3078303d74657220 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=Baltimore CyberTrust Root
+[t=1.046s] HIT StoreAddCert #70 rcx=0x000001ae72a4a9a0 rdx=0x000001ae719d9e70 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #71 rcx=0x000001ae72a4ac70 rdx=0x000001ae72a4a9a0 r9=0x000001ae72a4ad00 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #72 rcx=0x000001ae72a4ad60 rdx=0x000001ae719d9eb0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #73 rcx=0x000001ae72a4ac70 rdx=0x000001ae72a4ad60 r9=0x000001ae72a4ae80 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #74 rcx=0x000001ae72a4ac10 rdx=0x000001ae719d9f70 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #75 rcx=0x000001ae72a4ac70 rdx=0x000001ae72a4ac10 r9=0x000001ae72a4acd0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #76 rcx=0x000001ae72a4a970 rdx=0x000001ae719d9fd0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #77 rcx=0x000001ae72a4ac70 rdx=0x000001ae72a4a970 r9=0x000001ae72a4adc0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #78 rcx=0x000001ae72a4aeb0 rdx=0x000001ae719d9e70 r9=0x0000000000000060 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #79 rcx=0x000001ae72a4aeb0 rdx=0x000001ae719d9eb0 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #80 rcx=0x000001ae72a4aeb0 rdx=0x000001ae719d9f70 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #81 rcx=0x000001ae72a4aeb0 rdx=0x000001ae719d9fd0 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #82 rcx=0x000001ae72a4a910 rdx=0x000001ae72a4afa0 r9=0x000001ae72a4afa0 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #83 rcx=0x000001ae72a4afa0 rdx=0x000001ae719da630 r9=0x000001ae716b11f1 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #84 rcx=0x000001ae72a4a910 rdx=0x000001ae72a4abe0 r9=0x000001ae72a4abe0 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #85 rcx=0x000001ae72a4abe0 rdx=0x000001ae719da4f0 r9=0x000001ae719da578 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #86 rcx=0x000001ae72a4a910 rdx=0x000001ae72a4aa60 r9=0x000001ae72a4aa60 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #87 rcx=0x000001ae72a4aa60 rdx=0x000001ae719da770 r9=0x000001ae719da1d9 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #88 rcx=0x000001ae72a4a910 rdx=0x000001ae72a4a940 r9=0x000001ae72a4a940 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #89 rcx=0x000001ae72a4a940 rdx=0x000001ae719da850 r9=0x000001ae72a4ae08 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #90 rcx=0x000001ae72a4aa30 rdx=0x000001ae719da790 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #91 rcx=0x000001ae72a4afa0 rdx=0x000001ae72a4aa30 r9=0x000001ae72a4ac70 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #92 rcx=0x000001ae72a4ae80 rdx=0x000001ae719da7b0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #93 rcx=0x000001ae72a4afa0 rdx=0x000001ae72a4ae80 r9=0x000001ae72a4aee0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #94 rcx=0x000001ae72a4abe0 rdx=0x000001ae719da3f0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #95 rcx=0x000001ae72a4afa0 rdx=0x000001ae72a4abe0 r9=0x000001ae72a4af40 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #96 rcx=0x000001ae72a4adc0 rdx=0x000001ae719da630 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #97 rcx=0x000001ae72a4afa0 rdx=0x000001ae72a4adc0 r9=0x000001ae72a4a970 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #98 rcx=0x000001ae72a4aa60 rdx=0x000001ae719da790 r9=0x0000000000000060 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #99 rcx=0x000001ae72a4aa60 rdx=0x000001ae719da7b0 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #100 rcx=0x000001ae72a4aa60 rdx=0x000001ae719da3f0 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #101 rcx=0x000001ae72a4aa60 rdx=0x000001ae719da630 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #102 rcx=0x000001ae72a4ad00 rdx=0x000001ae72a4afd0 r9=0x000001ae72a4afd0 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #103 rcx=0x000001ae72a4afd0 rdx=0x000001ae719da830 r9=0x000001ae716b1431 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #104 rcx=0x000001ae72a4ad00 rdx=0x000001ae72a4ab20 r9=0x000001ae72a4ab20 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #105 rcx=0x000001ae72a4ab20 rdx=0x000001ae719da1b0 r9=0x000001ae719da318 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #106 rcx=0x000001ae72a4ad00 rdx=0x000001ae72a4ae50 r9=0x000001ae72a4ae50 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #107 rcx=0x000001ae72a4ae50 rdx=0x000001ae719da6d0 r9=0x000001ae719da339 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #108 rcx=0x000001ae72a4ad00 rdx=0x000001ae72a4aa90 r9=0x000001ae72a4aa90 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #109 rcx=0x000001ae72a4aa90 rdx=0x000001ae719da5f0 r9=0x000001ae72a4abc8 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #110 rcx=0x000001ae72a4adc0 rdx=0x000001ae72a4aee0 r9=0x00007ff6604e19c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #111 rcx=0x000001ae72a4adc0 rdx=0x000001ae72a4ad00 r9=0x00007ff6604e19c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #112 rcx=0x000001ae72a4adc0 rdx=0x000001ae72a4aa30 r9=0x00007ff6604e19c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT LogHelper #6: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=IE/O=Baltimore/OU=CyberTrust/CN=Baltimore CyberTrust Root" r9=0x00000004ceb5d840 s9="/C=IE/O=Baltimore/OU=CyberTrust/CN=Baltimore CyberTrust Root" a5=0x6339316534303636 a6=0x78303d7465722030 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=AAA Certificate Services
+[t=1.046s] HIT StoreAddCert #113 rcx=0x000001ae72a4a940 rdx=0x000001ae719da3b0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #114 rcx=0x000001ae72a4ab20 rdx=0x000001ae72a4a940 r9=0x000001ae72a4aa90 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #115 rcx=0x000001ae72a4aa00 rdx=0x000001ae719da370 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #116 rcx=0x000001ae72a4ab20 rdx=0x000001ae72a4aa00 r9=0x000001ae72a4ac40 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #117 rcx=0x000001ae72a4abe0 rdx=0x000001ae719da690 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #118 rcx=0x000001ae72a4ab20 rdx=0x000001ae72a4abe0 r9=0x000001ae72a4ac10 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #119 rcx=0x000001ae72a4ac70 rdx=0x000001ae719da130 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #120 rcx=0x000001ae72a4ab20 rdx=0x000001ae72a4ac70 r9=0x000001ae72a3a1a0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #121 rcx=0x000001ae72a3aa70 rdx=0x000001ae719da3d0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #122 rcx=0x000001ae72a4ab20 rdx=0x000001ae72a3aa70 r9=0x000001ae72a3a680 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #123 rcx=0x000001ae72a4acd0 rdx=0x000001ae719da3b0 r9=0x0000000000000080 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #124 rcx=0x000001ae72a4acd0 rdx=0x000001ae719da370 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #125 rcx=0x000001ae72a4acd0 rdx=0x000001ae719da690 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #126 rcx=0x000001ae72a4acd0 rdx=0x000001ae719da130 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #127 rcx=0x000001ae72a4acd0 rdx=0x000001ae719da3d0 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #128 rcx=0x000001ae72a4ad60 rdx=0x000001ae72a3a380 r9=0x000001ae72a3a380 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #129 rcx=0x000001ae72a3a380 rdx=0x000001ae719da890 r9=0x000001ae716b11f1 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #130 rcx=0x000001ae72a4ad60 rdx=0x000001ae72a3a5c0 r9=0x000001ae72a3a5c0 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #131 rcx=0x000001ae72a3a5c0 rdx=0x000001ae719da850 r9=0x000000000000013f ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #132 rcx=0x000001ae72a4ad60 rdx=0x000001ae72a3a740 r9=0x000001ae72a3a740 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #133 rcx=0x000001ae72a3a740 rdx=0x000001ae719da8b0 r9=0x0000000000000064 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #134 rcx=0x000001ae72a4ad60 rdx=0x000001ae72a3a2c0 r9=0x000001ae72a3a2c0 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #135 rcx=0x000001ae72a3a2c0 rdx=0x000001ae719da750 r9=0x0000000000000119 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #136 rcx=0x000001ae72a4ad60 rdx=0x000001ae72a3a290 r9=0x000001ae72a3a290 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #137 rcx=0x000001ae72a3a290 rdx=0x000001ae719da230 r9=0x000000000000001b ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #138 rcx=0x000001ae72a4ad60 rdx=0x000001ae719da5d0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #139 rcx=0x000001ae72a4aa00 rdx=0x000001ae72a4ad60 r9=0x000001ae72a4a940 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #140 rcx=0x000001ae72a4ab20 rdx=0x000001ae719da410 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #141 rcx=0x000001ae72a4aa00 rdx=0x000001ae72a4ab20 r9=0x000001ae72a4abe0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #142 rcx=0x000001ae72a4ac10 rdx=0x000001ae719da8b0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #143 rcx=0x000001ae72a4aa00 rdx=0x000001ae72a4ac10 r9=0x000001ae72a4ac40 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #144 rcx=0x000001ae72a4ac70 rdx=0x000001ae719da890 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #145 rcx=0x000001ae72a4aa00 rdx=0x000001ae72a4ac70 r9=0x000001ae72a3a1d0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #146 rcx=0x000001ae72a3a6b0 rdx=0x000001ae719da5f0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #147 rcx=0x000001ae72a4aa00 rdx=0x000001ae72a3a6b0 r9=0x000001ae72a3a440 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #148 rcx=0x000001ae72a4afd0 rdx=0x000001ae719da5d0 r9=0x0000000000000080 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #149 rcx=0x000001ae72a4afd0 rdx=0x000001ae719da410 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #150 rcx=0x000001ae72a4afd0 rdx=0x000001ae719da8b0 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #151 rcx=0x000001ae72a4afd0 rdx=0x000001ae719da890 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #152 rcx=0x000001ae72a4afd0 rdx=0x000001ae719da5f0 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #153 rcx=0x000001ae72a4a910 rdx=0x000001ae72a3a890 r9=0x000001ae72a3a890 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #154 rcx=0x000001ae72a3a890 rdx=0x000001ae719da6d0 r9=0x000001ae716b1261 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #155 rcx=0x000001ae72a4a910 rdx=0x000001ae72a3a200 r9=0x000001ae72a3a200 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #156 rcx=0x000001ae72a3a200 rdx=0x000001ae719da1b0 r9=0x000000000000013e ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #157 rcx=0x000001ae72a4a910 rdx=0x000001ae72a3a8c0 r9=0x000001ae72a3a8c0 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #158 rcx=0x000001ae72a3a8c0 rdx=0x000001ae719da1d0 r9=0x0000000000000064 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #159 rcx=0x000001ae72a4a910 rdx=0x000001ae72a3a6e0 r9=0x000001ae72a3a6e0 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #160 rcx=0x000001ae72a3a6e0 rdx=0x000001ae719da230 r9=0x000000000000010b ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #161 rcx=0x000001ae72a4a910 rdx=0x000001ae72a3a1a0 r9=0x000001ae72a3a1a0 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #162 rcx=0x000001ae72a3a1a0 rdx=0x000001ae719da290 r9=0x0000000000000001 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #163 rcx=0x000001ae72a4ac10 rdx=0x000001ae72a4abe0 r9=0x00007ff6604e19c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #164 rcx=0x000001ae72a4ac10 rdx=0x000001ae72a4a910 r9=0x00007ff6604e19c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #165 rcx=0x000001ae72a4ac10 rdx=0x000001ae72a4ac40 r9=0x00007ff6604e19c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #166 rcx=0x000001ae72a4ac10 rdx=0x000001ae72a4a940 r9=0x00007ff6604e19c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT LogHelper #7: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=GB/ST=Greater Manchester/L=Salford/O=Comodo CA Limited/CN=AAA Certif" r9=0x00000004ceb5d840 s9="/C=GB/ST=Greater Manchester/L=Salford/O=Comodo CA Limited/CN=AAA Certif" a5=0x6339316534303636 a6=0x78303d7465722030 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=Microsoft Root Certificate Authority
+[t=1.046s] HIT StoreAddCert #167 rcx=0x000001ae72a3aaa0 rdx=0x000001ae719dadf0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #168 rcx=0x000001ae72a3a650 rdx=0x000001ae72a3aaa0 r9=0x000001ae72a3a1a0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #169 rcx=0x000001ae72a3a710 rdx=0x000001ae719dac90 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #170 rcx=0x000001ae72a3a650 rdx=0x000001ae72a3a710 r9=0x000001ae72a3ab30 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #171 rcx=0x000001ae72a3a4d0 rdx=0x000001ae719dac70 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #172 rcx=0x000001ae72a3a650 rdx=0x000001ae72a3a4d0 r9=0x000001ae72a3ac20 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #173 rcx=0x000001ae72a3a8c0 rdx=0x000001ae719dadf0 r9=0x0000000000000080 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #174 rcx=0x000001ae72a3a8c0 rdx=0x000001ae719dac90 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #175 rcx=0x000001ae72a3a8c0 rdx=0x000001ae719dac70 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #176 rcx=0x000001ae72a3a590 rdx=0x000001ae72a3a6e0 r9=0x000001ae72a3a6e0 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #177 rcx=0x000001ae72a3a6e0 rdx=0x000001ae719dad70 r9=0x000001ae716b1322 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #178 rcx=0x000001ae72a3a590 rdx=0x000001ae72a3a290 r9=0x000001ae72a3a290 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #179 rcx=0x000001ae72a3a290 rdx=0x000001ae719da9d0 r9=0x000001ae719db0f8 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #180 rcx=0x000001ae72a3a590 rdx=0x000001ae72a3a2f0 r9=0x000001ae72a3a2f0 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #181 rcx=0x000001ae72a3a2f0 rdx=0x000001ae719db0d0 r9=0x000001ae72a3a763 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #182 rcx=0x000001ae72a3a380 rdx=0x000001ae719daeb0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #183 rcx=0x000001ae72a3ab30 rdx=0x000001ae72a3a380 r9=0x000001ae72a3aaa0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #184 rcx=0x000001ae72a3a3b0 rdx=0x000001ae719dacf0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #185 rcx=0x000001ae72a3ab30 rdx=0x000001ae72a3a3b0 r9=0x000001ae72a3a590 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #186 rcx=0x000001ae72a3a3e0 rdx=0x000001ae719daef0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #187 rcx=0x000001ae72a3ab30 rdx=0x000001ae72a3a3e0 r9=0x000001ae72a3a920 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #188 rcx=0x000001ae72a3aa10 rdx=0x000001ae719daeb0 r9=0x0000000000000080 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #189 rcx=0x000001ae72a3aa10 rdx=0x000001ae719dacf0 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #190 rcx=0x000001ae72a3aa10 rdx=0x000001ae719daef0 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #191 rcx=0x000001ae72a3ac50 rdx=0x000001ae72a3a5c0 r9=0x000001ae72a3a5c0 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #192 rcx=0x000001ae72a3a5c0 rdx=0x000001ae719dadd0 r9=0x000001ae716b12c2 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #193 rcx=0x000001ae72a3ac50 rdx=0x000001ae72a3a950 r9=0x000001ae72a3a950 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #194 rcx=0x000001ae72a3a950 rdx=0x000001ae719dae10 r9=0x000001ae719da9f8 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #195 rcx=0x000001ae72a3ac50 rdx=0x000001ae72a3a980 r9=0x000001ae72a3a980 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #196 rcx=0x000001ae72a3a980 rdx=0x000001ae719daad0 r9=0x000001ae72a3a793 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #197 rcx=0x000001ae72a3ac50 rdx=0x000001ae72a3aaa0 r9=0x00007ff6604e19c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #198 rcx=0x000001ae72a3ac50 rdx=0x000001ae72a3a290 r9=0x00007ff6604e19c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #199 rcx=0x000001ae72a3ac50 rdx=0x000001ae72a3aa40 r9=0x00007ff6604e19c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #200 rcx=0x000001ae72a3ac50 rdx=0x000001ae72a3a920 r9=0x00007ff6604e19c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT LogHelper #8: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/DC=com/DC=microsoft/CN=Microsoft Root Certificate Authority" r9=0x00000004ceb5d840 s9="/DC=com/DC=microsoft/CN=Microsoft Root Certificate Authority" a5=0x6339316534303636 a6=0x78303d7465722030 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=Thawte Timestamping CA
+[t=1.046s] HIT StoreAddCert #201 rcx=0x000001ae72a3a980 rdx=0x000001ae719daf10 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #202 rcx=0x000001ae72a3ab00 rdx=0x000001ae72a3a980 r9=0x000001ae72a3ab30 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #203 rcx=0x000001ae72a3ab60 rdx=0x000001ae719dab50 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #204 rcx=0x000001ae72a3ab00 rdx=0x000001ae72a3ab60 r9=0x000001ae72a3a2c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #205 rcx=0x000001ae72a3a3b0 rdx=0x000001ae719daa10 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #206 rcx=0x000001ae72a3ab00 rdx=0x000001ae72a3a3b0 r9=0x000001ae72a3a320 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #207 rcx=0x000001ae72a3a620 rdx=0x000001ae719daff0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #208 rcx=0x000001ae72a3ab00 rdx=0x000001ae72a3a620 r9=0x000001ae72a3ab90 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #209 rcx=0x000001ae72a3a230 rdx=0x000001ae719dad50 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #210 rcx=0x000001ae72a3ab00 rdx=0x000001ae72a3a230 r9=0x000001ae72a3acb0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #211 rcx=0x000001ae72a3abc0 rdx=0x000001ae719dabb0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #212 rcx=0x000001ae72a3ab00 rdx=0x000001ae72a3abc0 r9=0x000001ae72a3a5c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #213 rcx=0x000001ae72a3a2f0 rdx=0x000001ae719daf10 r9=0x00000000000000a0 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #214 rcx=0x000001ae72a3a2f0 rdx=0x000001ae719dab50 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #215 rcx=0x000001ae72a3a2f0 rdx=0x000001ae719daa10 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #216 rcx=0x000001ae72a3a2f0 rdx=0x000001ae719daff0 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #217 rcx=0x000001ae72a3a2f0 rdx=0x000001ae719dad50 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #218 rcx=0x000001ae72a3a2f0 rdx=0x000001ae719dabb0 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #219 rcx=0x000001ae72a3a5f0 rdx=0x000001ae72a3ac20 r9=0x000001ae72a3ac20 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #220 rcx=0x000001ae72a3ac20 rdx=0x000001ae719dad10 r9=0x000001ae716b1391 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #221 rcx=0x000001ae72a3a5f0 rdx=0x000001ae72a3abf0 r9=0x000001ae72a3abf0 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #222 rcx=0x000001ae72a3abf0 rdx=0x000001ae719dabf0 r9=0x000001ae719dad3b ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #223 rcx=0x000001ae72a3a5f0 rdx=0x000001ae72a3a680 r9=0x000001ae72a3a680 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #224 rcx=0x000001ae72a3a680 rdx=0x000001ae719da950 r9=0x000001ae719db05a ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #225 rcx=0x000001ae72a3a5f0 rdx=0x000001ae72a3a4a0 r9=0x000001ae72a3a4a0 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #226 rcx=0x000001ae72a3a4a0 rdx=0x000001ae719db030 r9=0x000001ae716b1485 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #227 rcx=0x000001ae72a3a5f0 rdx=0x000001ae72a3a140 r9=0x000001ae72a3a140 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #228 rcx=0x000001ae72a3a140 rdx=0x000001ae719da9b0 r9=0x000001ae719dada3 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #229 rcx=0x000001ae72a3a5f0 rdx=0x000001ae72a3a440 r9=0x000001ae72a3a440 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #230 rcx=0x000001ae72a3a440 rdx=0x000001ae719da910 r9=0x000001ae719db645 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #231 rcx=0x000001ae72a3a710 rdx=0x000001ae719dabf0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #232 rcx=0x000001ae72a3a140 rdx=0x000001ae72a3a710 r9=0x000001ae72a3ab30 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #233 rcx=0x000001ae72a3a170 rdx=0x000001ae719db050 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #234 rcx=0x000001ae72a3a140 rdx=0x000001ae72a3a170 r9=0x000001ae72a3ab60 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #235 rcx=0x000001ae72a3a500 rdx=0x000001ae719dad30 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #236 rcx=0x000001ae72a3a140 rdx=0x000001ae72a3a500 r9=0x000001ae72a3a2c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #237 rcx=0x000001ae72a3ac20 rdx=0x000001ae719dad90 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #238 rcx=0x000001ae72a3a140 rdx=0x000001ae72a3ac20 r9=0x000001ae72a3a200 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #239 rcx=0x000001ae72a3a5f0 rdx=0x000001ae719da910 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #240 rcx=0x000001ae72a3a140 rdx=0x000001ae72a3a5f0 r9=0x000001ae72a3a3b0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #241 rcx=0x000001ae72a3a1a0 rdx=0x000001ae719db4b0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #242 rcx=0x000001ae72a3a140 rdx=0x000001ae72a3a1a0 r9=0x000001ae72a3ab00 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #243 rcx=0x000001ae72a3a650 rdx=0x000001ae719dabf0 r9=0x00000000000000a0 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #244 rcx=0x000001ae72a3a650 rdx=0x000001ae719db050 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #245 rcx=0x000001ae72a3a650 rdx=0x000001ae719dad30 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #246 rcx=0x000001ae72a3a650 rdx=0x000001ae719dad90 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #247 rcx=0x000001ae72a3a650 rdx=0x000001ae719da910 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #248 rcx=0x000001ae72a3a650 rdx=0x000001ae719db4b0 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #249 rcx=0x000001ae72a3abc0 rdx=0x000001ae72a3a530 r9=0x000001ae72a3a530 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #250 rcx=0x000001ae72a3a530 rdx=0x000001ae719db8f0 r9=0x000001ae716b13b1 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #251 rcx=0x000001ae72a3abc0 rdx=0x000001ae72a3acb0 r9=0x000001ae72a3acb0 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #252 rcx=0x000001ae72a3acb0 rdx=0x000001ae719db890 r9=0x000001ae719db71b ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #253 rcx=0x000001ae72a3abc0 rdx=0x000001ae72a3a5c0 r9=0x000001ae72a3a5c0 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #254 rcx=0x000001ae72a3a5c0 rdx=0x000001ae719db810 r9=0x000001ae719db11a ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #255 rcx=0x000001ae72a3abc0 rdx=0x000001ae72a3a740 r9=0x000001ae72a3a740 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #256 rcx=0x000001ae72a3a740 rdx=0x000001ae719db8b0 r9=0x000001ae716b13c5 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #257 rcx=0x000001ae72a3abc0 rdx=0x000001ae72a3a320 r9=0x000001ae72a3a320 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #258 rcx=0x000001ae72a3a320 rdx=0x000001ae719db7b0 r9=0x000001ae719db8e3 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #259 rcx=0x000001ae72a3abc0 rdx=0x000001ae72a3a470 r9=0x000001ae72a3a470 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #260 rcx=0x000001ae72a3a470 rdx=0x000001ae719db750 r9=0x000001ae719db385 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #261 rcx=0x000001ae72a3a680 rdx=0x000001ae72a3ab00 r9=0x00007ff6604e19c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT LogHelper #9: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=ZA/ST=Western Cape/L=Durbanville/O=Thawte/OU=Thawte Certification/CN" r9=0x00000004ceb5d840 s9="/C=ZA/ST=Western Cape/L=Durbanville/O=Thawte/OU=Thawte Certification/CN" a5=0x6339316534303636 a6=0x78303d7465722030 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=Starfield Class 2 Certification Authority
+[t=1.046s] HIT StoreAddCert #262 rcx=0x000001ae72a3ab60 rdx=0x000001ae719db5d0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #263 rcx=0x000001ae72a3a470 rdx=0x000001ae72a3ab60 r9=0x000001ae72a3a5c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #264 rcx=0x000001ae72a3a2c0 rdx=0x000001ae719db2b0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #265 rcx=0x000001ae72a3a470 rdx=0x000001ae72a3a2c0 r9=0x000001ae72a3a5f0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #266 rcx=0x000001ae72a3a620 rdx=0x000001ae719db470 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #267 rcx=0x000001ae72a3a470 rdx=0x000001ae72a3a620 r9=0x000001ae72a3a710 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #268 rcx=0x000001ae72a3a200 rdx=0x000001ae719db5d0 r9=0x0000000000000080 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #269 rcx=0x000001ae72a3a200 rdx=0x000001ae719db2b0 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #270 rcx=0x000001ae72a3a200 rdx=0x000001ae719db470 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #271 rcx=0x000001ae72a3ace0 rdx=0x000001ae72a3a830 r9=0x000001ae72a3a830 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #272 rcx=0x000001ae72a3a830 rdx=0x000001ae719db310 r9=0x000001ae6f20e2f1 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #273 rcx=0x000001ae72a3ace0 rdx=0x000001ae72a3a530 r9=0x000001ae72a3a530 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #274 rcx=0x000001ae72a3a530 rdx=0x000001ae719db250 r9=0x000001ae72a3a75b ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #275 rcx=0x000001ae72a3ace0 rdx=0x000001ae72a3a440 r9=0x000001ae72a3a440 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #276 rcx=0x000001ae72a3a440 rdx=0x000001ae719db450 r9=0x000001ae729c65c8 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #277 rcx=0x000001ae72a3a5c0 rdx=0x000001ae719db330 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #278 rcx=0x000001ae72a3ab60 rdx=0x000001ae72a3a5c0 r9=0x000001ae72a3a5f0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #279 rcx=0x000001ae72a3a530 rdx=0x000001ae719db850 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #280 rcx=0x000001ae72a3ab60 rdx=0x000001ae72a3a530 r9=0x000001ae72a3a890 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #281 rcx=0x000001ae72a3ac20 rdx=0x000001ae719db2d0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #282 rcx=0x000001ae72a3ab60 rdx=0x000001ae72a3ac20 r9=0x000001ae72a3a6e0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #283 rcx=0x000001ae72a3a260 rdx=0x000001ae719db330 r9=0x0000000000000080 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #284 rcx=0x000001ae72a3a260 rdx=0x000001ae719db850 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #285 rcx=0x000001ae72a3a260 rdx=0x000001ae719db2d0 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #286 rcx=0x000001ae72a3a980 rdx=0x000001ae72a3a2c0 r9=0x000001ae72a3a2c0 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #287 rcx=0x000001ae72a3a2c0 rdx=0x000001ae719db7f0 r9=0x000001ae716b1481 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #288 rcx=0x000001ae72a3a980 rdx=0x000001ae72a3a140 r9=0x000001ae72a3a140 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #289 rcx=0x000001ae72a3a140 rdx=0x000001ae719db530 r9=0x000001ae72a3a1bb ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #290 rcx=0x000001ae72a3a980 rdx=0x000001ae72a3ace0 r9=0x000001ae72a3ace0 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #291 rcx=0x000001ae72a3ace0 rdx=0x000001ae719db790 r9=0x000001ae729c7108 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #292 rcx=0x000001ae72a3a470 rdx=0x000001ae72a3a5f0 r9=0x00007ff6604e19c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #293 rcx=0x000001ae72a3a470 rdx=0x000001ae72a3a830 r9=0x00007ff6604e19c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #294 rcx=0x000001ae72a3a470 rdx=0x000001ae72a3ac20 r9=0x00007ff6604e19c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT LogHelper #10: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=US/O=Starfield Technologies, Inc./OU=Starfield Class 2 Certification" r9=0x00000004ceb5d840 s9="/C=US/O=Starfield Technologies, Inc./OU=Starfield Class 2 Certification" a5=0x6339316534303636 a6=0x78303d7465722030 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=DigiCert Global Root CA
+[t=1.046s] HIT StoreAddCert #295 rcx=0x000001ae72a3a740 rdx=0x000001ae719db4f0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #296 rcx=0x000001ae72a3a6e0 rdx=0x000001ae72a3a740 r9=0x000001ae72a3a1a0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #297 rcx=0x000001ae72a3a890 rdx=0x000001ae719db5b0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #298 rcx=0x000001ae72a3a6e0 rdx=0x000001ae72a3a890 r9=0x000001ae72a3a980 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #299 rcx=0x000001ae72a3e4c0 rdx=0x000001ae719db530 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #300 rcx=0x000001ae72a3a6e0 rdx=0x000001ae72a3e4c0 r9=0x000001ae72a3e190 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #301 rcx=0x000001ae72a3e2b0 rdx=0x000001ae719db7f0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #302 rcx=0x000001ae72a3a6e0 rdx=0x000001ae72a3e2b0 r9=0x000001ae72a3de90 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #303 rcx=0x000001ae72a3a800 rdx=0x000001ae719db4f0 r9=0x0000000000000080 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #304 rcx=0x000001ae72a3a800 rdx=0x000001ae719db5b0 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #305 rcx=0x000001ae72a3a800 rdx=0x000001ae719db530 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #306 rcx=0x000001ae72a3a800 rdx=0x000001ae719db7f0 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #307 rcx=0x000001ae72a3e8b0 rdx=0x000001ae72a3dfb0 r9=0x000001ae72a3dfb0 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #308 rcx=0x000001ae72a3dfb0 rdx=0x000001ae719db810 r9=0x000001ae7183ac51 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #309 rcx=0x000001ae72a3e8b0 rdx=0x000001ae72a3dd70 r9=0x000001ae72a3dd70 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #310 rcx=0x000001ae72a3dd70 rdx=0x000001ae719db390 r9=0x000001ae719db3bb ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #311 rcx=0x000001ae72a3e8b0 rdx=0x000001ae72a3e400 r9=0x000001ae72a3e400 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #312 rcx=0x000001ae72a3e400 rdx=0x000001ae719db8f0 r9=0x000001ae719db3ff ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #313 rcx=0x000001ae72a3e8b0 rdx=0x000001ae72a3e490 r9=0x000001ae72a3e490 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #314 rcx=0x000001ae72a3e490 rdx=0x000001ae719db410 r9=0x000001ae719dbc06 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #315 rcx=0x000001ae72a3a6e0 rdx=0x000001ae719db8f0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #316 rcx=0x000001ae72a3a980 rdx=0x000001ae72a3a6e0 r9=0x000001ae72a3a740 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #317 rcx=0x000001ae72a3a7a0 rdx=0x000001ae719db3b0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #318 rcx=0x000001ae72a3a980 rdx=0x000001ae72a3a7a0 r9=0x000001ae72a3a890 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #319 rcx=0x000001ae72a3e8b0 rdx=0x000001ae719db410 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #320 rcx=0x000001ae72a3a980 rdx=0x000001ae72a3e8b0 r9=0x000001ae72a3de60 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #321 rcx=0x000001ae72a3de00 rdx=0x000001ae719dba90 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #322 rcx=0x000001ae72a3a980 rdx=0x000001ae72a3de00 r9=0x000001ae72a3e760 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #323 rcx=0x000001ae72a3a5c0 rdx=0x000001ae719db8f0 r9=0x0000000000000080 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #324 rcx=0x000001ae72a3a5c0 rdx=0x000001ae719db3b0 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #325 rcx=0x000001ae72a3a5c0 rdx=0x000001ae719db410 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #326 rcx=0x000001ae72a3a5c0 rdx=0x000001ae719dba90 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #327 rcx=0x000001ae72a3de30 rdx=0x000001ae72a3dfb0 r9=0x000001ae72a3dfb0 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #328 rcx=0x000001ae72a3dfb0 rdx=0x000001ae719dc050 r9=0x000001ae7183ada1 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #329 rcx=0x000001ae72a3de30 rdx=0x000001ae72a3e2b0 r9=0x000001ae72a3e2b0 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #330 rcx=0x000001ae72a3e2b0 rdx=0x000001ae719dbe10 r9=0x000001ae719dc0bb ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #331 rcx=0x000001ae72a3de30 rdx=0x000001ae72a3e730 r9=0x000001ae72a3e730 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #332 rcx=0x000001ae72a3e730 rdx=0x000001ae719dbab0 r9=0x000001ae719dbcff ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #333 rcx=0x000001ae72a3de30 rdx=0x000001ae72a3dda0 r9=0x000001ae72a3dda0 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #334 rcx=0x000001ae72a3dda0 rdx=0x000001ae719dbfb0 r9=0x000001ae719dbd26 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #335 rcx=0x000001ae72a3a740 rdx=0x000001ae72a3a7a0 r9=0x00007ff6604e19c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #336 rcx=0x000001ae72a3a740 rdx=0x000001ae72a3a980 r9=0x00007ff6604e19c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #337 rcx=0x000001ae72a3a740 rdx=0x000001ae72a3e8b0 r9=0x00007ff6604e19c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #338 rcx=0x000001ae72a3a740 rdx=0x000001ae72a3e400 r9=0x00007ff6604e19c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT LogHelper #11: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert Global Root CA" r9=0x00000004ceb5d840 s9="/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert Global Root CA" a5=0x6339316534303636 a6=0x78303d7465722030 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=Microsoft Root Authority
+[t=1.046s] HIT StoreAddCert #339 rcx=0x000001ae72a3e4c0 rdx=0x000001ae719dbe10 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #340 rcx=0x000001ae72a3dd70 rdx=0x000001ae72a3e4c0 r9=0x000001ae72a3de60 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #341 rcx=0x000001ae72a3e1f0 rdx=0x000001ae719dba50 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #342 rcx=0x000001ae72a3dd70 rdx=0x000001ae72a3e1f0 r9=0x000001ae72a3e250 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #343 rcx=0x000001ae72a3e280 rdx=0x000001ae719dbc70 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #344 rcx=0x000001ae72a3dd70 rdx=0x000001ae72a3e280 r9=0x000001ae72a3e4f0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #345 rcx=0x000001ae72a3e520 rdx=0x000001ae719dbe10 r9=0x0000000000000080 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #346 rcx=0x000001ae72a3e520 rdx=0x000001ae719dba50 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #347 rcx=0x000001ae72a3e520 rdx=0x000001ae719dbc70 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #348 rcx=0x000001ae72a3e040 rdx=0x000001ae72a3dfb0 r9=0x000001ae72a3dfb0 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #349 rcx=0x000001ae72a3dfb0 rdx=0x000001ae719dbc90 r9=0x000001ae72a3e5d1 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #350 rcx=0x000001ae72a3e040 rdx=0x000001ae72a3e640 r9=0x000001ae72a3e640 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #351 rcx=0x000001ae72a3e640 rdx=0x000001ae719dbb70 r9=0x000001ae719dc044 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #352 rcx=0x000001ae72a3e040 rdx=0x000001ae72a3de00 r9=0x000001ae72a3de00 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #353 rcx=0x000001ae72a3de00 rdx=0x000001ae719dc050 r9=0x000001ae72a3de47 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #354 rcx=0x000001ae72a3de00 rdx=0x000001ae719dbe70 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #355 rcx=0x000001ae72a3e4c0 rdx=0x000001ae72a3de00 r9=0x000001ae72a3e5b0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #356 rcx=0x000001ae72a3dd70 rdx=0x000001ae719dbd10 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #357 rcx=0x000001ae72a3e4c0 rdx=0x000001ae72a3dd70 r9=0x000001ae72a3dda0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #358 rcx=0x000001ae72a3e760 rdx=0x000001ae719dbf90 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #359 rcx=0x000001ae72a3e4c0 rdx=0x000001ae72a3e760 r9=0x000001ae72a3de60 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #360 rcx=0x000001ae72a3e730 rdx=0x000001ae719dbe70 r9=0x0000000000000080 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #361 rcx=0x000001ae72a3e730 rdx=0x000001ae719dbd10 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #362 rcx=0x000001ae72a3e730 rdx=0x000001ae719dbf90 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #363 rcx=0x000001ae72a3e010 rdx=0x000001ae72a3e040 r9=0x000001ae72a3e040 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #364 rcx=0x000001ae72a3e040 rdx=0x000001ae719dbb70 r9=0x000001ae72a3e271 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #365 rcx=0x000001ae72a3e010 rdx=0x000001ae72a3e280 r9=0x000001ae72a3e280 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #366 rcx=0x000001ae72a3e280 rdx=0x000001ae719dbe90 r9=0x000001ae719dc104 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #367 rcx=0x000001ae72a3e010 rdx=0x000001ae72a3eb20 r9=0x000001ae72a3eb20 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #368 rcx=0x000001ae72a3eb20 rdx=0x000001ae719dbfd0 r9=0x000001ae72a3eb07 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #369 rcx=0x000001ae72a3e220 rdx=0x000001ae72a3e5b0 r9=0x00007ff6604e19c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT LogHelper #12: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/OU=Copyright (c) 1997 Microsoft Corp./OU=Microsoft Corporation/CN=Micr" r9=0x00000004ceb5d840 s9="/OU=Copyright (c) 1997 Microsoft Corp./OU=Microsoft Corporation/CN=Micr" a5=0x6339316534303636 a6=0x78303d7465722030 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=Symantec Enterprise Mobile Root for Microsoft
+[t=1.046s] HIT StoreAddCert #370 rcx=0x000001ae72a3efa0 rdx=0x000001ae719dbcf0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #371 rcx=0x000001ae72a3e070 rdx=0x000001ae72a3efa0 r9=0x000001ae72a3ef10 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #372 rcx=0x000001ae72a3e9a0 rdx=0x000001ae719db910 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #373 rcx=0x000001ae72a3e070 rdx=0x000001ae72a3e9a0 r9=0x000001ae72a3e940 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #374 rcx=0x000001ae72a3f3f0 rdx=0x000001ae719dbd50 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #375 rcx=0x000001ae72a3e070 rdx=0x000001ae72a3f3f0 r9=0x000001ae72a3ed30 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #376 rcx=0x000001ae72a3dda0 rdx=0x000001ae719dbcf0 r9=0x0000000000000080 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #377 rcx=0x000001ae72a3dda0 rdx=0x000001ae719db910 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #378 rcx=0x000001ae72a3dda0 rdx=0x000001ae719dbd50 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #379 rcx=0x000001ae72a3ec10 rdx=0x000001ae72a3e970 r9=0x000001ae72a3e970 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #380 rcx=0x000001ae72a3e970 rdx=0x000001ae719dba70 r9=0x000001ae7183ac71 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #381 rcx=0x000001ae72a3ec10 rdx=0x000001ae72a3f450 r9=0x000001ae72a3f450 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #382 rcx=0x000001ae72a3f450 rdx=0x000001ae719dbdf0 r9=0x000001ae719db963 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #383 rcx=0x000001ae72a3ec10 rdx=0x000001ae72a3eaf0 r9=0x000001ae72a3eaf0 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #384 rcx=0x000001ae72a3eaf0 rdx=0x000001ae719dbaf0 r9=0x000001ae729c66cc ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #385 rcx=0x000001ae72a3f360 rdx=0x000001ae719dbdb0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #386 rcx=0x000001ae72a3e070 rdx=0x000001ae72a3f360 r9=0x000001ae72a3ee20 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #387 rcx=0x000001ae72a3eb80 rdx=0x000001ae719db950 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #388 rcx=0x000001ae72a3e070 rdx=0x000001ae72a3eb80 r9=0x000001ae72a3f210 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #389 rcx=0x000001ae72a3f0f0 rdx=0x000001ae719dbdf0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #390 rcx=0x000001ae72a3e070 rdx=0x000001ae72a3f0f0 r9=0x000001ae72a3f4e0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #391 rcx=0x000001ae72a3de60 rdx=0x000001ae719dbdb0 r9=0x0000000000000080 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #392 rcx=0x000001ae72a3de60 rdx=0x000001ae719db950 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #393 rcx=0x000001ae72a3de60 rdx=0x000001ae719dbdf0 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #394 rcx=0x000001ae72a3edc0 rdx=0x000001ae72a3eac0 r9=0x000001ae72a3eac0 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #395 rcx=0x000001ae72a3eac0 rdx=0x000001ae719dbaf0 r9=0x000001ae7183a9f1 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #396 rcx=0x000001ae72a3edc0 rdx=0x000001ae72a3eb20 r9=0x000001ae72a3eb20 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #397 rcx=0x000001ae72a3eb20 rdx=0x000001ae719dc750 r9=0x000001ae719dc383 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #398 rcx=0x000001ae72a3edc0 rdx=0x000001ae72a3ea30 r9=0x000001ae72a3ea30 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #399 rcx=0x000001ae72a3ea30 rdx=0x000001ae719dc1f0 r9=0x000001ae729c6e8c ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #400 rcx=0x000001ae72a3e9a0 rdx=0x000001ae72a3ed00 r9=0x00007ff6604e19c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #401 rcx=0x000001ae72a3e9a0 rdx=0x000001ae72a3f150 r9=0x00007ff6604e19c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #402 rcx=0x000001ae72a3e9a0 rdx=0x000001ae72a3f270 r9=0x00007ff6604e19c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #403 rcx=0x000001ae72a3e9a0 rdx=0x000001ae72a3ee20 r9=0x00007ff6604e19c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT LogHelper #13: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=US/O=Symantec Corporation/CN=Symantec Enterprise Mobile Root for Mic" r9=0x00000004ceb5d840 s9="/C=US/O=Symantec Corporation/CN=Symantec Enterprise Mobile Root for Mic" a5=0x6339316534303636 a6=0x78303d7465722030 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=Microsoft Root Certificate Authority 2011
+[t=1.046s] HIT StoreAddCert #404 rcx=0x000001ae72a3ea60 rdx=0x000001ae719dc2f0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #405 rcx=0x000001ae72a3f1b0 rdx=0x000001ae72a3ea60 r9=0x000001ae72a3f060 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #406 rcx=0x000001ae72a3eb80 rdx=0x000001ae719dc490 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #407 rcx=0x000001ae72a3f1b0 rdx=0x000001ae72a3eb80 r9=0x000001ae72a3e9d0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #408 rcx=0x000001ae72a3f480 rdx=0x000001ae719dc770 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #409 rcx=0x000001ae72a3f1b0 rdx=0x000001ae72a3f480 r9=0x000001ae72a3ea90 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #410 rcx=0x000001ae72a3f120 rdx=0x000001ae719dc710 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #411 rcx=0x000001ae72a3f1b0 rdx=0x000001ae72a3f120 r9=0x000001ae72a3f1e0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #412 rcx=0x000001ae72a3ebb0 rdx=0x000001ae719dc730 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #413 rcx=0x000001ae72a3f1b0 rdx=0x000001ae72a3ebb0 r9=0x000001ae72a3eb20 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #414 rcx=0x000001ae72a3eac0 rdx=0x000001ae719dc2f0 r9=0x00000000000000a0 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #415 rcx=0x000001ae72a3eac0 rdx=0x000001ae719dc490 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #416 rcx=0x000001ae72a3eac0 rdx=0x000001ae719dc770 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #417 rcx=0x000001ae72a3eac0 rdx=0x000001ae719dc710 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #418 rcx=0x000001ae72a3eac0 rdx=0x000001ae719dc730 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #419 rcx=0x000001ae72a3eb50 rdx=0x000001ae72a3eee0 r9=0x000001ae72a3eee0 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #420 rcx=0x000001ae72a3eee0 rdx=0x000001ae719dc890 r9=0x000001ae7183ad51 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #421 rcx=0x000001ae72a3eb50 rdx=0x000001ae72a3ef70 r9=0x000001ae72a3ef70 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #422 rcx=0x000001ae72a3ef70 rdx=0x000001ae719dc5f0 r9=0x000001ae719dc8d9 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #423 rcx=0x000001ae72a3eb50 rdx=0x000001ae72a3f090 r9=0x000001ae72a3f090 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #424 rcx=0x000001ae72a3f090 rdx=0x000001ae719dc310 r9=0x000001ae7183aa46 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #425 rcx=0x000001ae72a3eb50 rdx=0x000001ae72a3ed30 r9=0x000001ae72a3ed30 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #426 rcx=0x000001ae72a3ed30 rdx=0x000001ae719dc230 r9=0x000001ae719dc444 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #427 rcx=0x000001ae72a3eb50 rdx=0x000001ae72a3ec10 r9=0x000001ae72a3ec10 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #428 rcx=0x000001ae72a3ec10 rdx=0x000001ae719dc870 r9=0x000001ae729c6988 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #429 rcx=0x000001ae72a3ec40 rdx=0x000001ae719dc250 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #430 rcx=0x000001ae72a3ed60 rdx=0x000001ae72a3ec40 r9=0x000001ae72a3e970 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #431 rcx=0x000001ae72a3f3f0 rdx=0x000001ae719dc7b0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #432 rcx=0x000001ae72a3ed60 rdx=0x000001ae72a3f3f0 r9=0x000001ae72a3ebb0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #433 rcx=0x000001ae72a3f1e0 rdx=0x000001ae719dc5f0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #434 rcx=0x000001ae72a3ed60 rdx=0x000001ae72a3f1e0 r9=0x000001ae72a3ec10 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #435 rcx=0x000001ae72a3f060 rdx=0x000001ae719dc210 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #436 rcx=0x000001ae72a3ed60 rdx=0x000001ae72a3f060 r9=0x000001ae72a3eaf0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #437 rcx=0x000001ae72a3ea90 rdx=0x000001ae719dc270 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #438 rcx=0x000001ae72a3ed60 rdx=0x000001ae72a3ea90 r9=0x000001ae72a3f480 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #439 rcx=0x000001ae72a3e9d0 rdx=0x000001ae719dc250 r9=0x00000000000000a0 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #440 rcx=0x000001ae72a3e9d0 rdx=0x000001ae719dc7b0 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #441 rcx=0x000001ae72a3e9d0 rdx=0x000001ae719dc5f0 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #442 rcx=0x000001ae72a3e9d0 rdx=0x000001ae719dc210 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #443 rcx=0x000001ae72a3e9d0 rdx=0x000001ae719dc270 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #444 rcx=0x000001ae72a3efd0 rdx=0x000001ae72a3f090 r9=0x000001ae72a3f090 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #445 rcx=0x000001ae72a3f090 rdx=0x000001ae719dc2d0 r9=0x000001ae7183ab71 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #446 rcx=0x000001ae72a3efd0 rdx=0x000001ae72a3eb20 r9=0x000001ae72a3eb20 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #447 rcx=0x000001ae72a3eb20 rdx=0x000001ae719dc8b0 r9=0x000001ae719dc359 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #448 rcx=0x000001ae72a3efd0 rdx=0x000001ae72a3edf0 r9=0x000001ae72a3edf0 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #449 rcx=0x000001ae72a3edf0 rdx=0x000001ae719dc870 r9=0x000001ae7183abe6 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #450 rcx=0x000001ae72a3efd0 rdx=0x000001ae72a3eee0 r9=0x000001ae72a3eee0 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #451 rcx=0x000001ae72a3eee0 rdx=0x000001ae719dc850 r9=0x000001ae719dc404 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #452 rcx=0x000001ae72a3efd0 rdx=0x000001ae72a3eb50 r9=0x000001ae72a3eb50 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #453 rcx=0x000001ae72a3eb50 rdx=0x000001ae719dc450 r9=0x000001ae729c6708 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #454 rcx=0x000001ae72a3ec70 rdx=0x000001ae72a3ec10 r9=0x00007ff6604e19c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #455 rcx=0x000001ae72a3ec70 rdx=0x000001ae72a3f0c0 r9=0x00007ff6604e19c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #456 rcx=0x000001ae72a3ec70 rdx=0x000001ae72a3efa0 r9=0x00007ff6604e19c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #457 rcx=0x000001ae72a3ec70 rdx=0x000001ae72a3f180 r9=0x00007ff6604e19c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT LogHelper #14: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=US/ST=Washington/L=Redmond/O=Microsoft Corporation/CN=Microsoft Root" r9=0x00000004ceb5d840 s9="/C=US/ST=Washington/L=Redmond/O=Microsoft Corporation/CN=Microsoft Root" a5=0x6339316534303636 a6=0x78303d7465722030 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=Amazon Root CA 1
+[t=1.046s] HIT StoreAddCert #458 rcx=0x000001ae72a3eee0 rdx=0x000001ae719dc530 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #459 rcx=0x000001ae72a3f4e0 rdx=0x000001ae72a3eee0 r9=0x000001ae72a3ef10 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #460 rcx=0x000001ae72a3eaf0 rdx=0x000001ae719dc2d0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #461 rcx=0x000001ae72a3f4e0 rdx=0x000001ae72a3eaf0 r9=0x000001ae72a3e940 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #462 rcx=0x000001ae72a3f480 rdx=0x000001ae719dc350 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #463 rcx=0x000001ae72a3f4e0 rdx=0x000001ae72a3f480 r9=0x000001ae72a3eca0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #464 rcx=0x000001ae72a3ea30 rdx=0x000001ae719dc530 r9=0x0000000000000040 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #465 rcx=0x000001ae72a3ea30 rdx=0x000001ae719dc2d0 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #466 rcx=0x000001ae72a3ea30 rdx=0x000001ae719dc350 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #467 rcx=0x000001ae72a3efd0 rdx=0x000001ae72a3ea90 r9=0x000001ae72a3ea90 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #468 rcx=0x000001ae72a3ea90 rdx=0x000001ae719dc4d0 r9=0x000001ae7183ada1 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #469 rcx=0x000001ae72a3efd0 rdx=0x000001ae72a3f030 r9=0x000001ae72a3f030 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #470 rcx=0x000001ae72a3f030 rdx=0x000001ae719dcf50 r9=0x000001ae7183ab15 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #471 rcx=0x000001ae72a3efd0 rdx=0x000001ae72a3eb20 r9=0x000001ae72a3eb20 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #472 rcx=0x000001ae72a3eb20 rdx=0x000001ae719dcbb0 r9=0x000001ae719dcc9f ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #473 rcx=0x000001ae72a3f030 rdx=0x000001ae719dc910 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #474 rcx=0x000001ae72a3eee0 rdx=0x000001ae72a3f030 r9=0x000001ae72a3f0f0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #475 rcx=0x000001ae72a3e970 rdx=0x000001ae719dca90 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #476 rcx=0x000001ae72a3eee0 rdx=0x000001ae72a3e970 r9=0x000001ae72a3f3f0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #477 rcx=0x000001ae72a3efd0 rdx=0x000001ae719dc9b0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #478 rcx=0x000001ae72a3eee0 rdx=0x000001ae72a3efd0 r9=0x000001ae72a3ea90 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #479 rcx=0x000001ae72a3eb20 rdx=0x000001ae719dc910 r9=0x0000000000000040 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #480 rcx=0x000001ae72a3eb20 rdx=0x000001ae719dca90 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #481 rcx=0x000001ae72a3eb20 rdx=0x000001ae719dc9b0 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #482 rcx=0x000001ae72a3f480 rdx=0x000001ae72a3f4b0 r9=0x000001ae72a3f4b0 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #483 rcx=0x000001ae72a3f4b0 rdx=0x000001ae719dce10 r9=0x000001ae7183ada1 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #484 rcx=0x000001ae72a3f480 rdx=0x000001ae72a3f300 r9=0x000001ae72a3f300 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #485 rcx=0x000001ae72a3f300 rdx=0x000001ae719dcab0 r9=0x000001ae7183abc5 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #486 rcx=0x000001ae72a3f480 rdx=0x000001ae72a3f2a0 r9=0x000001ae72a3f2a0 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #487 rcx=0x000001ae72a3f2a0 rdx=0x000001ae719dcfb0 r9=0x000001ae719dccff ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #488 rcx=0x000001ae72a3ec40 rdx=0x000001ae72a3f480 r9=0x00007ff6604e19c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #489 rcx=0x000001ae72a3ec40 rdx=0x000001ae72a3f030 r9=0x00007ff6604e19c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #490 rcx=0x000001ae72a3ec40 rdx=0x000001ae72a3f3f0 r9=0x00007ff6604e19c0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT LogHelper #15: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=US/O=Amazon/CN=Amazon Root CA 1" r9=0x00000004ceb5d840 s9="/C=US/O=Amazon/CN=Amazon Root CA 1" a5=0x6339316534303636 a6=0x78303d7465722030 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=Microsoft Authenticode(tm) Root Authority
+[t=1.046s] HIT StoreAddCert #491 rcx=0x000001ae72a3f2a0 rdx=0x000001ae719dc9d0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #492 rcx=0x000001ae72a3ed30 rdx=0x000001ae72a3f2a0 r9=0x000001ae72a3ed60 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #493 rcx=0x000001ae72a3eee0 rdx=0x000001ae719dc9f0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #494 rcx=0x000001ae72a3ed30 rdx=0x000001ae72a3eee0 r9=0x000001ae72a3f210 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #495 rcx=0x000001ae72a3edc0 rdx=0x000001ae719dcdd0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #496 rcx=0x000001ae72a3ed30 rdx=0x000001ae72a3edc0 r9=0x000001ae72a3f0f0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #497 rcx=0x000001ae72a3e940 rdx=0x000001ae719dc9d0 r9=0x0000000000000060 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #498 rcx=0x000001ae72a3e940 rdx=0x000001ae719dc9f0 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #499 rcx=0x000001ae72a3e940 rdx=0x000001ae719dcdd0 r9=0x0000000000000000 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert #500 rcx=0x000001ae72a3f060 rdx=0x000001ae72a3f090 r9=0x000001ae72a3f090 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #501 rcx=0x000001ae72a3f090 rdx=0x000001ae719dd010 r9=0x000001ae7183ab31 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #502 rcx=0x000001ae72a3f060 rdx=0x000001ae72a3f1e0 r9=0x000001ae72a3f1e0 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #503 rcx=0x000001ae72a3f1e0 rdx=0x000001ae719dcc70 r9=0x000001ae7183aaa3 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #504 rcx=0x000001ae72a3f060 rdx=0x000001ae72a40050 r9=0x000001ae72a40050 ret=0x00007ff65f89302a
+[t=1.046s] HIT StoreAddCert #505 rcx=0x000001ae72a40050 rdx=0x000001ae719dce70 r9=0x000001ae729c6c48 ret=0x00007ff65f893198
+[t=1.046s] HIT StoreAddCert #506 rcx=0x000001ae72a3f060 rdx=0x000001ae719dd0b0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #507 rcx=0x000001ae72a3eee0 rdx=0x000001ae72a3f060 r9=0x000001ae72a3edc0 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #508 rcx=0x000001ae72a3f120 rdx=0x000001ae719dcfd0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #509 rcx=0x000001ae72a3eee0 rdx=0x000001ae72a3f120 r9=0x000001ae72a3ed60 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #510 rcx=0x000001ae72a3ed90 rdx=0x000001ae719dcff0 r9=0x00007ff6604c6460 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #511 rcx=0x000001ae72a3eee0 rdx=0x000001ae72a3ed90 r9=0x000001ae72a3f090 ret=0x00007ff65f8b7225
+[t=1.046s] HIT StoreAddCert #512 rcx=0x000001ae72a3f0f0 rdx=0x000001ae719dd0b0 r9=0x0000000000000060 ret=0x00007ff65f8926d8
+[t=1.046s] HIT StoreAddCert log capped at 512 lines
+[t=1.046s] HIT LogHelper #16: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=US/O=MSFT/CN=Microsoft Authenticode(tm) Root Authority" r9=0x00000004ceb5d840 s9="/C=US/O=MSFT/CN=Microsoft Authenticode(tm) Root Authority" a5=0x000001ae72a3edd0 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=DigiCert High Assurance EV Root CA
+[t=1.046s] HIT LogHelper #17: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert High Assurance EV " r9=0x00000004ceb5d840 s9="/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert High Assurance EV " a5=0x000001ae72a3faf0 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=Amazon Root CA 2
+[t=1.046s] HIT LogHelper #18: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=US/O=Amazon/CN=Amazon Root CA 2" r9=0x00000004ceb5d840 s9="/C=US/O=Amazon/CN=Amazon Root CA 2" a5=0x000001ae72a3f580 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=Microsoft Root Certificate Authority 2010
+[t=1.046s] HIT LogHelper #19: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=US/ST=Washington/L=Redmond/O=Microsoft Corporation/CN=Microsoft Root" r9=0x00000004ceb5d840 s9="/C=US/ST=Washington/L=Redmond/O=Microsoft Corporation/CN=Microsoft Root" a5=0x000001ae72a3f7c0 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=Microsoft ECC TS Root Certificate Authority 2018
+[t=1.046s] HIT LogHelper #20: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=US/ST=Washington/L=Redmond/O=Microsoft Corporation/CN=Microsoft ECC " r9=0x00000004ceb5d840 s9="/C=US/ST=Washington/L=Redmond/O=Microsoft Corporation/CN=Microsoft ECC " a5=0x000001ae729bb390 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=Copyright (c) 1997 Microsoft Corp.
+[t=1.046s] HIT LogHelper #21: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/O=Microsoft Trust Network/OU=Microsoft Corporation/OU=Microsoft Time S" r9=0x00000004ceb5d840 s9="/O=Microsoft Trust Network/OU=Microsoft Corporation/OU=Microsoft Time S" a5=0x00000000ffffffff a6=0x00007ffb00000000 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=NO LIABILITY ACCEPTED, (c)97 VeriSign, Inc.
+[t=1.046s] HIT LogHelper #22: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/O=VeriSign Trust Network/OU=VeriSign, Inc./OU=VeriSign Time Stamping S" r9=0x00000004ceb5d840 s9="/O=VeriSign Trust Network/OU=VeriSign, Inc./OU=VeriSign Time Stamping S" a5=0x00000000ffffffff a6=0x00007ffb00000000 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=ageLANServer Self-signed
+[t=1.046s] HIT LogHelper #23: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/O=github.com/luskaner/ageLANServer/CN=ageLANServer Self-signed" r9=0x00000004ceb5d840 s9="/O=github.com/luskaner/ageLANServer/CN=ageLANServer Self-signed" a5=0x000001ae729b18e0 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=Amazon Root CA 3
+[t=1.046s] HIT LogHelper #24: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=US/O=Amazon/CN=Amazon Root CA 3" r9=0x00000004ceb5d840 s9="/C=US/O=Amazon/CN=Amazon Root CA 3" a5=0x000001ae729b1440 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=Microsoft ECC Product Root Certificate Authority 2018
+[t=1.046s] HIT LogHelper #25: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=US/ST=Washington/L=Redmond/O=Microsoft Corporation/CN=Microsoft ECC " r9=0x00000004ceb5d840 s9="/C=US/ST=Washington/L=Redmond/O=Microsoft Corporation/CN=Microsoft ECC " a5=0x000001ae729b1370 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=Microsoft Time Stamp Root Certificate Authority 2014
+[t=1.046s] HIT LogHelper #26: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=US/ST=Washington/L=Redmond/O=Microsoft Corporation/CN=Microsoft Time" r9=0x00000004ceb5d840 s9="/C=US/ST=Washington/L=Redmond/O=Microsoft Corporation/CN=Microsoft Time" a5=0x000001ae729b2040 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=Microsoft Identity Verification Root Certificate Authority 2
+[t=1.046s] HIT LogHelper #27: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=US/O=Microsoft Corporation/CN=Microsoft Identity Verification Root C" r9=0x00000004ceb5d840 s9="/C=US/O=Microsoft Corporation/CN=Microsoft Identity Verification Root C" a5=0x000001ae729b1a70 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=Sectigo Public Server Authentication Root E46
+[t=1.046s] HIT LogHelper #28: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=GB/O=Sectigo Limited/CN=Sectigo Public Server Authentication Root E4" r9=0x00000004ceb5d840 s9="/C=GB/O=Sectigo Limited/CN=Sectigo Public Server Authentication Root E4" a5=0x000001ae729b22e0 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=SSL.com TLS RSA Root CA 2022
+[t=1.046s] HIT LogHelper #29: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=US/O=SSL Corporation/CN=SSL.com TLS RSA Root CA 2022" r9=0x00000004ceb5d840 s9="/C=US/O=SSL Corporation/CN=SSL.com TLS RSA Root CA 2022" a5=0x000001ae729b20a0 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=UTN-USERFirst-Object
+[t=1.046s] HIT LogHelper #30: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=US/ST=UT/L=Salt Lake City/O=The USERTRUST Network/OU=http://www.user" r9=0x00000004ceb5d840 s9="/C=US/ST=UT/L=Salt Lake City/O=The USERTRUST Network/OU=http://www.user" a5=0x000001ae729b2c60 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=IdenTrust Commercial Root CA 1
+[t=1.046s] HIT LogHelper #31: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=US/O=IdenTrust/CN=IdenTrust Commercial Root CA 1" r9=0x00000004ceb5d840 s9="/C=US/O=IdenTrust/CN=IdenTrust Commercial Root CA 1" a5=0x000001ae729b2700 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=DigiCert Global Root G2
+[t=1.046s] HIT LogHelper #32: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert Global Root G2" r9=0x00000004ceb5d840 s9="/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert Global Root G2" a5=0x000001ae729b30c0 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=QuoVadis Root Certification Authority
+[t=1.046s] HIT LogHelper #33: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=BM/O=QuoVadis Limited/OU=Root Certification Authority/CN=QuoVadis Ro" r9=0x00000004ceb5d840 s9="/C=BM/O=QuoVadis Limited/OU=Root Certification Authority/CN=QuoVadis Ro" a5=0x000001ae729b2730 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=DigiCert Trusted Root G4
+[t=1.046s] HIT LogHelper #34: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert Trusted Root G4" r9=0x00000004ceb5d840 s9="/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert Trusted Root G4" a5=0x000001ae729b32d0 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=GlobalSign
+[t=1.046s] HIT LogHelper #35: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/OU=GlobalSign Root CA - R3/O=GlobalSign/CN=GlobalSign" r9=0x00000004ceb5d840 s9="/OU=GlobalSign Root CA - R3/O=GlobalSign/CN=GlobalSign" a5=0x000001ae729b3960 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=Certum Trusted Network CA 2
+[t=1.046s] HIT LogHelper #36: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=PL/O=Unizeto Technologies S.A./OU=Certum Certification Authority/CN=" r9=0x00000004ceb5d840 s9="/C=PL/O=Unizeto Technologies S.A./OU=Certum Certification Authority/CN=" a5=0x000001ae729b3d20 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=USERTrust ECC Certification Authority
+[t=1.046s] HIT LogHelper #37: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=US/ST=New Jersey/L=Jersey City/O=The USERTRUST Network/CN=USERTrust " r9=0x00000004ceb5d840 s9="/C=US/ST=New Jersey/L=Jersey City/O=The USERTRUST Network/CN=USERTrust " a5=0x000001ae729b3d50 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=Sectigo Public Code Signing Root R46
+[t=1.046s] HIT LogHelper #38: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=GB/O=Sectigo Limited/CN=Sectigo Public Code Signing Root R46" r9=0x00000004ceb5d840 s9="/C=GB/O=Sectigo Limited/CN=Sectigo Public Code Signing Root R46" a5=0x000001ae729b3f90 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=ISRG Root X1
+[t=1.046s] HIT LogHelper #39: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=US/O=Internet Security Research Group/CN=ISRG Root X1" r9=0x00000004ceb5d840 s9="/C=US/O=Internet Security Research Group/CN=ISRG Root X1" a5=0x000001ae729b48c0 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=SSL.com Root Certification Authority ECC
+[t=1.046s] HIT LogHelper #40: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=US/ST=Texas/L=Houston/O=SSL Corporation/CN=SSL.com Root Certificatio" r9=0x00000004ceb5d840 s9="/C=US/ST=Texas/L=Houston/O=SSL Corporation/CN=SSL.com Root Certificatio" a5=0x000001ae729b4f50 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=SSL.com Root Certification Authority RSA
+[t=1.046s] HIT LogHelper #41: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=US/ST=Texas/L=Houston/O=SSL Corporation/CN=SSL.com Root Certificatio" r9=0x00000004ceb5d840 s9="/C=US/ST=Texas/L=Houston/O=SSL Corporation/CN=SSL.com Root Certificatio" a5=0x000001ae729b4e00 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=Starfield Root Certificate Authority - G2
+[t=1.046s] HIT LogHelper #42: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=US/ST=Arizona/L=Scottsdale/O=Starfield Technologies, Inc./CN=Starfie" r9=0x00000004ceb5d840 s9="/C=US/ST=Arizona/L=Scottsdale/O=Starfield Technologies, Inc./CN=Starfie" a5=0x000001ae729b4b90 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=GlobalSign Root CA
+[t=1.046s] HIT LogHelper #43: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=BE/O=GlobalSign nv-sa/OU=Root CA/CN=GlobalSign Root CA" r9=0x00000004ceb5d840 s9="/C=BE/O=GlobalSign nv-sa/OU=Root CA/CN=GlobalSign Root CA" a5=0x000001ae729b4950 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=COMODO RSA Certification Authority
+[t=1.046s] HIT LogHelper #44: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=GB/ST=Greater Manchester/L=Salford/O=COMODO CA Limited/CN=COMODO RSA" r9=0x00000004ceb5d840 s9="/C=GB/ST=Greater Manchester/L=Salford/O=COMODO CA Limited/CN=COMODO RSA" a5=0x000001ae729b5940 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=Sectigo Public Server Authentication Root R46
+[t=1.046s] HIT LogHelper #45: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=GB/O=Sectigo Limited/CN=Sectigo Public Server Authentication Root R4" r9=0x00000004ceb5d840 s9="/C=GB/O=Sectigo Limited/CN=Sectigo Public Server Authentication Root R4" a5=0x000001ae729b5df0 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=Starfield Services Root Certificate Authority - G2
+[t=1.046s] HIT LogHelper #46: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=US/ST=Arizona/L=Scottsdale/O=Starfield Technologies, Inc./CN=Starfie" r9=0x00000004ceb5d840 s9="/C=US/ST=Arizona/L=Scottsdale/O=Starfield Technologies, Inc./CN=Starfie" a5=0x000001ae729b5b80 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=thawte Primary Root CA
+[t=1.046s] HIT LogHelper #47: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=US/O=thawte, Inc./OU=Certification Services Division/OU=(c) 2006 tha" r9=0x00000004ceb5d840 s9="/C=US/O=thawte, Inc./OU=Certification Services Division/OU=(c) 2006 tha" a5=0x000001ae729b5e50 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=SecureTrust CA
+[t=1.046s] HIT LogHelper #48: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=US/O=SecureTrust Corporation/CN=SecureTrust CA" r9=0x00000004ceb5d840 s9="/C=US/O=SecureTrust Corporation/CN=SecureTrust CA" a5=0x000001ae729b5dc0 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=DigiCert CS ECC P384 Root G5
+[t=1.046s] HIT LogHelper #49: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=US/O=DigiCert, Inc./CN=DigiCert CS ECC P384 Root G5" r9=0x00000004ceb5d840 s9="/C=US/O=DigiCert, Inc./CN=DigiCert CS ECC P384 Root G5" a5=0x000001ae729b6270 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=GlobalSign
+[t=1.046s] HIT LogHelper #50: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/OU=GlobalSign Root CA - R6/O=GlobalSign/CN=GlobalSign" r9=0x00000004ceb5d840 s9="/OU=GlobalSign Root CA - R6/O=GlobalSign/CN=GlobalSign" a5=0x000001ae729b62d0 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=DigiCert Global Root G3
+[t=1.046s] HIT LogHelper #51: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert Global Root G3" r9=0x00000004ceb5d840 s9="/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert Global Root G3" a5=0x000001ae729b6570 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=SSL.com EV Root Certification Authority RSA R2
+[t=1.046s] HIT LogHelper #52: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=US/ST=Texas/L=Houston/O=SSL Corporation/CN=SSL.com EV Root Certifica" r9=0x00000004ceb5d840 s9="/C=US/ST=Texas/L=Houston/O=SSL Corporation/CN=SSL.com EV Root Certifica" a5=0x000001ae729b7470 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=Class 3 Public Primary Certification Authority
+[t=1.046s] HIT LogHelper #53: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=US/O=VeriSign, Inc./OU=Class 3 Public Primary Certification Authorit" r9=0x00000004ceb5d840 s9="/C=US/O=VeriSign, Inc./OU=Class 3 Public Primary Certification Authorit" a5=0x00000000ffffffff a6=0x00007ffb00000000 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=Security Communication RootCA2
+[t=1.046s] HIT LogHelper #54: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=JP/O=SECOM Trust Systems CO.,LTD./OU=Security Communication RootCA2" r9=0x00000004ceb5d840 s9="/C=JP/O=SECOM Trust Systems CO.,LTD./OU=Security Communication RootCA2" a5=0x000001ae729b7410 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=DigiCert CS RSA4096 Root G5
+[t=1.046s] HIT LogHelper #55: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=US/O=DigiCert, Inc./CN=DigiCert CS RSA4096 Root G5" r9=0x00000004ceb5d840 s9="/C=US/O=DigiCert, Inc./CN=DigiCert CS RSA4096 Root G5" a5=0x000001ae729b6ed0 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=Hotspot 2.0 Trust Root CA - 03
+[t=1.046s] HIT LogHelper #56: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=US/O=WFA Hotspot 2.0/CN=Hotspot 2.0 Trust Root CA - 03" r9=0x00000004ceb5d840 s9="/C=US/O=WFA Hotspot 2.0/CN=Hotspot 2.0 Trust Root CA - 03" a5=0x000001ae729b8400 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=Entrust.net Certification Authority (2048)
+[t=1.046s] HIT LogHelper #57: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/O=Entrust.net/OU=www.entrust.net/CPS_2048 incorp. by ref. (limits liab" r9=0x00000004ceb5d840 s9="/O=Entrust.net/OU=www.entrust.net/CPS_2048 incorp. by ref. (limits liab" a5=0x000001ae729b8220 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=GlobalSign Code Signing Root R45
+[t=1.046s] HIT LogHelper #58: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=BE/O=GlobalSign nv-sa/CN=GlobalSign Code Signing Root R45" r9=0x00000004ceb5d840 s9="/C=BE/O=GlobalSign nv-sa/CN=GlobalSign Code Signing Root R45" a5=0x000001ae729b7950 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=VeriSign Class 3 Public Primary Certification Authority - G5
+[t=1.046s] HIT LogHelper #59: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=US/O=VeriSign, Inc./OU=VeriSign Trust Network/OU=(c) 2006 VeriSign, " r9=0x00000004ceb5d840 s9="/C=US/O=VeriSign, Inc./OU=VeriSign Trust Network/OU=(c) 2006 VeriSign, " a5=0x000001ae729b8af0 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=Go Daddy Root Certificate Authority - G2
+[t=1.046s] HIT LogHelper #60: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=US/ST=Arizona/L=Scottsdale/O=GoDaddy.com, Inc./CN=Go Daddy Root Cert" r9=0x00000004ceb5d840 s9="/C=US/ST=Arizona/L=Scottsdale/O=GoDaddy.com, Inc./CN=Go Daddy Root Cert" a5=0x000001ae729b8b50 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=VeriSign Universal Root Certification Authority
+[t=1.046s] HIT LogHelper #61: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=US/O=VeriSign, Inc./OU=VeriSign Trust Network/OU=(c) 2008 VeriSign, " r9=0x00000004ceb5d840 s9="/C=US/O=VeriSign, Inc./OU=VeriSign Trust Network/OU=(c) 2008 VeriSign, " a5=0x000001ae729b8610 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=USERTrust RSA Certification Authority
+[t=1.046s] HIT LogHelper #62: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=US/ST=New Jersey/L=Jersey City/O=The USERTRUST Network/CN=USERTrust " r9=0x00000004ceb5d840 s9="/C=US/ST=New Jersey/L=Jersey City/O=The USERTRUST Network/CN=USERTrust " a5=0x000001ae729b8790 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=Go Daddy Class 2 Certification Authority
+[t=1.046s] HIT LogHelper #63: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=US/O=The Go Daddy Group, Inc./OU=Go Daddy Class 2 Certification Auth" r9=0x00000004ceb5d840 s9="/C=US/O=The Go Daddy Group, Inc./OU=Go Daddy Class 2 Certification Auth" a5=0x0000000000000000 a6=0x00000004ceb5d470 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=Certum Trusted Network CA
+[t=1.046s] HIT LogHelper #64: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=PL/O=Unizeto Technologies S.A./OU=Certum Certification Authority/CN=" r9=0x00000004ceb5d840 s9="/C=PL/O=Unizeto Technologies S.A./OU=Certum Certification Authority/CN=" a5=0x000001ae729b9810 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=DigiCert Assured ID Root CA
+[t=1.046s] HIT LogHelper #65: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert Assured ID Root CA" r9=0x00000004ceb5d840 s9="/C=US/O=DigiCert Inc/OU=www.digicert.com/CN=DigiCert Assured ID Root CA" a5=0x000001ae729b96c0 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=AddTrust External CA Root
+[t=1.046s] HIT LogHelper #66: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=SE/O=AddTrust AB/OU=AddTrust External TTP Network/CN=AddTrust Extern" r9=0x00000004ceb5d840 s9="/C=SE/O=AddTrust AB/OU=AddTrust External TTP Network/CN=AddTrust Extern" a5=0x000001ae729b9570 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=HARICA TLS RSA Root CA 2021
+[t=1.046s] HIT LogHelper #67: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=GR/O=Hellenic Academic and Research Institutions CA/CN=HARICA TLS RS" r9=0x00000004ceb5d840 s9="/C=GR/O=Hellenic Academic and Research Institutions CA/CN=HARICA TLS RS" a5=0x000001ae729ba680 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 cert name=Hellenic Academic and Research Institutions RootCA 2015
+[t=1.046s] HIT LogHelper #68: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/C=GR/L=Athens/O=Hellenic Academic and Research Institutions Cert. Auth" r9=0x00000004ceb5d840 s9="/C=GR/L=Athens/O=Hellenic Academic and Research Institutions Cert. Auth" a5=0x000001ae729ba500 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] CRYPT32 INJECT: own cert appended to store enum
+[t=1.046s] CRYPT32 cert name=pb-live-release6-api.worldsedgelink.com
+[t=1.046s] HIT LogHelper #69: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d440 s8="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" r9=0x00000004ceb5d840 s9="/CN=pb-live-release6-api.worldsedgelink.com/O=AoE2LAN" a5=0x000001ae729ba140 a6=0x0000000000000004 ret=0x00007ff65d68dd33
+[t=1.046s] HIT LogHelper #70: "SystemCertsWin: %zd certificates loaded" r8=0x0000000000000043 r9=0x000000018002099b a5=0x000001ae658d0a60 a6=0x0000000000000000 ret=0x00007ff65d68ed18
+[t=1.062s] HIT LogHelper #71: "AutomatchInternal: Instantiating" r8=0xe59b38183ef3c100 r9=0x000000000000026d a5=0x000001ae71275770 a6=0x000001ae712755b8 ret=0x00007ff65d44bd9d
+[t=1.062s] HIT LogHelper #72: "WindowsCertificates: Adding certificate; subject=%s issuer=%s" r8=0x00000004ceb5d7d0 s8="/C=CA/ST=British Columbia/L=Vancouver/O=Relic Entertainment/CN=RelicLin" r9=0x00000004ceb5dbd0 s9="/C=CA/ST=British Columbia/L=Vancouver/O=Relic Entertainment/CN=RelicLin" a5=0x000001ae718382d0 a6=0x000001ae63c00000 ret=0x00007ff65d68dd33
+[t=1.281s] cert: purged stale roots=1
+[t=2.296s] cert: user-Root registered (schannel trust path live)
