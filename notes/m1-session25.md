@@ -188,3 +188,32 @@ the enabled twin hit-testable/topmost in XAML (data route, no code).
 `screensimplemainmenu.xaml` stock copy kept at `dev/lanhook/screensimplemainmenu.xaml.prev-s25-before`;
 all changes are attributes only and revert by copying it back. `AoE2DE_s.exe` still crc `4f533b6c`
 (its mtime moves at every launch — something touches the file — contents unchanged).
+
+## 25h. Marker run — the LIVE widget is the ENABLED twin (measured)
+
+Operator hovered the menu and looked at the Multiplayer button: it came up **narrower** (the 600 px
+marker), and the 35 % opacity on the Disabled twins had **no visible effect** (button solid).
+
+⇒ The element on screen is `PaphosButtonMultiplayer` **or** `ButtonMultiplayer` — the *enabled* twin.
+The `…Disabled` twins are not drawn at all (code-behind hides them; their `ForegroundBrush` grey never
+appears). So the greyed look is the enabled twin being rendered with **IsEnabled = false** (or an
+equivalent disable style) by the game's state code at runtime — not a dead twin stacked on top.
+
+Consequences, in plain terms:
+- The XAML seam is real and reaches the widget (width proved it), but the *enabled/disabled decision*
+  is a runtime value set by code-behind, so a plain `IsEnabled="True"` in XAML will probably be
+  overwritten. Untested.
+- The missing bottom-right help line is consistent with WPF-disabled + a game help panel that only
+  serves enabled controls; `ToolTipService.ShowOnDisabled` is not what paints that line.
+- The file is **restored to stock** (crc `8398949b`, 35,095 B, XML parses, only unrelated `Width="600"`
+  remains at line 499 — stock content). `dev/lanhook/screensimplemainmenu.xaml.prev-s25-before` is
+  now identical to the live file.
+
+### Ordered next experiments on the live enabled twin (data first, one attribute per run)
+1. `IsEnabled="True"` on the live enabled twin → tests whether code-behind re-sets it after load.
+2. if unchanged: change the live twin's `TestKey` (`Background/PaphosButtonMultiplayer` /
+   `Background/ButtonMultiplayer`) to an unregistered value → tests whether
+   `Age2ButtonPropertyManager` finds and disables the widget by TestKey lookup.
+3. if unchanged: the disable is state-driven and not reachable from data → the rlink slot-0xb0 hunt
+   (25c) is the only road, and the MP screen's own `CheckMultiPlayerPrivileges()` will very likely
+   bounce a forced button anyway.
