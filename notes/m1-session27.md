@@ -149,10 +149,8 @@ proven**; the cause of the early exits is **unknown**. Recovery that worked: wai
 - `dev/tools/jdk-25.0.5+8` (Temurin, 141 MB zip) — `java -version` OK.
 - `dev/tools/ghidra_12.2_PUBLIC` (569 MB zip, 8,823 files) — `support/analyzeHeadless.bat`
   answers usage; needs `JAVA_HOME` set to the JDK above.
-- `dev/ghidra-import.cmd` imports `..\AoE2DE_s.exe` with
-  `GHIDRA_HEADLESS_MAXMEM=10G`; project at `dev/ghidra-proj` (16 GB RAM, 6 cores on
-  this machine). The import ran 40 min and was **killed on purpose**: it was
-  analysing the on-disk ciphertext (27b), so its output would be junk.
+- First attempt (`dev/ghidra-import.cmd` on the shipped `AoE2DE_s.exe`) ran 40 min and
+  was killed: it was analysing on-disk ciphertext (27b), so its output would be junk.
 - No env var was set for the REA MCP server, and it cannot see this install without a
   restart of the agent host. Do not plan on REA's Ghidra provider; drive
   `analyzeHeadless.bat` directly.
@@ -179,3 +177,45 @@ the disabled look and blocks the click.** Two honest routes, in order of cost:
 
 Do not re-run: XAML `IsEnabled`/TestKey edits (s26), the privilege slot patch (s26),
 the s23/s25 vtable `0x143669fc0` patch, the three XAML experiments of 27f.
+
+## 27k. Ghidra actually works now — the working recipe (use this, do not re-derive)
+
+Full auto-analysis of this binary is **not** the way. The two failures measured:
+
+- Import of the shipped exe: 40 min in, killed by hand — it was reading ciphertext.
+- Import of the decrypted copy **with** analysis: ran 21:22→22:01 and then failed with
+  `REPORT: Can't checkpoint with locked buffers (1 locks found)` (a Ghidra headless
+  race, thrown at the final checkpoint after 40 min of work). `analyzeHeadless` has no
+  `-max-cpu` flag in 12.2, so the race cannot be tuned away.
+
+What works, measured end to end:
+
+1. `dev/AoE2DE_dec.exe` — a copy of `AoE2DE_s.exe` with `.text` raw bytes
+   (`0x400..0x3195400`) replaced by `dev/lanhook/gametext.bin`. Same headers, same VAs,
+   real code. The shipped exe is not touched (crc `4f533b6c`). Built with a 6-line
+   python one-liner; regenerate it whenever `gametext.bin` is re-dumped.
+2. Import **without** analysis (40 seconds):
+   `dev\ghidra-import-dec.cmd` → project `dev/ghidra-dec`, program `AoE2DE_dec.exe`.
+   `JAVA_HOME=dev	ools\jdk-25.0.5+8`, `GHIDRA_HEADLESS_MAXMEM=10G`.
+3. Decompile on demand: edit `dev/ghidra-scripts/targets.txt` (one hex VA per line,
+   `#` comments, `@out <path>` for the output file) and run `dev\ghidra-decomp.cmd`.
+   `dev/ghidra-scripts/PdataDecomp.java` builds function bodies from the PE exception
+   table (`.pdata`, 169,486 entries, **RVAs — add the image base**), disassembles them
+   and writes C to `@out`. Takes ~90 s for a handful of functions.
+
+Notes that cost time to learn:
+
+- Ghidra 12.2 has **no bundled Jython**. `.py` scripts fail with "Ghidra was not started
+  with PyGhidra". Use `.java` scripts.
+- **Script arguments do not arrive** through `analyzeHeadless ... -postScript X.java
+  out=... addr=...` here (`getScriptArgs()` came back empty every time, through the
+  `.bat` and through `cmd //c`). Hence the file-driven `targets.txt` interface.
+- Java string escapes in a `.java` script must stay ASCII-safe: use forward slashes in
+  Windows paths (`D:/x/y`), never `\`.
+
+Already decompiled, in `dev/ghidra-dec/decomp2.c` (105 KB, function bounds verified
+against `.pdata`): `0x1419dfa30` (the bulk enable — confirmed `(**(code**)(*w+0x68))(w,1)`
+for 17 buttons), `0x141c8feb0` (the main-menu widget binder, 6.7 KB),
+`0x141c8bf40` (builds the screen state block), `0x141b83e60` (state ctor),
+`0x141b33c80` (state applier), `0x141c8d370` (mode setter). `dev/ghidra-dec/decomp1.c`
+holds the first three.

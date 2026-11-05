@@ -20,6 +20,9 @@ copy /y "%SRC%\dev\lanhook\*.cmd" "%DST%\dev\lanhook\" >nul
 copy /y "%SRC%\dev\lanhook\*.py" "%DST%\dev\lanhook\" >nul
 copy /y "%SRC%\dev\lanhook\*.def" "%DST%\dev\lanhook\" >nul
 copy /y "%SRC%\dev\lanhook\work\*.txt" "%DST%\dev\lanhook\work\" >nul
+copy /y "%SRC%\dev\ghidra-scripts\*.java" "%DST%\dev\ghidra-scripts\" >nul
+copy /y "%SRC%\dev\ghidra-scripts\targets.txt" "%DST%\dev\ghidra-scripts\" >nul
+copy /y "%SRC%\dev\ghidra*.cmd" "%DST%\dev\" >nul
 copy /y "%SRC%\logs\lanhook-*.log" "%DST%\logs\" >nul
 
 cd /d "%DST%"
