@@ -1400,13 +1400,15 @@ static void route(TLSSES *t, const char *method, const char *path,
         log_resp_head("0,[null]", 8);
         http_respond(t, "0,[null]");
     } else if (contains(path, "/game/Leaderboard/getAvailableLeaderboards")) {
-        // The game parses this into its LeaderboardInfoCache. The catch-all
-        // "[0,[]]" is a JSON *array*, so the object parser rejects it, the
-        // leaderboard registry stays empty, and the main menu greys out
-        // Multiplayer. Shape = the game's own DTO reader (0x14073d890):
-        // result int, and the ten definition arrays; each leaderboard entry
-        // is {leaderboardID int, leaderboardName str, isRanked bool}
-        // (0x1407365e0). One dummy entry so the cache is never empty.
+        // The game parses this into its LeaderboardInfoCache with an object
+        // reader; the catch-all "[0,[]]" is a JSON *array*, so it logged
+        // "response was not formatted correctly" and cached nothing.
+        // Shape = the game's own DTO reader (0x14073d890): result int plus the
+        // definition arrays; a leaderboard entry is {leaderboardID int,
+        // leaderboardName str, isRanked bool} (0x1407365e0). One dummy entry so
+        // the list is never empty.
+        // shortcut: this reply alone does NOT fill the leaderboard-definition
+        // registry that rule 2 counts, see notes/m1-session29.md 29f.
         static const char LB[] =
             "{\"result\":0,"
             "\"leaderboards\":[{\"leaderboardID\":1,\"leaderboardName\":\"1v1\",\"isRanked\":true}],"

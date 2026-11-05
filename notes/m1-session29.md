@@ -12,7 +12,8 @@ INFERRED. No game file, no `.text` byte, no XAML was changed. The only code chan
   `{leaderboardID:int, leaderboardName:str, isRanked:bool}` (`leaderboards reply: object, 1 entry`).
 - `AoE2DE_s.exe` crc **`4f533b6c`** — untouched. `dev/AoE2DE_dec.exe` `487054ce`.
 - `dev/lanhook/gametext.bin` crc `ca040d52`. XAML stock crc `8398949b` — untouched.
-- game-dir `dbghelp.dll` = `dev/lanhook/dbghelp.dll` = crc **`bbfeec88`** (216,576 B, this session).
+- game-dir `dbghelp.dll` = `dev/lanhook/dbghelp.dll` = crc **`617d80f3`** (216,576 B, final build of
+  this session; the two probe runs used `bbfeec88`, which differs only in the added readout).
 
 ## 29b. MEASURED: the reply schema of `getAvailableLeaderboards`
 
