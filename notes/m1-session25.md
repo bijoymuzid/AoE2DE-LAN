@@ -150,3 +150,41 @@ as the enable path). Any future scan for UI element names must test UTF-16 as we
 - `AoE2DE_s.exe` crc **4f533b6c**, unmodified. `resources\_common\wpfg\…` unmodified.
 - Do **not** re-run the three-slot patch as if it were the answer, and do not extend it with a fourth
   slot without resolving the slot-0xb0 object's vtable from the shipped file first.
+## 25g. THE UI IS DATA — the loose XAML is parsed at runtime (proven, 16:5x)
+
+Second run of the session (`logs/lanhook-15096.log`, 134 s, clean) carried the two
+`ToolTipService.ShowOnDisabled="True"` additions from 25d. Result: **no help line on Multiplayer** —
+inconclusive on its own (file not read, or the attribute is not what paints the line).
+
+So a control experiment replaced the guess: `ButtonExit`'s `HelpLocale` was changed `99207` → `99203`
+(line 473) in the same loose file. Exit's help line already worked, so its text is a direct readout of
+whether the file on disk is live.
+
+**Operator, next launch: hovered Exit → the bottom-right line read "Play with or against human
+players."** That string only exists in the edited file. ⇒
+`resources\_common\wpfg\screen\screensimplemainmenu.xaml` is read from disk every launch, and its
+attributes take effect. The UI layer is a **data seam**: no code bytes, no Arxan exposure, revert by
+editing the text.
+
+Consequence for the MP widget: the grey Multiplayer button is a **layout/data** problem, not a
+privilege problem. And the fact that 25d's `ShowOnDisabled` on the two *Disabled* twins changed
+nothing means the visible grey widget is **not those elements as currently declared** — the live
+widget must be identified before any enable edit, otherwise we keep editing dead objects.
+
+### Markers now in the file to identify the live twin (one run)
+
+| twin | marker |
+|---|---|
+| `PaphosButtonMultiplayer` (enabled) | `Width="600"` (stock 754), normal opacity |
+| `PaphosButtonMultiplayerDisabled` | `Width="754"`, `Opacity="0.35"` |
+| `ButtonMultiplayer` (enabled, non-Paphos stack) | `Width="600"`, normal opacity |
+| `ButtonMultiplayerDisabled` (non-Paphos) | `Width="754"`, `Opacity="0.35"` |
+
+Readout: button narrower (600) → the **enabled** twin is what is on screen, i.e. code-behind only sets
+`IsEnabled`, and the click/enable story is `Age2ButtonPropertyManager` state (code route).
+Button still 754 wide and faded to 35 % → the **disabled** twin is on screen, and the fix is to make
+the enabled twin hit-testable/topmost in XAML (data route, no code).
+
+`screensimplemainmenu.xaml` stock copy kept at `dev/lanhook/screensimplemainmenu.xaml.prev-s25-before`;
+all changes are attributes only and revert by copying it back. `AoE2DE_s.exe` still crc `4f533b6c`
+(its mtime moves at every launch — something touches the file — contents unchanged).
