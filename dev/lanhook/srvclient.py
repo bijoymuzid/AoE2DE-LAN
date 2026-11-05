@@ -254,5 +254,32 @@ chk(tail == b"", f"server did not close after close frame ({tail[:20]!r})")
 wsock.close()
 print("  ws close handshake ok")
 
+# ---- getAvailableLeaderboards must be a JSON OBJECT, not the catch-all array
+# (s29: an array makes the game's LeaderboardInfoCache parse fail, the
+# leaderboard registry stay empty and the Multiplayer button go grey).
+lbsock = ctx.wrap_socket(socket.create_connection(("127.0.0.1", PORT), timeout=10),
+                         server_hostname=HOST)
+lbsock.sendall((f"GET /game/Leaderboard/getAvailableLeaderboards HTTP/1.1\r\n"
+                f"Host: {HOST}\r\nConnection: close\r\n\r\n").encode())
+lb = b""
+while True:
+    d = lbsock.recv(65536)
+    if not d:
+        break
+    lb += d
+lbsock.close()
+_, _, lbp = lb.partition(b"\r\n\r\n")
+lbd = json.loads(lbp) if lbp else None
+chk(isinstance(lbd, dict), f"leaderboards reply must be an object, got {lbp[:32]!r}")
+if isinstance(lbd, dict):
+    chk(lbd.get("result") == 0, "leaderboards result")
+    chk(isinstance(lbd.get("leaderboards"), list) and lbd["leaderboards"],
+        "leaderboards must be a non-empty array")
+    e = lbd["leaderboards"][0]
+    chk(isinstance(e.get("leaderboardID"), int), "entry.leaderboardID")
+    chk(isinstance(e.get("leaderboardName"), str), "entry.leaderboardName")
+    chk(isinstance(e.get("isRanked"), bool), "entry.isRanked")
+print(f"  leaderboards reply: object, {len(lbd.get('leaderboards', [])) if lbd else 0} entry")
+
 print("PASS" if ok else "FAILED")
 sys.exit(0 if ok else 1)

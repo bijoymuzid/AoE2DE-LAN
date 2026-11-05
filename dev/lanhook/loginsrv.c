@@ -1399,6 +1399,22 @@ static void route(TLSSES *t, const char *method, const char *path,
         // deliver yet, and ackNum stays put while nothing is acknowledged.
         log_resp_head("0,[null]", 8);
         http_respond(t, "0,[null]");
+    } else if (contains(path, "/game/Leaderboard/getAvailableLeaderboards")) {
+        // The game parses this into its LeaderboardInfoCache. The catch-all
+        // "[0,[]]" is a JSON *array*, so the object parser rejects it, the
+        // leaderboard registry stays empty, and the main menu greys out
+        // Multiplayer. Shape = the game's own DTO reader (0x14073d890):
+        // result int, and the ten definition arrays; each leaderboard entry
+        // is {leaderboardID int, leaderboardName str, isRanked bool}
+        // (0x1407365e0). One dummy entry so the cache is never empty.
+        static const char LB[] =
+            "{\"result\":0,"
+            "\"leaderboards\":[{\"leaderboardID\":1,\"leaderboardName\":\"1v1\",\"isRanked\":true}],"
+            "\"mappings\":[],\"matchTypes\":[],\"races\":[],\"factions\":[],"
+            "\"leaderboardRegions\":[],\"rankLevels\":[],\"statDefinitions\":[],"
+            "\"selfAssessmentTiers\":[]}";
+        log_resp_head(LB, (int)strlen_f(LB));
+        http_respond(t, LB);
     } else if (contains(path, "/game/news/")) {
         log_resp_head("[0,[]]", 5);
         http_respond(t, "[0,[]]");

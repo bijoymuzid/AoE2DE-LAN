@@ -5,7 +5,8 @@ blocked on M1). Phase M1 (Identity / LoginShim) is mid-flight.
 **How to use this file in a new chat:** read §0 → §1 → §2, then start at M1 below
 (§9 milestone table + "M1 entry state"), then notes/m0-findings.md §10a–10e.
 Everything a fresh assistant needs to continue without redoing the analysis
-is here. **Start at notes/m1-session27.md (current state; supersedes everything older)**, then
+is here. **Start at notes/m1-session29.md (current state; supersedes everything older)**, then
+notes/m1-session28.md (the twin-rule cause chain), then
 notes/m1-session21.md (the login reply that made the client login), then §9 milestone table +
 "M1 entry state" below, then notes/m0-findings.md §10a–10e.
 

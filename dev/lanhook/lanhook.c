@@ -895,6 +895,16 @@ static void rules_probe(void) {
             rl_d("svc", " slot+0x308 arg 4 (rule 4)", (long long)rl_call2(vt, 0x308, svc, 4));
         }
     }
+    // rule 2 is "logged in AND leaderboard registry non-empty"; the count is
+    // (end-begin)/0xc0 of the vector at 0x1442e18b0.
+    { DWORD64 beg = 0, end = 0, mroot = 0;
+      __try { beg = *(volatile DWORD64*)(g_Base + 0x42e18b0ULL); } __except (EXCEPTION_EXECUTE_HANDLER) { beg = 0; }
+      __try { end = *(volatile DWORD64*)(g_Base + 0x42e18b8ULL); } __except (EXCEPTION_EXECUTE_HANDLER) { end = 0; }
+      __try { mroot = *(volatile DWORD64*)(g_Base + 0x42e18c8ULL); } __except (EXCEPTION_EXECUTE_HANDLER) { mroot = 0; }
+      rl_h("lb", " registry begin [0x1442e18b0]", beg);
+      rl_h("lb", " registry end   [0x1442e18b8]", end);
+      rl_h("lb", " registry map   [0x1442e18c8]", mroot);
+      rl_d("lb", " definition count", (end >= beg) ? (long long)((end - beg) / 0xc0) : -1); }
 }
 
 // Read-only shape scan for the live twin-rule records.  A record is 0x48 bytes:
