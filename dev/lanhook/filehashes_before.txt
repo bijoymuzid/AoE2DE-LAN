@@ -1,0 +1,3 @@
+AoE2DE_s.exe 1e415af8b7fbbe6a 72176952
+steam_api64.dll a178f19a516023ef 262944
+winmm.dll 80a9d0677f715e93 578560

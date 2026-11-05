@@ -1,0 +1,40 @@
+14039b8e0  sub      rsp, 0x28
+14039b8e4  mov      r8, qword ptr [rcx + 8]
+14039b8e8  mov      r11, rcx
+14039b8eb  mov      rcx, qword ptr [rcx + 0x10]
+14039b8ef  sub      rcx, r8
+14039b8f2  mov      rdx, qword ptr [r11 + 0x20]
+14039b8f6  lea      rax, [rdx + 4]
+14039b8fa  cmp      rax, rcx
+14039b8fd  jae      0x14039b948
+14039b8ff  lea      rax, [rdx + r8]
+14039b903  xor      r8d, r8d
+14039b906  cmp      rdx, rcx
+14039b909  cmovae   rax, r8
+14039b90d  mov      qword ptr [r11 + 0x28], rax
+14039b911  cmp      byte ptr [rax], 0x6e
+14039b914  jne      0x14039b948
+14039b916  cmp      byte ptr [rax + 1], 0x75
+14039b91a  jne      0x14039b948
+14039b91c  cmp      byte ptr [rax + 2], 0x6c
+14039b920  jne      0x14039b948
+14039b922  cmp      byte ptr [rax + 3], 0x6c
+14039b926  jne      0x14039b948
+14039b928  mov      edx, 4
+14039b92d  mov      rcx, r11
+14039b930  call     0x14039b550
+14039b935  mov      rcx, r11
+14039b938  call     0x14039b860
+14039b93d  test     al, al
+14039b93f  je       0x14039b948
+14039b941  mov      al, 1
+14039b943  add      rsp, 0x28
+14039b947  ret      
+14039b948  xor      al, al
+14039b94a  add      rsp, 0x28
+14039b94e  ret      
+14039b94f  int3     
+14039b950  mov      qword ptr [rsp + 8], rbx
+14039b955  mov      qword ptr [rsp + 0x10], rbp
+14039b95a  mov      qword ptr [rsp + 0x18], rsi
+14039b95f  push     rdi

@@ -1,0 +1,199 @@
+140683db0  mov      qword ptr [rsp + 8], rbx
+140683db5  mov      qword ptr [rsp + 0x10], rsi
+140683dba  push     rdi
+140683dbb  sub      rsp, 0x200
+140683dc2  mov      rax, qword ptr [rip + 0x3a92377]  ; 0x144116140
+140683dc9  xor      rax, rsp
+140683dcc  mov      qword ptr [rsp + 0x1f0], rax
+140683dd4  mov      rcx, qword ptr [rip + 0x461a815]  ; 0x144c9e5f0
+140683ddb  mov      rbx, qword ptr [rcx + 0x1818]
+140683de2  mov      rax, qword ptr [rcx]
+140683de5  call     qword ptr [rax + 0x150]
+140683deb  xor      esi, esi
+140683ded  mov      dword ptr [rsp + 0x20], esi
+140683df1  mov      byte ptr [rsp + 0x24], 1
+140683df6  mov      dword ptr [rsp + 0x28], esi
+140683dfa  mov      rcx, qword ptr [rax]
+140683dfd  mov      r9, qword ptr [rcx + 0xc8]
+140683e04  lea      r8, [rsp + 0x20]
+140683e09  mov      edx, 5
+140683e0e  mov      rcx, rax
+140683e11  call     r9
+140683e14  test     eax, eax
+140683e16  jne      0x140683e22
+140683e18  mov      eax, 1
+140683e1d  jmp      0x140683f74
+140683e22  cmp      eax, 2
+140683e25  jne      0x140683ebb
+140683e2b  mov      edi, 0x3b4
+140683e30  mov      rax, qword ptr gs:[0x58]
+140683e39  add      rdi, qword ptr [rax]
+140683e3c  mov      eax, dword ptr [rip + 0x461a3fe]  ; 0x144c9e240
+140683e42  cmp      eax, dword ptr [rdi]
+140683e44  jg       0x140683ff7
+140683e4a  cmp      dword ptr [rip + 0x461a407], 1  ; 0x144c9e258
+140683e51  jl       0x140683e64
+140683e53  cmp      eax, dword ptr [rdi]
+140683e55  jg       0x14068405d
+140683e5b  cmp      byte ptr [rip + 0x461a3fe], sil  ; 0x144c9e260
+140683e62  je       0x140683e99
+140683e64  cmp      eax, dword ptr [rdi]
+140683e66  jg       0x1406840c3
+140683e6c  cmp      byte ptr [rip + 0x461a3ed], sil  ; 0x144c9e260
+140683e73  je       0x140683eb4
+140683e75  call     0x1402abe60
+140683e7a  mov      r8d, 1
+140683e80  lea      rdx, [rip + 0x3013c99]  ; 0x143697b20 "F:\Agents\PhoenixBuilder-07\p4\portland_group\SDK\RelicLink\rlink\internal\service\worldwide\WorldwideLoginService.cpp"
+140683e87  mov      rcx, rax
+140683e8a  call     0x1402abcc0
+140683e8f  test     al, al
+140683e91  je       0x140683eb4
+140683e93  mov      eax, dword ptr [rip + 0x461a3a7]  ; 0x144c9e240
+140683e99  cmp      eax, dword ptr [rdi]
+140683e9b  jg       0x140683f99
+140683ea1  lea      rdx, [rip + 0x3014038]  ; 0x143697ee0 "WorldwideLoginAsync::DoUpdateCrossplaySetting: Error requesting crossplay privilege."
+140683ea8  lea      rcx, [rip + 0x461a399]  ; 0x144c9e248
+140683eaf  call     0x1402bcc00
+140683eb4  xor      eax, eax
+140683eb6  jmp      0x140683f74
+140683ebb  lea      rcx, [rsp + 0x30]
+140683ec0  call     0x1402a9f70
+140683ec5  nop      
+140683ec6  mov      rax, qword ptr [rbx]
+140683ec9  lea      rdx, [rsp + 0x30]
+140683ece  mov      rcx, rbx
+140683ed1  call     qword ptr [rax + 0xb0]
+140683ed7  cmp      eax, 1
+140683eda  jne      0x140683ee0
+140683edc  mov      ebx, eax
+140683ede  jmp      0x140683f5b
+140683ee0  cmp      eax, 2
+140683ee3  jne      0x140683f3a
+140683ee5  call     0x1402abe60
+140683eea  cmp      dword ptr [rax + 0x10], 1
+140683eee  jl       0x140683efb
+140683ef0  call     0x1402abe60
+140683ef5  cmp      byte ptr [rax + 0x18], 0
+140683ef9  je       0x140683f24
+140683efb  call     0x1402abe60
+140683f00  cmp      byte ptr [rax + 0x18], 0
+140683f04  je       0x140683f59
+140683f06  call     0x1402abe60
+140683f0b  mov      r8d, 1
+140683f11  lea      rdx, [rip + 0x3013c08]  ; 0x143697b20 "F:\Agents\PhoenixBuilder-07\p4\portland_group\SDK\RelicLink\rlink\internal\service\worldwide\WorldwideLoginService.cpp"
+140683f18  mov      rcx, rax
+140683f1b  call     0x1402abcc0
+140683f20  test     al, al
+140683f22  je       0x140683f59
+140683f24  call     0x1402abe60
+140683f29  lea      rdx, [rip + 0x3014010]  ; 0x143697f40 "WorldwideLoginAsync::DoUpdateCrossplaySetting: Could not fetch local profile."
+140683f30  mov      rcx, rax
+140683f33  call     0x1402bcc00
+140683f38  jmp      0x140683f59
+140683f3a  cmp      byte ptr [rsp + 0x1c8], 0
+140683f42  je       0x140683f59
+140683f44  cmp      byte ptr [rsp + 0x24], 0
+140683f49  jne      0x140683f59
+140683f4b  mov      rax, qword ptr [rbx]
+140683f4e  xor      edx, edx
+140683f50  mov      rcx, rbx
+140683f53  call     qword ptr [rax + 0x98]
+140683f59  mov      ebx, esi
+140683f5b  lea      rcx, [rsp + 0x1d0]
+140683f63  call     0x1402aab10
+140683f68  lea      rcx, [rsp + 0x40]
+140683f6d  call     0x1402a9880
+140683f72  mov      eax, ebx
+140683f74  mov      rcx, qword ptr [rsp + 0x1f0]
+140683f7c  xor      rcx, rsp
+140683f7f  call     0x142d6e390
+140683f84  lea      r11, [rsp + 0x200]
+140683f8c  mov      rbx, qword ptr [r11 + 0x10]
+140683f90  mov      rsi, qword ptr [r11 + 0x18]
+140683f94  mov      rsp, r11
+140683f97  pop      rdi
+140683f98  ret      
+140683f99  lea      rcx, [rip + 0x461a2a0]  ; 0x144c9e240
+140683fa0  call     0x142d6e150
+140683fa5  cmp      dword ptr [rip + 0x461a294], -1  ; 0x144c9e240
+140683fac  jne      0x140683ea1
+140683fb2  xorps    xmm0, xmm0
+140683fb5  movdqu   xmmword ptr [rip + 0x461a28b], xmm0  ; 0x144c9e248
+140683fbd  mov      qword ptr [rip + 0x461a294], rsi  ; 0x144c9e258
+140683fc4  mov      byte ptr [rip + 0x461a295], sil  ; 0x144c9e260
+140683fcb  movdqu   xmmword ptr [rip + 0x461a295], xmm0  ; 0x144c9e268
+140683fd3  mov      qword ptr [rip + 0x461a29e], rsi  ; 0x144c9e278
+140683fda  lea      rcx, [rip + 0x29bb59f]  ; 0x14303f580
+140683fe1  call     0x142d6ded4
+140683fe6  lea      rcx, [rip + 0x461a253]  ; 0x144c9e240
+140683fed  call     0x142d6e0e4
+140683ff2  jmp      0x140683ea1
+140683ff7  lea      rcx, [rip + 0x461a242]  ; 0x144c9e240
+140683ffe  call     0x142d6e150
+140684003  mov      eax, dword ptr [rip + 0x461a237]  ; 0x144c9e240
+140684009  cmp      eax, -1
+14068400c  jne      0x140683e4a
+140684012  xorps    xmm0, xmm0
+140684015  movdqu   xmmword ptr [rip + 0x461a22b], xmm0  ; 0x144c9e248
+14068401d  mov      qword ptr [rip + 0x461a234], rsi  ; 0x144c9e258
+140684024  mov      byte ptr [rip + 0x461a235], sil  ; 0x144c9e260
+14068402b  movdqu   xmmword ptr [rip + 0x461a235], xmm0  ; 0x144c9e268
+140684033  mov      qword ptr [rip + 0x461a23e], rsi  ; 0x144c9e278
+14068403a  lea      rcx, [rip + 0x29bb53f]  ; 0x14303f580
+140684041  call     0x142d6ded4
+140684046  lea      rcx, [rip + 0x461a1f3]  ; 0x144c9e240
+14068404d  call     0x142d6e0e4
+140684052  mov      eax, dword ptr [rip + 0x461a1e8]  ; 0x144c9e240
+140684058  jmp      0x140683e4a
+14068405d  lea      rcx, [rip + 0x461a1dc]  ; 0x144c9e240
+140684064  call     0x142d6e150
+140684069  mov      eax, dword ptr [rip + 0x461a1d1]  ; 0x144c9e240
+14068406f  cmp      eax, -1
+140684072  jne      0x140683e5b
+140684078  xorps    xmm0, xmm0
+14068407b  movdqu   xmmword ptr [rip + 0x461a1c5], xmm0  ; 0x144c9e248
+140684083  mov      qword ptr [rip + 0x461a1ce], rsi  ; 0x144c9e258
+14068408a  mov      byte ptr [rip + 0x461a1cf], sil  ; 0x144c9e260
+140684091  movdqu   xmmword ptr [rip + 0x461a1cf], xmm0  ; 0x144c9e268
+140684099  mov      qword ptr [rip + 0x461a1d8], rsi  ; 0x144c9e278
+1406840a0  lea      rcx, [rip + 0x29bb4d9]  ; 0x14303f580
+1406840a7  call     0x142d6ded4
+1406840ac  lea      rcx, [rip + 0x461a18d]  ; 0x144c9e240
+1406840b3  call     0x142d6e0e4
+1406840b8  mov      eax, dword ptr [rip + 0x461a182]  ; 0x144c9e240
+1406840be  jmp      0x140683e5b
+1406840c3  lea      rcx, [rip + 0x461a176]  ; 0x144c9e240
+1406840ca  call     0x142d6e150
+1406840cf  cmp      dword ptr [rip + 0x461a16a], -1  ; 0x144c9e240
+1406840d6  jne      0x140683e6c
+1406840dc  xorps    xmm0, xmm0
+1406840df  movdqu   xmmword ptr [rip + 0x461a161], xmm0  ; 0x144c9e248
+1406840e7  mov      qword ptr [rip + 0x461a16a], rsi  ; 0x144c9e258
+1406840ee  mov      byte ptr [rip + 0x461a16b], sil  ; 0x144c9e260
+1406840f5  movdqu   xmmword ptr [rip + 0x461a16b], xmm0  ; 0x144c9e268
+1406840fd  mov      qword ptr [rip + 0x461a174], rsi  ; 0x144c9e278
+140684104  lea      rcx, [rip + 0x29bb475]  ; 0x14303f580
+14068410b  call     0x142d6ded4
+140684110  lea      rcx, [rip + 0x461a129]  ; 0x144c9e240
+140684117  call     0x142d6e0e4
+14068411c  jmp      0x140683e6c
+140684121  int3     
+140684122  int3     
+140684123  int3     
+140684124  int3     
+140684125  int3     
+140684126  int3     
+140684127  int3     
+140684128  int3     
+140684129  int3     
+14068412a  int3     
+14068412b  int3     
+14068412c  int3     
+14068412d  int3     
+14068412e  int3     
+14068412f  int3     
+140684130  mov      rax, rsp
+140684133  mov      qword ptr [rax + 0x10], rbx
+140684137  mov      qword ptr [rax + 0x18], rsi
+14068413b  mov      qword ptr [rax + 0x20], rdi
+14068413f  push     rbp

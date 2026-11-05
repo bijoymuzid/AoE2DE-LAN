@@ -1,0 +1,281 @@
+140593700  and      eax, 0xfc084ff
+140593706  test     dword ptr [rsi + 1], edx
+140593709  add      byte ptr [rax], al
+14059370b  lea      rsi, [rip + 0x30ee7b6]  ; 0x143681ec8 "profileID"
+140593712  cmp      byte ptr [rbp - 0x1f], al
+140593715  je       0x140593843
+14059371b  mov      r13, qword ptr [rbx + 0x20]
+14059371f  mov      rcx, qword ptr [rbx + 8]
+140593723  mov      rax, qword ptr [rbx + 0x10]
+140593727  sub      rax, rcx
+14059372a  cmp      r13, rax
+14059372d  jae      0x140593861
+140593733  lea      rax, [rcx + r13]
+140593737  mov      qword ptr [rbx + 0x28], rax
+14059373b  test     rax, rax
+14059373e  je       0x140593861
+140593744  mov      rcx, rbx
+140593747  call     0x14039b7c0
+14059374c  test     al, al
+14059374e  je       0x140593861
+140593754  mov      rcx, rbx
+140593757  call     0x14039bb50
+14059375c  cmp      al, 0x22
+14059375e  jne      0x140594308
+140593764  mov      rax, qword ptr [rbx + 8]
+140593768  mov      rdx, qword ptr [rbx + 0x20]
+14059376c  mov      rcx, qword ptr [rbx + 0x10]
+140593770  sub      rcx, rax
+140593773  lea      r8, [rax + rdx]
+140593777  cmp      rdx, rcx
+14059377a  mov      eax, 0
+14059377f  cmovae   r8, rax
+140593783  mov      qword ptr [rbx + 0x28], r8
+140593787  lea      r14, [r8 + 1]
+14059378b  inc      r13
+14059378e  mov      r15b, 0x70
+140593791  movsx    ecx, byte ptr [r14]
+140593795  call     qword ptr [rip + 0x2c05b95]  ; 0x143199330
+14059379b  mov      edi, eax
+14059379d  movsx    ecx, r15b
+1405937a1  call     qword ptr [rip + 0x2c05b89]  ; 0x143199330
+1405937a7  cmp      eax, edi
+1405937a9  jne      0x1405937ce
+1405937ab  inc      r14
+1405937ae  inc      rsi
+1405937b1  inc      r13
+1405937b4  mov      rax, qword ptr [rbx + 0x10]
+1405937b8  sub      rax, qword ptr [rbx + 8]
+1405937bc  cmp      r13, rax
+1405937bf  jae      0x140593861
+1405937c5  movzx    r15d, byte ptr [rsi]
+1405937c9  test     r15b, r15b
+1405937cc  jne      0x140593791
+1405937ce  cmp      byte ptr [r14], 0x22
+1405937d2  jne      0x140593861
+1405937d8  cmp      byte ptr [rsi], 0
+1405937db  jne      0x140593861
+1405937e1  lea      rax, [r13 + 1]
+1405937e5  mov      r8, qword ptr [rbx + 0x20]
+1405937e9  mov      rcx, rax
+1405937ec  sub      rcx, r8
+1405937ef  mov      r9, qword ptr [rbx + 8]
+1405937f3  mov      rdx, qword ptr [rbx + 0x10]
+1405937f7  sub      rdx, r9
+1405937fa  cmp      rax, rdx
+1405937fd  ja       0x14059381d
+1405937ff  movsxd   rcx, ecx
+140593802  add      rcx, r8
+140593805  mov      qword ptr [rbx + 0x20], rcx
+140593809  lea      rax, [rcx + r9]
+14059380d  cmp      rcx, rdx
+140593810  mov      ecx, 0
+140593815  cmovae   rax, rcx
+140593819  mov      qword ptr [rbx + 0x28], rax
+14059381d  mov      rcx, rbx
+140593820  call     0x14039b7c0
+140593825  test     al, al
+140593827  je       0x140593861
+140593829  mov      rcx, rbx
+14059382c  call     0x14039bb50
+140593831  cmp      al, 0x3a
+140593833  jne      0x140593861
+140593835  mov      byte ptr [rbp - 0x1d], 1
+140593839  mov      edx, 1
+14059383e  call     0x14039b550
+140593843  lea      rdx, [r12 + 0x3b8]
+14059384b  mov      r8d, 0xffffffff
+140593851  mov      rcx, rbx
+140593854  call     0x14039c900
+140593859  test     al, al
+14059385b  je       0x140594380
+140593861  mov      rcx, rbx
+140593864  call     0x14039b8e0
+140593869  test     al, al
+14059386b  jne      0x1405939bf
+140593871  lea      rsi, [rip + 0x30f9a10]  ; 0x14368d288 "m_loginEvent.m_info"
+140593878  cmp      byte ptr [rbp - 0x1f], al
+14059387b  je       0x1405939aa
+140593881  mov      r13, qword ptr [rbx + 0x20]
+140593885  mov      rcx, qword ptr [rbx + 8]
+140593889  mov      rax, qword ptr [rbx + 0x10]
+14059388d  sub      rax, rcx
+140593890  cmp      r13, rax
+140593893  jae      0x1405939bf
+140593899  lea      rax, [rcx + r13]
+14059389d  mov      qword ptr [rbx + 0x28], rax
+1405938a1  test     rax, rax
+1405938a4  je       0x1405939bf
+1405938aa  mov      rcx, rbx
+1405938ad  call     0x14039b7c0
+1405938b2  test     al, al
+1405938b4  je       0x1405939bf
+1405938ba  mov      rcx, rbx
+1405938bd  call     0x14039bb50
+1405938c2  cmp      al, 0x22
+1405938c4  jne      0x140594315
+1405938ca  mov      rax, qword ptr [rbx + 8]
+1405938ce  mov      rdx, qword ptr [rbx + 0x20]
+1405938d2  mov      rcx, qword ptr [rbx + 0x10]
+1405938d6  sub      rcx, rax
+1405938d9  lea      r8, [rax + rdx]
+1405938dd  cmp      rdx, rcx
+1405938e0  mov      eax, 0
+1405938e5  cmovae   r8, rax
+1405938e9  mov      qword ptr [rbx + 0x28], r8
+1405938ed  lea      r14, [r8 + 1]
+1405938f1  inc      r13
+1405938f4  mov      r15b, 0x6d
+1405938f7  nop      word ptr [rax + rax]
+140593900  movsx    ecx, byte ptr [r14]
+140593904  call     qword ptr [rip + 0x2c05a26]  ; 0x143199330
+14059390a  mov      edi, eax
+14059390c  movsx    ecx, r15b
+140593910  call     qword ptr [rip + 0x2c05a1a]  ; 0x143199330
+140593916  cmp      eax, edi
+140593918  jne      0x14059393d
+14059391a  inc      r14
+14059391d  inc      rsi
+140593920  inc      r13
+140593923  mov      rax, qword ptr [rbx + 0x10]
+140593927  sub      rax, qword ptr [rbx + 8]
+14059392b  cmp      r13, rax
+14059392e  jae      0x1405939bf
+140593934  movzx    r15d, byte ptr [rsi]
+140593938  test     r15b, r15b
+14059393b  jne      0x140593900
+14059393d  cmp      byte ptr [r14], 0x22
+140593941  jne      0x1405939bf
+140593943  cmp      byte ptr [rsi], 0
+140593946  jne      0x1405939bf
+140593948  lea      rax, [r13 + 1]
+14059394c  mov      r8, qword ptr [rbx + 0x20]
+140593950  mov      rcx, rax
+140593953  sub      rcx, r8
+140593956  mov      r9, qword ptr [rbx + 8]
+14059395a  mov      rdx, qword ptr [rbx + 0x10]
+14059395e  sub      rdx, r9
+140593961  cmp      rax, rdx
+140593964  ja       0x140593984
+140593966  movsxd   rcx, ecx
+140593969  add      rcx, r8
+14059396c  mov      qword ptr [rbx + 0x20], rcx
+140593970  lea      rax, [rcx + r9]
+140593974  cmp      rcx, rdx
+140593977  mov      ecx, 0
+14059397c  cmovae   rax, rcx
+140593980  mov      qword ptr [rbx + 0x28], rax
+140593984  mov      rcx, rbx
+140593987  call     0x14039b7c0
+14059398c  test     al, al
+14059398e  je       0x1405939bf
+140593990  mov      rcx, rbx
+140593993  call     0x14039bb50
+140593998  cmp      al, 0x3a
+14059399a  jne      0x1405939bf
+14059399c  mov      byte ptr [rbp - 0x1d], 1
+1405939a0  mov      edx, 1
+1405939a5  call     0x14039b550
+1405939aa  lea      rdx, [r12 + 0x38]
+1405939af  mov      rcx, rbx
+1405939b2  call     0x140611620
+1405939b7  test     al, al
+1405939b9  je       0x140594380
+1405939bf  mov      rcx, rbx
+1405939c2  call     0x14039b8e0
+1405939c7  test     al, al
+1405939c9  jne      0x140593b25
+1405939cf  lea      rsi, [rip + 0x30f9882]  ; 0x14368d258 "m_GetInventoryItemsEvent.m_info.itemLocations"
+1405939d6  cmp      byte ptr [rbp - 0x1f], al
+1405939d9  je       0x140593b07
+1405939df  mov      r13, qword ptr [rbx + 0x20]
+1405939e3  mov      rcx, qword ptr [rbx + 8]
+1405939e7  mov      rax, qword ptr [rbx + 0x10]
+1405939eb  sub      rax, rcx
+1405939ee  cmp      r13, rax
+1405939f1  jae      0x140593b25
+1405939f7  lea      rax, [rcx + r13]
+1405939fb  mov      qword ptr [rbx + 0x28], rax
+1405939ff  test     rax, rax
+140593a02  je       0x140593b25
+140593a08  mov      rcx, rbx
+140593a0b  call     0x14039b7c0
+140593a10  test     al, al
+140593a12  je       0x140593b25
+140593a18  mov      rcx, rbx
+140593a1b  call     0x14039bb50
+140593a20  cmp      al, 0x22
+140593a22  jne      0x140594322
+140593a28  mov      rax, qword ptr [rbx + 8]
+140593a2c  mov      rdx, qword ptr [rbx + 0x20]
+140593a30  mov      rcx, qword ptr [rbx + 0x10]
+140593a34  sub      rcx, rax
+140593a37  lea      r8, [rax + rdx]
+140593a3b  cmp      rdx, rcx
+140593a3e  mov      eax, 0
+140593a43  cmovae   r8, rax
+140593a47  mov      qword ptr [rbx + 0x28], r8
+140593a4b  lea      r14, [r8 + 1]
+140593a4f  inc      r13
+140593a52  mov      r15b, 0x6d
+140593a55  movsx    ecx, byte ptr [r14]
+140593a59  call     qword ptr [rip + 0x2c058d1]  ; 0x143199330
+140593a5f  mov      edi, eax
+140593a61  movsx    ecx, r15b
+140593a65  call     qword ptr [rip + 0x2c058c5]  ; 0x143199330
+140593a6b  cmp      eax, edi
+140593a6d  jne      0x140593a92
+140593a6f  inc      r14
+140593a72  inc      rsi
+140593a75  inc      r13
+140593a78  mov      rax, qword ptr [rbx + 0x10]
+140593a7c  sub      rax, qword ptr [rbx + 8]
+140593a80  cmp      r13, rax
+140593a83  jae      0x140593b25
+140593a89  movzx    r15d, byte ptr [rsi]
+140593a8d  test     r15b, r15b
+140593a90  jne      0x140593a55
+140593a92  cmp      byte ptr [r14], 0x22
+140593a96  jne      0x140593b25
+140593a9c  cmp      byte ptr [rsi], 0
+140593a9f  jne      0x140593b25
+140593aa5  lea      rax, [r13 + 1]
+140593aa9  mov      r8, qword ptr [rbx + 0x20]
+140593aad  mov      rcx, rax
+140593ab0  sub      rcx, r8
+140593ab3  mov      r9, qword ptr [rbx + 8]
+140593ab7  mov      rdx, qword ptr [rbx + 0x10]
+140593abb  sub      rdx, r9
+140593abe  cmp      rax, rdx
+140593ac1  ja       0x140593ae1
+140593ac3  movsxd   rcx, ecx
+140593ac6  add      rcx, r8
+140593ac9  mov      qword ptr [rbx + 0x20], rcx
+140593acd  lea      rax, [r9 + rcx]
+140593ad1  cmp      rcx, rdx
+140593ad4  mov      ecx, 0
+140593ad9  cmovae   rax, rcx
+140593add  mov      qword ptr [rbx + 0x28], rax
+140593ae1  mov      rcx, rbx
+140593ae4  call     0x14039b7c0
+140593ae9  test     al, al
+140593aeb  je       0x140593b25
+140593aed  mov      rcx, rbx
+140593af0  call     0x14039bb50
+140593af5  cmp      al, 0x3a
+140593af7  jne      0x140593b25
+140593af9  mov      byte ptr [rbp - 0x1d], 1
+140593afd  mov      edx, 1
+140593b02  call     0x14039b550
+140593b07  lea      rdx, [r12 + 0x440]
+140593b0f  mov      r8d, 0xffffffff
+140593b15  mov      rcx, rbx
+140593b18  call     0x1405bd880
+140593b1d  test     al, al
+140593b1f  je       0x140594380
+140593b25  mov      rcx, rbx
+140593b28  call     0x14039b8e0
+140593b2d  test     al, al
+140593b2f  jne      0x140593c90
+140593b35  lea      rsi, [rip + 0x30f980c]  ; 0x14368d348 "m_GetInventoryItemsEvent.m_info.itemInstances"
+140593b3c  cmp      byte ptr [rbp - 0x1f], al

@@ -1,0 +1,69 @@
+1407cc6f0  mov      qword ptr [rsp + 8], rbx
+1407cc6f5  mov      qword ptr [rsp + 0x10], rbp
+1407cc6fa  mov      qword ptr [rsp + 0x20], rsi
+1407cc6ff  push     rdi
+1407cc700  push     r14
+1407cc702  push     r15
+1407cc704  sub      rsp, 0x50
+1407cc708  mov      rax, r8
+1407cc70b  mov      rbx, rdx
+1407cc70e  mov      r14, rcx
+1407cc711  xor      r15d, r15d
+1407cc714  mov      r8, qword ptr [r8 + 0x10]
+1407cc718  cmp      qword ptr [rax + 0x18], 0xf
+1407cc71d  jbe      0x1407cc722
+1407cc71f  mov      rax, qword ptr [rax]
+1407cc722  cmp      r8, 0x19
+1407cc726  jne      0x1407cc847
+1407cc72c  lea      rdx, [rip + 0x2ed24bd]  ; 0x14369ebf0 "AchievementGrantedMessage"
+1407cc733  mov      rcx, rax
+1407cc736  call     0x142d7058d
+1407cc73b  test     eax, eax
+1407cc73d  jne      0x1407cc847
+1407cc743  mov      ecx, 0x108
+1407cc748  call     0x142d6dc48
+1407cc74d  mov      rdi, rax
+1407cc750  mov      qword ptr [rsp + 0x80], rax
+1407cc758  xor      edx, edx
+1407cc75a  mov      r8d, 0x108
+1407cc760  mov      rcx, rax
+1407cc763  call     0x142d70587
+1407cc768  lea      rax, [rip + 0x2eaa181]  ; 0x1436768f0
+1407cc76f  mov      qword ptr [rdi], rax
+1407cc772  mov      rbp, 0xffffffffffffffff
+1407cc779  mov      dword ptr [rdi + 0x10], ebp
+1407cc77c  lea      rax, [rip + 0x2e9b68d]  ; 0x143667e10
+1407cc783  mov      qword ptr [rdi + 8], rax
+1407cc787  lea      rcx, [rdi + 0x20]
+1407cc78b  call     0x1404c4ec0
+1407cc790  call     0x14032bf20
+1407cc795  mov      qword ptr [rdi + 0x18], rbp
+1407cc799  mov      qword ptr [rdi + 0x100], rbp
+1407cc7a0  mov      qword ptr [rsp + 0x80], rdi
+1407cc7a8  mov      ecx, 0x18
+1407cc7ad  call     0x142d6dc48
+1407cc7b2  mov      rsi, rax
+1407cc7b5  mov      qword ptr [rsp + 0x80], rax
+1407cc7bd  xorps    xmm0, xmm0
+1407cc7c0  movups   xmmword ptr [rax], xmm0
+1407cc7c3  mov      dword ptr [rax + 8], 1
+1407cc7ca  mov      dword ptr [rax + 0xc], 1
+1407cc7d1  lea      rax, [rip + 0x2ea94c8]  ; 0x143675ca0
+1407cc7d8  mov      qword ptr [rsi], rax
+1407cc7db  mov      qword ptr [rsi + 0x10], rdi
+1407cc7df  mov      qword ptr [rsp + 0x38], rdi
+1407cc7e4  mov      qword ptr [rsp + 0x40], rsi
+1407cc7e9  mov      dword ptr [rsp + 0x20], r15d
+1407cc7ee  lea      r9, [rip + 0x3a724bb]  ; 0x14423ecb0
+1407cc7f5  lea      r8, [rip + 0x3a6d524]  ; 0x144239d20
+1407cc7fc  xor      edx, edx
+1407cc7fe  mov      rcx, rbx
+1407cc801  call     0x142d705a5
+1407cc806  test     rax, rax
+1407cc809  je       0x1407cc86d
+1407cc80b  mov      rdx, rdi
+1407cc80e  mov      rcx, rax
+1407cc811  call     0x1407b0fa0
+1407cc816  test     al, al
+1407cc818  jne      0x1407cc979
+1407cc81e  mov      eax, ebp

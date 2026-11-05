@@ -1,0 +1,200 @@
+140f0fa20  call     0x140a72500
+140f0fa25  mov      eax, eax
+140f0fa27  mov      qword ptr [r14 + 0x3158], rax
+140f0fa2e  cmp      dword ptr [rsi + 0x20], -0xc
+140f0fa32  je       0x140f0fa3e
+140f0fa34  cmp      dword ptr [rsi + 0x60], r15d
+140f0fa38  setne    al
+140f0fa3b  mov      byte ptr [rdi + 5], al
+140f0fa3e  cmp      dword ptr [rsi + 0x60], r15d
+140f0fa42  sete     al
+140f0fa45  mov      byte ptr [r14 + 0x3160], al
+140f0fa4c  cmp      byte ptr [rdi + 5], r15b
+140f0fa50  je       0x140f0faef
+140f0fa56  xorps    xmm0, xmm0
+140f0fa59  movups   xmmword ptr [rsp + 0x48], xmm0
+140f0fa5e  mov      qword ptr [rsp + 0x58], r15
+140f0fa63  mov      qword ptr [rsp + 0x60], r15
+140f0fa68  mov      r8d, 0x22
+140f0fa6e  lea      rdx, [rip + 0x237638b]  ; 0x143285e00 "AOEAccountListener::OnAccountEvent"
+140f0fa75  lea      rcx, [rsp + 0x48]
+140f0fa7a  call     0x1402aa3e0
+140f0fa7f  lea      rax, [rsp + 0x48]
+140f0fa84  mov      qword ptr [rsp + 0x40], rax
+140f0fa89  lea      rax, [rbp - 0x18]
+140f0fa8d  mov      qword ptr [rbp - 0x20], rax
+140f0fa91  lea      rdx, [rsp + 0x48]
+140f0fa96  lea      rcx, [rbp - 0x18]
+140f0fa9a  call     0x1402aa930
+140f0fa9f  mov      rbx, rax
+140f0faa2  lea      rdx, [rsi + 0x18]
+140f0faa6  lea      rcx, [rsp + 0x70]
+140f0faab  call     0x140ecbe80
+140f0fab0  nop      
+140f0fab1  mov      r8, rbx
+140f0fab4  mov      rdx, rax
+140f0fab7  lea      rcx, [rbp - 0x70]
+140f0fabb  call     0x140e89cc0
+140f0fac0  nop      
+140f0fac1  lea      rcx, [rsp + 0x48]
+140f0fac6  call     0x1402a9ba0
+140f0facb  nop      
+140f0facc  lea      rcx, [r14 + 0x34a0]
+140f0fad3  lea      rdx, [rbp - 0x70]
+140f0fad7  call     0x140e9a860
+140f0fadc  nop      
+140f0fadd  lea      rcx, [rbp - 0x50]
+140f0fae1  call     0x1402a9ba0
+140f0fae6  lea      rcx, [rbp - 0x70]
+140f0faea  call     0x1402a9ba0
+140f0faef  mov      eax, dword ptr [rsi + 0x60]
+140f0faf2  add      eax, 3
+140f0faf5  cmp      eax, 0xe
+140f0faf8  ja       0x140f0fee5
+140f0fafe  cdqe     
+140f0fb00  mov      ecx, dword ptr [r13 + rax*4 + 0xf1047c]
+140f0fb08  add      rcx, r13
+140f0fb0b  jmp      rcx
+140f0fb0d  mov      word ptr [rdi + 2], 1
+140f0fb13  lea      r8, [rip + 0x237630e]  ; 0x143285e28 "OnAccountEvent/AET_Login/R_PlatformSignInError"
+140f0fb1a  xor      edx, edx
+140f0fb1c  lea      rcx, [rip + 0x235475d]  ; 0x143264280 "Network"
+140f0fb23  call     0x140f19210
+140f0fb28  mov      rax, qword ptr [r14]
+140f0fb2b  mov      dl, 1
+140f0fb2d  mov      rcx, r14
+140f0fb30  call     qword ptr [rax + 0x130]
+140f0fb36  jmp      0x140f10407
+140f0fb3b  mov      byte ptr [rdi + 2], 1
+140f0fb3f  lea      r8, [rip + 0x2376312]  ; 0x143285e58 "OnAccountEvent/AET_Login/R_AuthTokenRequestError"
+140f0fb46  xor      edx, edx
+140f0fb48  lea      rcx, [rip + 0x2354731]  ; 0x143264280 "Network"
+140f0fb4f  call     0x140f19210
+140f0fb54  mov      rax, qword ptr [r14]
+140f0fb57  mov      dl, 1
+140f0fb59  mov      rcx, r14
+140f0fb5c  call     qword ptr [rax + 0x130]
+140f0fb62  jmp      0x140f10407
+140f0fb67  mov      r9d, dword ptr [rsi + 0x20]
+140f0fb6b  lea      r8, [rip + 0x237631e]  ; 0x143285e90 "OnAccountEvent/AET_Login/R_ExtendedError %d"
+140f0fb72  xor      edx, edx
+140f0fb74  lea      rcx, [rip + 0x2354705]  ; 0x143264280 "Network"
+140f0fb7b  call     0x140f19210
+140f0fb80  mov      eax, dword ptr [rsi + 0x20]
+140f0fb83  add      eax, 0xf
+140f0fb86  cmp      eax, 0xe
+140f0fb89  ja       0x140f0fc9c
+140f0fb8f  cdqe     
+140f0fb91  mov      ecx, dword ptr [r13 + rax*4 + 0xf104b8]
+140f0fb99  add      rcx, r13
+140f0fb9c  jmp      rcx
+140f0fb9e  lea      rax, [rip + 0x2376317]  ; 0x143285ebc "xbox"
+140f0fba5  lea      r15, [rip + 0x237631c]  ; 0x143285ec8 "NON XBOX"
+140f0fbac  cmp      dword ptr [rsi + 0x340], 9
+140f0fbb3  cmove    r15, rax
+140f0fbb7  mov      byte ptr [rdi + 4], 0
+140f0fbbb  lea      r8, [rip + 0x237631e]  ; 0x143285ee0 "OnAccountEvent/AET_Login/R_ExtendedError/EE_RLinkServiceUnavailable"
+140f0fbc2  xor      edx, edx
+140f0fbc4  lea      rcx, [rip + 0x23546b5]  ; 0x143264280 "Network"
+140f0fbcb  call     0x140f19210
+140f0fbd0  lea      rdi, [rip + 0x237634d]  ; 0x143285f24 "valid"
+140f0fbd7  lea      rbx, [rip + 0x2376352]  ; 0x143285f30 "NOT VALID"
+140f0fbde  mov      r9, rbx
+140f0fbe1  cmp      qword ptr [rsi + 0x78], -1
+140f0fbe6  cmovne   r9, rdi
+140f0fbea  mov      qword ptr [rsp + 0x20], r15
+140f0fbef  lea      r8, [rip + 0x237634a]  ; 0x143285f40 "Account info: %s, type=%s"
+140f0fbf6  xor      edx, edx
+140f0fbf8  lea      rcx, [rip + 0x2354681]  ; 0x143264280 "Network"
+140f0fbff  call     0x140f19210
+140f0fc04  lea      rcx, [rsi + 0x248]
+140f0fc0b  cmp      qword ptr [rcx + 0x18], 7
+140f0fc10  jbe      0x140f0fc15
+140f0fc12  mov      rcx, qword ptr [rcx]
+140f0fc15  lea      rax, [rsi + 0x228]
+140f0fc1c  cmp      qword ptr [rax + 0x18], 7
+140f0fc21  jbe      0x140f0fc26
+140f0fc23  mov      rax, qword ptr [rax]
+140f0fc26  cmp      qword ptr [rsi + 0x1e0], -1
+140f0fc2e  cmovne   rbx, rdi
+140f0fc32  mov      qword ptr [rsp + 0x30], rcx
+140f0fc37  mov      qword ptr [rsp + 0x28], rax
+140f0fc3c  mov      qword ptr [rsp + 0x20], r15
+140f0fc41  mov      r9, rbx
+140f0fc44  lea      r8, [rip + 0x2376315]  ; 0x143285f60 "Default profile info: %s type=%s alias=%ls sanitised_alias=%ls"
+140f0fc4b  xor      edx, edx
+140f0fc4d  lea      rcx, [rip + 0x235462c]  ; 0x143264280 "Network"
+140f0fc54  call     0x140f19210
+140f0fc59  mov      rax, qword ptr [r14]
+140f0fc5c  mov      dl, 1
+140f0fc5e  mov      rcx, r14
+140f0fc61  call     qword ptr [rax + 0x130]
+140f0fc67  jmp      0x140f10407
+140f0fc6c  mov      word ptr [rdi + 3], 0
+140f0fc72  mov      rax, qword ptr [r14]
+140f0fc75  mov      dl, 1
+140f0fc77  mov      rcx, r14
+140f0fc7a  call     qword ptr [rax + 0x130]
+140f0fc80  jmp      0x140f10407
+140f0fc85  mov      byte ptr [rdi + 4], 0
+140f0fc89  mov      rax, qword ptr [r14]
+140f0fc8c  mov      dl, 1
+140f0fc8e  mov      rcx, r14
+140f0fc91  call     qword ptr [rax + 0x130]
+140f0fc97  jmp      0x140f10407
+140f0fc9c  lea      r8, [rip + 0x23762fd]  ; 0x143285fa0 "OnAccountEvent/AET_Login/R_ExtendedError/UNKNOWN"
+140f0fca3  xor      edx, edx
+140f0fca5  lea      rcx, [rip + 0x23545d4]  ; 0x143264280 "Network"
+140f0fcac  call     0x140f19210
+140f0fcb1  mov      rax, qword ptr [r14]
+140f0fcb4  mov      dl, 1
+140f0fcb6  mov      rcx, r14
+140f0fcb9  call     qword ptr [rax + 0x130]
+140f0fcbf  jmp      0x140f10407
+140f0fcc4  mov      r9, qword ptr [rsi + 0x1e0]
+140f0fccb  lea      r8, [rip + 0x2376306]  ; 0x143285fd8 "OnAccountEvent/AET_Login/R_Success profileID=%lld"
+140f0fcd2  xor      edx, edx
+140f0fcd4  lea      rcx, [rip + 0x23545a5]  ; 0x143264280 "Network"
+140f0fcdb  call     0x140f19210
+140f0fce0  mov      word ptr [rdi + 3], 0x101
+140f0fce6  lea      rdx, [rsi + 0x18]
+140f0fcea  mov      rcx, r14
+140f0fced  call     0x140f109b0
+140f0fcf2  lea      rax, [rsp + 0x70]
+140f0fcf7  mov      qword ptr [rsp + 0x68], rax
+140f0fcfc  lea      rdx, [rsi + 0x2f8]
+140f0fd03  lea      rcx, [rsp + 0x70]
+140f0fd08  call     0x1402bf980
+140f0fd0d  mov      rdi, rax
+140f0fd10  mov      rbx, qword ptr [rsi + 0x318]
+140f0fd17  movsxd   rdx, dword ptr [rsi + 0x2f0]
+140f0fd1e  lea      rcx, [rsp + 0x40]
+140f0fd23  call     0x140f0af70
+140f0fd28  nop      
+140f0fd29  mov      r9, rdi
+140f0fd2c  mov      r8, rbx
+140f0fd2f  mov      rdx, rax
+140f0fd32  mov      rcx, r14
+140f0fd35  call     0x140f14bf0
+140f0fd3a  mov      rbx, qword ptr [rip + 0x33cc7af]  ; 0x1442dc4f0
+140f0fd41  xorps    xmm0, xmm0
+140f0fd44  movups   xmmword ptr [rbp - 0x70], xmm0
+140f0fd48  xorps    xmm1, xmm1
+140f0fd4b  movdqa   xmmword ptr [rbp - 0x60], xmm1
+140f0fd50  mov      r8d, 0x12
+140f0fd56  lea      rdx, [rip + 0x235445b]  ; 0x1432641b8 "IDS_REGION_DEFAULT"
+140f0fd5d  lea      rcx, [rbp - 0x70]
+140f0fd61  call     0x1402aa3e0
+140f0fd66  nop      
+140f0fd67  xorps    xmm0, xmm0
+140f0fd6a  movups   xmmword ptr [rbp - 0x50], xmm0
+140f0fd6e  xorps    xmm1, xmm1
+140f0fd71  movdqa   xmmword ptr [rbp - 0x40], xmm1
+140f0fd76  xor      r8d, r8d
+140f0fd79  lea      rdx, [rip + 0x2766d48]  ; 0x143676ac8
+140f0fd80  lea      rcx, [rbp - 0x50]
+140f0fd84  call     0x1402aa3e0
+140f0fd89  mov      qword ptr [rbp - 0x30], r15
+140f0fd8d  mov      byte ptr [rbp - 0x28], 0
+140f0fd91  lea      rcx, [rbx + 0x2628]
+140f0fd98  mov      r8d, 1

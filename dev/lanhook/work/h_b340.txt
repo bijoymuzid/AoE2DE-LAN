@@ -1,0 +1,66 @@
+14039b340  mov      qword ptr [rsp + 0x18], rbx
+14039b345  mov      qword ptr [rsp + 0x20], rsi
+14039b34a  push     rdi
+14039b34b  sub      rsp, 0x60
+14039b34f  mov      rax, qword ptr [rip + 0x3d7adea]  ; 0x144116140
+14039b356  xor      rax, rsp
+14039b359  mov      qword ptr [rsp + 0x50], rax
+14039b35e  mov      rdi, rdx
+14039b361  mov      rbx, rcx
+14039b364  mov      eax, dword ptr [rdx + 0x18]
+14039b367  inc      eax
+14039b369  mov      dword ptr [rdx + 0x18], eax
+14039b36c  cmp      byte ptr [rdx + 2], 0
+14039b370  je       0x14039b37d
+14039b372  cmp      eax, 1
+14039b375  setle    al
+14039b378  jmp      0x14039b3fe
+14039b37d  cmp      byte ptr [rdx + 1], 0
+14039b381  je       0x14039b3fc
+14039b383  cmp      byte ptr [rdx + 3], 0
+14039b387  jne      0x14039b4bb
+14039b38d  xorps    xmm0, xmm0
+14039b390  movups   xmmword ptr [rsp + 0x30], xmm0
+14039b395  movdqa   xmm1, xmmword ptr [rip + 0x3304cd3]  ; 0x1436a0070
+14039b39d  movdqu   xmmword ptr [rsp + 0x40], xmm1
+14039b3a3  mov      byte ptr [rsp + 0x30], 0
+14039b3a8  mov      r8d, 0xffffffff
+14039b3ae  lea      rdx, [rsp + 0x30]
+14039b3b3  call     0x14039cc60
+14039b3b8  test     al, al
+14039b3ba  jne      0x14039b41d
+14039b3bc  mov      rdx, qword ptr [rsp + 0x48]
+14039b3c1  cmp      rdx, 0xf
+14039b3c5  jbe      0x14039b3fc
+14039b3c7  inc      rdx
+14039b3ca  mov      rcx, qword ptr [rsp + 0x30]
+14039b3cf  cmp      rdx, 0x1000
+14039b3d6  mov      rax, rcx
+14039b3d9  jb       0x14039b3f4
+14039b3db  add      rdx, 0x27
+14039b3df  mov      rcx, qword ptr [rcx - 8]
+14039b3e3  sub      rax, rcx
+14039b3e6  sub      rax, 8
+14039b3ea  cmp      rax, 0x1f
+14039b3ee  ja       0x14039b530
+14039b3f4  lfence   
+14039b3f7  call     0x142d6dc84
+14039b3fc  xor      al, al
+14039b3fe  mov      rcx, qword ptr [rsp + 0x50]
+14039b403  xor      rcx, rsp
+14039b406  call     0x142d6e390
+14039b40b  lea      r11, [rsp + 0x60]
+14039b410  mov      rbx, qword ptr [r11 + 0x20]
+14039b414  mov      rsi, qword ptr [r11 + 0x28]
+14039b418  mov      rsp, r11
+14039b41b  pop      rdi
+14039b41c  ret      
+14039b41d  mov      rcx, rbx
+14039b420  call     0x14039b7c0
+14039b425  test     al, al
+14039b427  je       0x14039b3bc
+14039b429  mov      rcx, qword ptr [rbx + 0x20]
+14039b42d  mov      rdx, qword ptr [rbx + 8]
+14039b431  mov      rax, qword ptr [rbx + 0x10]
+14039b435  sub      rax, rdx
+14039b438  cmp      rcx, rax

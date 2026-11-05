@@ -1,0 +1,9 @@
+# binaries are built locally / git-ignored analysis dumps
+*.exe
+*.dll
+*.obj
+*.exp
+*.lib
+*.npy
+gametext.bin
+pdata_funcs.json
