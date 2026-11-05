@@ -22,4 +22,6 @@ rem offline login-server validation harness
 "%VC%\bin\Hostx64\x64\cl.exe" -nologo -MT -O1 -GS- -DNDEBUG -DWIN32_WINNT=0x0A00 %INC% srvtest.c loginsrv.c -c -Fo srvtest.obj || exit /b 1
 "%VC%\bin\Hostx64\x64\link.exe" -nologo -OUT:srvtest.exe srvtest.obj loginsrv.obj hookcore.obj hooks.obj %LIBS% kernel32.lib ws2_32.lib || exit /b 1
 
+rem stage the built DLL into the game dir (the game loads .\dbghelp.dll)
+copy /y dbghelp.dll ..\..\dbghelp.dll >nul
 echo === build ok ===

@@ -185,7 +185,23 @@ static DWORD g_Stage = 1;
 static signed char g_Only[HK_MAX];   // set when AOE2LAN_HOOKS restricts installs
 
 // ---------------------------------------------------------------- MP unlock
-// Session 23. The Multiplayer button is disabled because rlink's
+// Session 26: the s23/s25 target was wrong. The read-only map proved the live
+// platform object carries vtable 0x14366b450 (plain member getters), NOT
+// 0x143669fc0 -- so those three slots were never on the privilege path. The
+// real chain, measured at runtime and verified against the shipped .rdata:
+//   svc = [platform+0x1818]  vtable 0x14366f848
+//     +0xb0  keyed readiness query (0 = present, 2 = not ready)
+//   usr = [platform+0x12f8]  vtable 0x143670a10
+//     +0xb8  signed-in user name (bool)
+//     +0xc8  HasPrivilege (0 allowed, 1 ?, 2 unsupported)
+// HasPlatformPrivilege (0x14051a390) fails at the first of these for the key
+// 0x14327ce50 + "state == -1" descriptor, and never reaches the other two.
+// Re-point those three slots; the query stub answers only that one key and
+// calls the stock implementation for anything else.
+// In-memory only, nothing on disk changes, reverted by relaunch. Opt-in:
+// AOE2LAN_MPUNLOCK=1.
+//
+// Session 23 note (superseded but kept for history). The Multiplayer button is disabled because rlink's
 // WorldwideAccountService::HasPlatformPrivilege (0x14051a390, ENCRYPTED on
 // disk) needs a live platform user: it calls the platform object's vtable
 // slot 0xb8 ("user signed in"), and only then slot 0xc8 (HasPrivilege).
@@ -195,34 +211,76 @@ static signed char g_Only[HK_MAX];   // set when AOE2LAN_HOOKS restricts install
 // vtable (0x143669fc0, plain .rdata, never encrypted) at these stubs.
 // In-memory only, nothing on disk changes, restored by relaunch. Opt-in:
 // AOE2LAN_MPUNLOCK=1.
-typedef int (*PfnPlatBool)(void *self);
-typedef int (*PfnPlatPriv)(void *self, int priv, void *out, unsigned char b);
-typedef int (*PfnPlatState)(void *self, int priv, unsigned char b);
+typedef int (*PfnQuery)(void *self, void *key);
+typedef int (*PfnName)(void *self, void *out);
+typedef int (*PfnPriv)(void *self, int priv, void *out, unsigned char b);
 
-// session 25: one-shot "called" lines separate "never asked" from "asked".
-static int pv_signed_in(void *self) {
+// session 26: which path asks? 4 stack words per call, image VAs only, compact.
+static void spy_callers(const char *tag, void *self) {
+    char b[256]; int i = 0;
+    DWORD64 *sp = 0;
+    __try { sp = (DWORD64*)_AddressOfReturnAddress(); }   // caller's rsp after the call
+    __except (EXCEPTION_EXECUTE_HANDLER) { return; }
+    i = cput(b, i, "callers "); 
+    for (const char *t = tag; t && *t && i < 30; t++) b[i++] = *t;
+    i = cput(b, i, " self=rva=0x");
+    if ((DWORD64)self >= g_Base && (DWORD64)self < g_Base + 0x5000000) i = chx(b, i, (DWORD64)self - g_Base);
+    else i = cput(b, i, "heap");
+    b[i] = 0; log_line(b);
+    if (!sp) return;
+    for (int k = 0; k < 12; k++) {
+        DWORD64 v = 0;
+        __try { v = sp[k]; } __except (EXCEPTION_EXECUTE_HANDLER) { break; }
+        if (v >= g_Base && v < g_Base + 0x5000000) {
+            char l[96]; int j = 0;
+            j = cput(l, j, "  ret["); j = cpct(l, j, (unsigned long long)k);
+            j = cput(l, j, "] game+0x"); j = chx(l, j, v - g_Base);
+            l[j] = 0; log_line(l);
+        }
+    }
+}
+
+static PfnQuery g_OrigSvcQuery = 0;      // stock 0x1405204f0, for the fallthrough
+#define MP_KEY_DESC 0x327ce50            // descriptor fa70 builds: [0x14327ce50, .., -1]
+
+// one-shot "called" lines separate "never asked" from "asked" (s25 pattern).
+// Answers 0 ("ready") only for the descriptor platform_user_signed_in uses;
+// every other key goes to the stock implementation untouched.
+static int svc_query(void *self, void *key) {
+    static LONG once = 0;
+    if (key && (DWORD64)*(volatile DWORD64*)key == g_Base + (MP_KEY_DESC - 0x140000000)
+             && *(volatile DWORD64*)((char*)key + 0x10) == (DWORD64)-1) {
+        if (!InterlockedExchange(&once, 1)) { log_line("mpunlock: called svc_query (ready key)"); spy_callers("svc0xb0", self); }
+        return 0;
+    }
+    return g_OrigSvcQuery ? g_OrigSvcQuery(self, key) : 2;
+}
+// "who is signed in" -> bool. The stock fills a std::string; fa70 only reads al,
+// but leave a valid empty string behind so nothing downstream sees garbage.
+static int usr_signed_in(void *self, void *out) {
     static LONG once = 0; (void)self;
-    if (!InterlockedExchange(&once, 1)) log_line("mpunlock: called pv_signed_in");
+    if (!InterlockedExchange(&once, 1)) { log_line("mpunlock: called usr_signed_in"); spy_callers("usr0xb8", self); }
+    if (out) { volatile DWORD64 *q = (volatile DWORD64*)out;   // MSVC std::string, SSO
+               q[0] = (DWORD64)out + 0x10; q[1] = 0; q[2] = 7; q[3] = 0; }
     return 1;
 }
-static int pv_has_priv(void *self, int priv, void *out, unsigned char b) {
-    static LONG once = 0; (void)self; (void)priv; (void)out; (void)b;
-    if (!InterlockedExchange(&once, 1)) log_line("mpunlock: called pv_has_priv");
-    return 1;
-}
-static int pv_priv_state(void *self, int priv, unsigned char b) {
+// HasPrivilege -> 0 = allowed, and the same out struct the stock writes.
+static int usr_has_priv(void *self, int priv, void *out, unsigned char b) {
     static LONG once = 0; (void)self; (void)priv; (void)b;
-    if (!InterlockedExchange(&once, 1)) log_line("mpunlock: called pv_priv_state");
-    return 0;   // 0 = allowed
+    if (!InterlockedExchange(&once, 1)) { log_line("mpunlock: called usr_has_priv"); spy_callers("usr0xc8", self); }
+    if (out) { volatile DWORD32 *d = (volatile DWORD32*)out;
+               d[0] = 0; d[1] = 1; d[2] = 0; }
+    return 0;
 }
 
-// the three slots, shared with the heartbeat re-read below
+// the three slots (plain .rdata, never encrypted), shared with the 1 Hz re-read
 static const struct { DWORD64 va; DWORD64 orig; void *repl; const char *what; } g_MpSlots[] = {
-    { 0x14366A078, 0x1403BA0F0, (void*)&pv_signed_in,  "slot 0xb8 user-signed-in" },
-    { 0x14366A080, 0x1403B7200, (void*)&pv_has_priv,   "slot 0xc0 HasPrivilege"    },
-    { 0x14366A088, 0x1403B7270, (void*)&pv_priv_state, "slot 0xc8 privilege state" },
+    { 0x14366F8F8, 0x1405204F0, (void*)&svc_query,     "svc vtable+0xb0 keyed readiness" },
+    { 0x143670AC8, 0x140556D90, (void*)&usr_signed_in, "usr vtable+0xb8 signed-in name"  },
+    { 0x143670AD8, 0x1405527B0, (void*)&usr_has_priv,  "usr vtable+0xc8 HasPrivilege"    },
 };
 static volatile LONG g_MpUnlocked = 0;   // set only when all three slots took
+static int g_MpSpy = 0;                   // AOE2LAN_MPSPY: read-only object map
 static signed char g_MpReverted[3];
 
 static int getenv_flag(const WCHAR *name) {
@@ -248,6 +306,8 @@ static void mp_unlock(void) {
         { DWORD old;
           if (!VirtualProtect(slot, 8, PAGE_READWRITE, &old)) {
               log_line("mpunlock: VirtualProtect failed"); continue; }
+          if (g_MpSlots[k].repl == (void*)&svc_query)
+              g_OrigSvcQuery = (PfnQuery)(g_Base + (g_MpSlots[k].orig - (DWORD64)0x140000000));
           *slot = (DWORD64)g_MpSlots[k].repl;
           VirtualProtect(slot, 8, old, &old); }
         { char c[128]; int j=0; const char *t="mpunlock: patched ";
@@ -259,7 +319,7 @@ static void mp_unlock(void) {
           c[j]=0; log_line(c);
           if (*slot == (DWORD64)g_MpSlots[k].repl) patched++; }
     }
-    log_line("mpunlock: platform vtable re-pointed (in-memory only)");
+    log_line("mpunlock: privilege-path vtable slots re-pointed (in-memory only)");
     if (patched == (int)(sizeof(g_MpSlots)/sizeof(g_MpSlots[0]))) g_MpUnlocked = 1;
 }
 
@@ -391,6 +451,8 @@ install_loop:
           if (!pending) break;
           Sleep(200);
       } }
+    g_MpSpy = getenv_flag(L"AOE2LAN_MPSPY");
+    if (g_MpSpy) log_line("mpspy: on (read-only object map)");
     if (getenv_flag(L"AOE2LAN_MPUNLOCK")) mp_unlock();
     else log_line("mpunlock: off (AOE2LAN_MPUNLOCK unset)");
     log_line("LanHookThread: install loop done");
@@ -517,10 +579,239 @@ static void mp_check_slots(void) {
         }
     }
 }
+// session 26: read-only object map. s26 re-read of HasPlatformPrivilege shows
+// platform.vtbl[0x98] forwards to [this+0x90].vtbl[0x90] and platform.vtbl[0x150]
+// is a string-compare bool, so the object behind g_Platform may not own the
+// vtable patched in s25. Print the live object, its vtable and the slot values so
+// a later re-point is based on measurement, not assumption. Reads only.
+#define PLATFORM_GLOBAL 0x4c9e5f0   // [0x144c9e5f0] = rlink platform object
+static const unsigned g_SpyOffs[] = { 0x90, 0x98, 0xb0, 0xb8, 0xc0, 0xc8, 0x150, 0x158 };
+
+static void spy_rva(const char *tag, DWORD64 va) {
+    char b[160]; int i = 0;
+    i = cput(b, i, "mpspy: ");
+    for (const char *t = tag; t && *t && i < 40; t++) b[i++] = *t;
+    i = cput(b, i, " rva=0x");
+    if (va >= g_Base && va < g_Base + 0x5000000) i = chx(b, i, va - g_Base);
+    else i = cput(b, i, "outside");
+    b[i] = 0; log_line(b);
+}
+
+// one interface member of the platform object: pointer, vtable, and the four
+// slots the privilege chain calls. Reads only.
+static void spy_iface(const char *tag, unsigned off, DWORD64 plat) {
+    DWORD64 p = 0, vt = 0;
+    __try { p = *(volatile DWORD64*)(plat + off); }
+    __except (EXCEPTION_EXECUTE_HANDLER) { return; }
+    { char b[160]; int i = 0;
+      i = cput(b, i, "mpspy: ");
+      for (const char *t = tag; t && *t && i < 40; t++) b[i++] = *t;
+      i = cput(b, i, " ptr="); i = chx(b, i, p);
+      b[i] = 0; log_line(b); }
+    if (!p) return;
+    __try { vt = *(volatile DWORD64*)p; }
+    __except (EXCEPTION_EXECUTE_HANDLER) { return; }
+    spy_rva("  vtable", vt);
+    if (!(vt >= g_Base && vt < g_Base + 0x5000000)) return;
+    { const unsigned in[] = { 0xb0, 0xb8, 0xc0, 0xc8 };
+      for (unsigned k = 0; k < sizeof(in)/sizeof(in[0]); k++) {
+        DWORD64 s = 0;
+        __try { s = *(volatile DWORD64*)(vt + in[k]); }
+        __except (EXCEPTION_EXECUTE_HANDLER) { continue; }
+        { char b[160]; int i = 0;
+          i = cput(b, i, "mpspy:     slot+0x"); i = chx(b, i, in[k]); i = cput(b, i, " -> ");
+          if (s >= g_Base && s < g_Base + 0x5000000) { i = cput(b, i, "rva=0x"); i = chx(b, i, s - g_Base); }
+          else i = cput(b, i, "outside");
+          b[i] = 0; log_line(b); } }
+    }
+}
+
+static void mp_spy(void) {
+    if (!g_MpSpy) return;
+    DWORD64 plat = 0, vt = 0;
+    __try { plat = *(volatile DWORD64*)(g_Base + PLATFORM_GLOBAL); }
+    __except (EXCEPTION_EXECUTE_HANDLER) { log_line("mpspy: read of platform failed"); return; }
+    spy_rva("platform obj", plat);
+    if (!plat) { log_line("mpspy: platform is null"); return; }
+    __try { vt = *(volatile DWORD64*)plat; }
+    __except (EXCEPTION_EXECUTE_HANDLER) { log_line("mpspy: read of vtable failed"); return; }
+    spy_rva("platform vtable", vt);
+    if (!(vt >= g_Base && vt < g_Base + 0x5000000)) return;
+    for (unsigned k = 0; k < sizeof(g_SpyOffs)/sizeof(g_SpyOffs[0]); k++) {
+        DWORD64 s = 0;
+        __try { s = *(volatile DWORD64*)(vt + g_SpyOffs[k]); }
+        __except (EXCEPTION_EXECUTE_HANDLER) { continue; }
+        { char b[160]; int i = 0; DWORD64 off = g_SpyOffs[k];
+          i = cput(b, i, "mpspy:   slot+"); i = chx(b, i, off);
+          i = cput(b, i, " -> ");
+          if (s >= g_Base && s < g_Base + 0x5000000) { i = cput(b, i, "rva=0x"); i = chx(b, i, s - g_Base); }
+          else i = cput(b, i, "outside");
+          b[i] = 0; log_line(b); }
+    }
+    // the two interface members the privilege chain reads:
+    //   [plat+0x1818] -> the object whose vtbl[0xb0] answers the keyed query
+    //   [plat+0x12f8] -> the object whose vtbl[0xb8]/[0xc8] answer sign-in/privilege
+    spy_iface("[plat+0x1818] svc", 0x1818, plat);
+    spy_iface("[plat+0x12f8] usr", 0x12f8, plat);
+    spy_iface("[plat+0x1820]",      0x1820, plat);
+    spy_iface("[plat+0x1828]",      0x1828, plat);
+    spy_iface("[plat+0x1830]",      0x1830, plat);
+    spy_iface("[plat+0x1838]",      0x1838, plat);
+}
+
+// ---------------------------------------------------------------- UI probe (s27)
+// Read-only. Nobody knows the Age2Button vtable (no class-name RTTI, and most of
+// .text is Arxan-encrypted on disk so it cannot be found by reading the file).
+// The live process does know it: every widget object starts with a pointer to a
+// vtable in .rdata whose +0x68 slot is the enabled setter. So scan writable
+// memory for such pointers and report the unique vtables whose +0x68 entry
+// begins with a "store a byte through rcx" instruction. Nothing is written.
+// Opt-in: AOE2LAN_UIW=1.
+#define UIW_RDATA0 0x3197000ULL          // .rdata rva window (from the shipped PE)
+#define UIW_RDATA1 0x3da60a8ULL
+#define UIW_TEXT1  0x3197000ULL          // .text ends here
+
+static int uiw_in_text(DWORD64 v) { return v >= g_Base + 0x1000 && v < g_Base + UIW_TEXT1; }
+static int uiw_in_rdata(DWORD64 v) { return v >= g_Base + UIW_RDATA0 && v < g_Base + UIW_RDATA1; }
+
+// does the code at p look like "mov byte ptr [rcx(+disp)], dl" in its first 32 bytes?
+static int uiw_setbool(DWORD64 p) {
+    int hit = 0;
+    __try {
+        const BYTE *c = (const BYTE*)p;
+        for (int k = 0; k < 32; k++) {
+            int b0 = c[k], b1 = c[k + 1];
+            if (b0 >= 0x40 && b0 <= 0x4F) { b0 = c[k + 1]; b1 = c[k + 2]; }
+            if (b0 == 0x88 && (b1 == 0x51 || b1 == 0x91)) { hit = 1; break; }  // [rcx+d], dl
+        }
+    } __except (EXCEPTION_EXECUTE_HANDLER) { return 0; }
+    return hit;
+}
+
+static void uiw_log_vt(DWORD64 vt, unsigned hits) {
+    char b[200]; int i = 0;
+    i = cput(b, i, "uiw: vtable+0x"); i = chx(b, i, vt - g_Base);
+    i = cput(b, i, " objs="); i = cpct(b, i, hits);
+    i = cput(b, i, " setter+0x"); i = chx(b, i, *(volatile DWORD64*)(vt + 0x68) - g_Base);
+    i = cput(b, i, " bytes=");
+    __try {
+        const BYTE *c = (const BYTE*)*(volatile DWORD64*)(vt + 0x68);
+        for (int k = 0; k < 12 && i < 190; k++) {
+            const char *hx = "0123456789abcdef";
+            b[i++] = hx[c[k] >> 4]; b[i++] = hx[c[k] & 15];
+        }
+    } __except (EXCEPTION_EXECUTE_HANDLER) { i = cput(b, i, "?"); }
+    b[i] = 0; log_line(b);
+}
+
+static void ui_widget_probe(void) {
+    if (!getenv_flag(L"AOE2LAN_UIW")) return;
+    DWORD64 found[64]; unsigned nfound = 0, nvt = 0;
+    DWORDLONG scanned = 0;
+    BYTE *a = 0;
+    MEMORY_BASIC_INFORMATION mbi;
+    for (;;) {
+        if (!VirtualQuery(a, &mbi, sizeof mbi)) break;
+        a = (BYTE*)mbi.BaseAddress + mbi.RegionSize;
+        if ((DWORD64)mbi.BaseAddress >= g_Base && (DWORD64)mbi.BaseAddress < g_Base + 0x5000000) continue;
+        if (mbi.State != MEM_COMMIT || !(mbi.Protect & (PAGE_READWRITE | PAGE_WRITECOPY))) continue;
+        if (mbi.RegionSize > (64u << 20)) continue;          // skip huge reserved blocks
+        scanned += mbi.RegionSize;
+        for (DWORD64 p = (DWORD64)mbi.BaseAddress; p + 8 <= (DWORD64)mbi.BaseAddress + mbi.RegionSize; p += 8) {
+            DWORD64 v = 0;
+            __try { v = *(volatile DWORD64*)p; } __except (EXCEPTION_EXECUTE_HANDLER) { continue; }
+            if (!uiw_in_rdata(v)) continue;
+            DWORD64 s0 = 0, s1 = 0, s2 = 0, set = 0;
+            __try { s0 = *(volatile DWORD64*)v; s1 = *(volatile DWORD64*)(v + 8);
+                    s2 = *(volatile DWORD64*)(v + 16); set = *(volatile DWORD64*)(v + 0x68); }
+            __except (EXCEPTION_EXECUTE_HANDLER) { continue; }
+            if (!uiw_in_text(s0) || !uiw_in_text(s1) || !uiw_in_text(s2)) continue;
+            if (!uiw_in_text(set) || !uiw_setbool(set)) continue;
+            unsigned k = 0;
+            for (; k < nvt; k++) if (found[k] == v) break;
+            if (k < nvt) continue;
+            if (nvt < 64) { found[nvt++] = v; uiw_log_vt(v, (unsigned)(p & 0xffffffff)); }
+        }
+    }
+    { char b[120]; int i = 0;
+      i = cput(b, i, "uiw: scanned MB="); i = cpct(b, i, scanned >> 20);
+      i = cput(b, i, " candidate vtables="); i = cpct(b, i, nvt);
+      b[i] = 0; log_line(b); }
+}
+
+// Targeted variant: the widget manager's GetWidget(TestKey) call site in the game
+// loads the key string "Background/ButtonMultiplayer" from .rdata, so every widget
+// object holds that pointer. Find it, then report the object's vtable, the +0x68
+// setter and the bytes at the object start. Read-only.
+#define UIW_KEY_RVA 0x333af28ULL      // "Background/ButtonMultiplayer" in .rdata
+
+static void ui_widget_keyprobe(void) {
+    if (!getenv_flag(L"AOE2LAN_UIW")) return;
+    const DWORD64 key = g_Base + UIW_KEY_RVA;
+    DWORDLONG scanned = 0; unsigned n = 0;
+    BYTE *a = 0;
+    MEMORY_BASIC_INFORMATION mbi;
+    for (;;) {
+        if (!VirtualQuery(a, &mbi, sizeof mbi)) break;
+        a = (BYTE*)mbi.BaseAddress + mbi.RegionSize;
+        if ((DWORD64)mbi.BaseAddress >= g_Base && (DWORD64)mbi.BaseAddress < g_Base + 0x5000000) continue;
+        if (mbi.State != MEM_COMMIT || !(mbi.Protect & (PAGE_READWRITE | PAGE_WRITECOPY))) continue;
+        if (mbi.RegionSize > (64u << 20)) continue;
+        scanned += mbi.RegionSize;
+        for (DWORD64 q = (DWORD64)mbi.BaseAddress; q + 8 <= (DWORD64)mbi.BaseAddress + mbi.RegionSize; q += 8) {
+            DWORD64 v = 0;
+            __try { v = *(volatile DWORD64*)q; } __except (EXCEPTION_EXECUTE_HANDLER) { continue; }
+            if (v != key) continue;
+            if (n >= 8) continue;
+            n++;
+            { char b[200]; int i = 0;
+              i = cput(b, i, "uiwK: hit at game+0x"); i = chx(b, i, q - g_Base);
+              i = cput(b, i, " off_in_obj=-0x");
+              b[i] = 0; log_line(b); }
+            // the object base is not known; dump the 0x60 bytes before and after the pointer
+            for (int back = 1; back <= 3; back++) {
+                DWORD64 base = q - 8 * back, vt = 0, set = 0;
+                __try { vt = *(volatile DWORD64*)base; set = *(volatile DWORD64*)(vt + 0x68); }
+                __except (EXCEPTION_EXECUTE_HANDLER) { continue; }
+                { char b[200]; int i = 0;
+                  i = cput(b, i, "uiwK:   base=q-"); i = cpct(b, i, 8 * back);
+                  i = cput(b, i, " q0=");
+                  __try {
+                      const BYTE *c = (const BYTE*)base;
+                      for (int k = 0; k < 8; k++) { const char *hx = "0123456789abcdef";
+                          b[i++] = hx[c[k] >> 4]; b[i++] = hx[c[k] & 15]; }
+                  } __except (EXCEPTION_EXECUTE_HANDLER) { i = cput(b, i, "?"); }
+                  if (uiw_in_rdata(vt) && uiw_in_text(set)) {
+                      i = cput(b, i, " VTBL+0x"); i = chx(b, i, vt - g_Base);
+                      i = cput(b, i, " setter+0x"); i = chx(b, i, set - g_Base);
+                      i = cput(b, i, " sb="); i = cpct(b, i, (unsigned long long)uiw_setbool(set));
+                  } else i = cput(b, i, " no vtbl");
+                  b[i] = 0; log_line(b); }
+            }
+            // byte map of the 0x100 bytes around the pointer, to spot the name field
+            { char b[200]; int i = 0;
+              unsigned nz = 0;
+              __try {
+                  const DWORD64 *c = (const DWORD64*)(q - 0x40);
+                  for (int k = 0; k < 8; k++) if (c[k]) nz++;
+              } __except (EXCEPTION_EXECUTE_HANDLER) { nz = 99; }
+              i = cput(b, i, "uiwK:   nonzero qwords in q-0x40..q+0x00: "); i = cpct(b, i, nz);
+              b[i] = 0; log_line(b); }
+        }
+    }
+    { char b[120]; int i = 0;
+      i = cput(b, i, "uiwK: scanned MB="); i = cpct(b, i, scanned >> 20);
+      i = cput(b, i, " hits="); i = cpct(b, i, n);
+      b[i] = 0; log_line(b); }
+}
+
 static DWORD WINAPI HeartbeatThread(LPVOID p) {
     (void)p;
     for (int k = 1;; k++) {
         Sleep(1000);
+        if (k == 6 || k == 10 || k == 20 || k == 40) mp_spy();   // once after login
+        if (k == 60) ui_widget_probe();
+        if (k == 60) ui_widget_keyprobe();
         mp_check_slots();
         if (k % 5 == 0) {   // keep the old 5 s liveness cadence
             char b[64]; int i = 0;
