@@ -805,6 +805,184 @@ static void ui_widget_keyprobe(void) {
       b[i] = 0; log_line(b); }
 }
 
+
+// ---------------------------------------------------------------- rule probe (s28)
+// Read-only. The Multiplayer button's on/off state is decided by the twin-rule
+// table: 0x141b126f0 registers the (enabled, disabled) widget pair,
+// 0x141b12d60 fills one status per rule id, 0x141b12a00 evaluates every record,
+// 0x141b12410 applies it (visibility of both twins + SetEnabled of the live one).
+// Our pair uses ids {2,4,5,8,11,13}; 11 and 12 are constants and 8 needs the
+// game's own privilege chain, so this prints 2, 4, 5, 13 and then, once, the live
+// record for the pair - its computed status is the number that turns the button
+// on or off.  Reads only; nothing here writes game memory.  Opt-in: AOE2LAN_RULES=1.
+#define RULES_SVC 0x42dc4f0ULL       // [0x1442dc4f0] + 0x2e8 = online service object
+#define RULES_CFG 0x43552b8ULL       // [0x1443552b8] = the settings/online singleton
+
+static int rl_in_module(DWORD64 v) { return v >= g_Base && v < g_Base + 0x5000000; }
+
+static void rl_h(const char *tag, const char *sub, DWORD64 v) {
+    char b[160]; int i = 0;
+    i = cput(b, i, "rules: "); i = cput(b, i, tag);
+    if (sub) i = cput(b, i, sub);
+    i = cput(b, i, " = 0x"); i = chx(b, i, v);
+    b[i] = 0; log_line(b);
+}
+static void rl_rva(const char *tag, const char *sub, DWORD64 v) {
+    char b[160]; int i = 0;
+    i = cput(b, i, "rules: "); i = cput(b, i, tag);
+    if (sub) i = cput(b, i, sub);
+    i = cput(b, i, " = ");
+    if (rl_in_module(v)) { i = cput(b, i, "game+0x"); i = chx(b, i, v - g_Base); }
+    else i = cput(b, i, "outside");
+    b[i] = 0; log_line(b);
+}
+static void rl_d(const char *tag, const char *sub, long long v) {
+    char b[160]; int i = 0;
+    i = cput(b, i, "rules: "); i = cput(b, i, tag);
+    if (sub) i = cput(b, i, sub);
+    i = cput(b, i, " = ");
+    if (v < 0) { b[i++] = '-'; v = -v; }
+    i = cpct(b, i, (unsigned long long)v);
+    b[i] = 0; log_line(b);
+}
+
+typedef int (*PfnVoid)(void *self);
+typedef int (*PfnInt)(void *self, int arg);
+
+static int rl_call1(DWORD64 vt, unsigned off, DWORD64 self) {
+    int r;
+    __try { r = ((PfnVoid)*(volatile DWORD64*)(vt + off))((void*)self); }
+    __except (EXCEPTION_EXECUTE_HANDLER) { r = -2; }
+    return r;
+}
+static int rl_call2(DWORD64 vt, unsigned off, DWORD64 self, int arg) {
+    int r;
+    __try { r = ((PfnInt)*(volatile DWORD64*)(vt + off))((void*)self, arg); }
+    __except (EXCEPTION_EXECUTE_HANDLER) { r = -2; }
+    return r;
+}
+
+static void rules_probe(void) {
+    DWORD64 cfg = 0, vt = 0, root = 0, svc = 0;
+    if (!getenv_flag(L"AOE2LAN_RULES")) return;
+    __try { cfg = *(volatile DWORD64*)(g_Base + RULES_CFG); }
+    __except (EXCEPTION_EXECUTE_HANDLER) { cfg = 0; }
+    rl_h("cfg", " [0x1443552b8]", cfg);
+    if (cfg) {
+        __try { vt = *(volatile DWORD64*)cfg; } __except (EXCEPTION_EXECUTE_HANDLER) { vt = 0; }
+        rl_rva("cfg", " vtable", vt);
+        { DWORD64 b698 = 0; long long d680 = 0, d6b4 = 0;
+          __try { b698 = *(volatile BYTE*)(cfg + 0x698); } __except (EXCEPTION_EXECUTE_HANDLER) { b698 = 999; }
+          __try { d680 = *(volatile int*)(cfg + 0x680); } __except (EXCEPTION_EXECUTE_HANDLER) { d680 = -999; }
+          __try { d6b4 = *(volatile int*)(cfg + 0x6b4); } __except (EXCEPTION_EXECUTE_HANDLER) { d6b4 = -999; }
+          rl_d("cfg", " byte+0x698  (rule 13)", (long long)b698);
+          rl_d("cfg", " dword+0x680 (rule 15)", d680);
+          rl_d("cfg", " dword+0x6b4 (rule 15)", d6b4); }
+    }
+    __try { root = *(volatile DWORD64*)(g_Base + RULES_SVC); }
+    __except (EXCEPTION_EXECUTE_HANDLER) { root = 0; }
+    rl_h("svc", " owner [0x1442dc4f0]", root);
+    if (root) { __try { svc = *(volatile DWORD64*)(root + 0x2e8); } __except (EXCEPTION_EXECUTE_HANDLER) { svc = 0; } }
+    rl_h("svc", " object [+0x2e8]", svc);
+    if (svc) {
+        __try { vt = *(volatile DWORD64*)svc; } __except (EXCEPTION_EXECUTE_HANDLER) { vt = 0; }
+        rl_rva("svc", " vtable", vt);
+        if (rl_in_module(vt)) {
+            rl_d("svc", " slot+0x80        (rule 0)", (long long)rl_call1(vt, 0x80, svc));
+            rl_d("svc", " slot+0x88        (rule 1)", (long long)rl_call1(vt, 0x88, svc));
+            rl_d("svc", " slot+0x90        (rule 2)", (long long)rl_call1(vt, 0x90, svc));
+            rl_d("svc", " slot+0x308 arg 2 (rule 5)", (long long)rl_call2(vt, 0x308, svc, 2));
+            rl_d("svc", " slot+0x308 arg 4 (rule 4)", (long long)rl_call2(vt, 0x308, svc, 4));
+        }
+    }
+}
+
+// Read-only shape scan for the live twin-rule records.  A record is 0x48 bytes:
+//   +0 status (int), +8/+0x10 listA (int vector), +0x20/+0x28 listB (int vector),
+//   +0x38 enabled widget, +0x40 disabled widget.
+// The filter is deliberately strict: both lists non-empty, every id in 0..15, and
+// both widget pointers must start with an .rdata vtable.  The status is the number
+// that decides whether the live twin is enabled.  Nothing is written.
+#define RL_RD0 0x3197000ULL
+#define RL_RD1 0x3da60a8ULL
+
+static int rl_in_rdata(DWORD64 v) { return v >= g_Base + RL_RD0 && v < g_Base + RL_RD1; }
+
+static void rl_ids(const char *tag, DWORD64 beg, DWORD64 end) {
+    char b[200]; int i = 0, n = 0;
+    i = cput(b, i, "rules:   "); i = cput(b, i, tag); i = cput(b, i, " ids=");
+    if (beg == end) i = cput(b, i, "(empty)");
+    __try {
+        for (DWORD64 q = beg; q + 4 <= end && n < 24; q += 4, n++) {
+            int id = *(volatile int*)q;
+            if (n) b[i++] = ',';
+            if (id < 0) { b[i++] = '-'; id = -id; }
+            i = cpct(b, i, (unsigned long long)id);
+        }
+    } __except (EXCEPTION_EXECUTE_HANDLER) { i = cput(b, i, " ?"); }
+    b[i] = 0; log_line(b);
+}
+
+static int rl_ids_ok(DWORD64 beg, DWORD64 end) {
+    if (beg == end) return 0;
+    if ((end - beg) > 64 || ((end - beg) & 3)) return 0;
+    __try {
+        for (DWORD64 q = beg; q + 4 <= end; q += 4) {
+            int id = *(volatile int*)q;
+            if (id < 0 || id > 15) return 0;
+        }
+    } __except (EXCEPTION_EXECUTE_HANDLER) { return 0; }
+    return 1;
+}
+
+static void rules_scan(void) {
+    BYTE *a = 0;
+    MEMORY_BASIC_INFORMATION mbi;
+    unsigned n = 0;
+    DWORDLONG scanned = 0;
+    if (!getenv_flag(L"AOE2LAN_RULES")) return;
+    for (;;) {
+        if (!VirtualQuery(a, &mbi, sizeof mbi)) break;
+        a = (BYTE*)mbi.BaseAddress + mbi.RegionSize;
+        if ((DWORD64)mbi.BaseAddress >= g_Base && (DWORD64)mbi.BaseAddress < g_Base + 0x5000000) continue;
+        if (mbi.State != MEM_COMMIT || !(mbi.Protect & (PAGE_READWRITE | PAGE_WRITECOPY))) continue;
+        if (mbi.RegionSize > (512u << 20)) continue;
+        scanned += mbi.RegionSize;
+        DWORD64 lo = (DWORD64)mbi.BaseAddress, hi = lo + mbi.RegionSize;
+        for (DWORD64 p = lo; p + 0x48 <= hi; p += 8) {
+            int st = 0; DWORD64 b0 = 0, e0 = 0, c0 = 0, b1 = 0, e1 = 0, c1 = 0, wa = 0, wb = 0;
+            __try {
+                st = *(volatile int*)p;
+                if (st < 0 || st > 8) continue;
+                b0 = *(volatile DWORD64*)(p + 8);    e0 = *(volatile DWORD64*)(p + 0x10); c0 = *(volatile DWORD64*)(p + 0x18);
+                b1 = *(volatile DWORD64*)(p + 0x20); e1 = *(volatile DWORD64*)(p + 0x28); c1 = *(volatile DWORD64*)(p + 0x30);
+                wa = *(volatile DWORD64*)(p + 0x38); wb = *(volatile DWORD64*)(p + 0x40);
+            } __except (EXCEPTION_EXECUTE_HANDLER) { continue; }
+            if (b0 > e0 || e0 > c0 || b1 > e1 || e1 > c1) continue;
+            if (!rl_ids_ok(b0, e0) || !rl_ids_ok(b1, e1)) continue;
+            if (!wa || !wb || wa == wb) continue;
+            { DWORD64 va = 0, vb = 0;
+              __try { va = *(volatile DWORD64*)wa; vb = *(volatile DWORD64*)wb; }
+              __except (EXCEPTION_EXECUTE_HANDLER) { continue; }
+              if (!rl_in_rdata(va) || !rl_in_rdata(vb)) continue; }
+            if (n >= 24) continue;
+            n++;
+            { char b[200]; int i = 0;
+              i = cput(b, i, "rules: RECORD at 0x"); i = chx(b, i, p);
+              i = cput(b, i, " status="); i = cpct(b, i, (unsigned long long)st);
+              i = cput(b, i, " A=0x"); i = chx(b, i, wa);
+              i = cput(b, i, " B=0x"); i = chx(b, i, wb);
+              b[i] = 0; log_line(b); }
+            rl_ids("A list ", b0, e0);
+            rl_ids("B skip ", b1, e1);
+        }
+    }
+    { char b[140]; int i = 0;
+      i = cput(b, i, "rules: scanned MB="); i = cpct(b, i, scanned >> 20);
+      i = cput(b, i, " records="); i = cpct(b, i, n);
+      b[i] = 0; log_line(b); }
+}
+
 static DWORD WINAPI HeartbeatThread(LPVOID p) {
     (void)p;
     for (int k = 1;; k++) {
@@ -812,6 +990,8 @@ static DWORD WINAPI HeartbeatThread(LPVOID p) {
         if (k == 6 || k == 10 || k == 20 || k == 40) mp_spy();   // once after login
         if (k == 60) ui_widget_probe();
         if (k == 60) ui_widget_keyprobe();
+        if (k == 25 || k == 40 || k == 70) rules_probe();
+        if (k == 75 || k == 95) rules_scan();
         mp_check_slots();
         if (k % 5 == 0) {   // keep the old 5 s liveness cadence
             char b[64]; int i = 0;

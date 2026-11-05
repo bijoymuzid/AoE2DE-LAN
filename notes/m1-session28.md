@@ -192,3 +192,106 @@ line of attack is finished.
 `dev/ghidra-scripts/targets.txt` + `dev\ghidra-decomp.cmd` still works (~60 s for 4 functions).
 Batch used this session: `0x141b126f0, 0x141b12890, 0x141b12820, 0x141b11ad0` → `decomp3.c`.
 Decompiled C of these four is what 28c/28e are based on.
+
+## 28k. MEASURED: the five inputs, in two clean launches (run 1 pid 7988, run 2 pid 14404)
+
+New read-only probe `rules_probe()` / `rules_scan()` in `lanhook.c`, opt-in `AOE2LAN_RULES=1`,
+launcher `PLAY-stage8-RULES.cmd`. Prints at t=25/40/70 s, scans writable memory at t=75/95 s.
+No writes, no detours. DLL crc after the session: **`6ce9a7bd`** (215,552 B); `hooktest` 68/68;
+`AoE2DE_s.exe` still `4f533b6c`.
+
+Both runs, identical at 25/40/70 s:
+
+```
+cfg [0x1443552b8] = heap ptr, vtable game+0x3295d38
+cfg byte+0x698  (rule 13) = 0
+cfg dword+0x680 (rule 15) = 2
+cfg dword+0x6b4 (rule 15) = 0
+svc owner [0x1442dc4f0] = heap ptr
+svc object [+0x2e8]     = heap ptr, vtable game+0x3284698
+svc slot+0x80        (rule 0) = 1
+svc slot+0x88        (rule 1) = 1
+svc slot+0x90        (rule 2) = 0        <-- the only failing input
+svc slot+0x308 arg 2 (rule 5) = 0
+svc slot+0x308 arg 4 (rule 4) = 0
+```
+
+## 28l. MEASURED: the live records, and the Multiplayer pair's status
+
+`rules_scan()` found the record vector in writable memory. Rigorous filter (both int lists
+non-empty, every id 0..15, both widget pointers starting with an `.rdata` vtable):
+
+```
+RECORD status=2  A ids=2,8,4,5,11,12,13   B skip ids=12   <-- ButtonMultiplayer
+RECORD status=2  A ids=2,8,4,5,11,12,13   B skip ids=12   <-- PaphosButtonMultiplayer
+RECORD status=0  A ids=10,11,12,13        B skip ids=12
+RECORD status=0  A ids=9,14,11,12,13      B skip ids=12
+RECORD status=0  A ids=11,12,13           B skip ids=12   (x2)
+```
+
+⇒ the two Multiplayer pairs are the only records with **status = 2**, and the only inputs of that
+pair that are non-zero are **rule 2**, so the disable is caused by rule 2. Rules 4, 5, 11, 13 are
+harmless as measured; rule 8 (privileges) was not evaluated by the probe but cannot raise the max
+above 2, so it does not matter here.
+
+Also measured: `visibility`/`SetEnabled` polarity. `IsEnabled` FALSE is the boxed value from
+`0x1407fc860`, TRUE from `0x1407fec40`; record **status 2 = blocked** (it hides and switches off the
+live twin), status 0 = normal. `Visibility`: 0 = visible, 2 = hidden. (s28g's guess was inverted;
+this is now measured.)
+
+## 28m. THE CAUSE, named: our relay answers getAvailableLeaderboards with rubbish
+
+Rule 2 is `0x140f12e80(svc)`:
+
+```
+al = svc->vtbl[0x88]()            ; measured 1 = "signed in" (checks +0x2c88, +0x2c89, +0xa0, ...)
+if !al return 0
+return 0x140e84100()              ; "count of the leaderboard registry != 0"  (setne on count)
+```
+
+`0x140e84100` counts the 0xc0-byte entries of the string-keyed registry at `0x1442e18b0` /
+`0x1442e18b8` (a `(end-begin)/0xc0 != 0` test). That registry is filled by `0x140e83240` /
+`0x140e84190` — both inside the rlink **WorldwideLeaderboardService** code
+(`F:\Agents\...\WorldwideLeaderboardService.cpp`, caches `LeaderboardCache`,
+`LeaderboardStatsCache`, `LeaderboardInfoCache`).
+
+And the relay log of the same run shows exactly why it is empty:
+
+```
+[t=4.500s] HTTP REQ /game/Leaderboard/getAvailableLeaderboards
+[t=4.500s] HTTP RESP BODY [0,[]
+[t=4.609s] LogWarn: "LeaderboardInfoCache - response was not formatted correctly: [0,[]]"
+```
+
+⇒ **Our relay answers `/game/Leaderboard/getAvailableLeaderboards` with `[0,[]]`, the game cannot
+parse it, the leaderboard registry stays empty, rule 2 reports "blocked", and the main menu's twin
+rule switches the Multiplayer button off.** One chain, every link measured.
+
+Chain, in order: relay reply → `LeaderboardInfoCache` parse failure → empty registry →
+`svc->vtbl[0x90] = 0` → rule 2 = blocked → record status 2 → `SetEnabled(live twin, off)` →
+grey plate (XAML `IsEnabled=False` trigger at line 45) + no help line + dead click.
+
+## 28n. What the reply must look like (partial, from the deserializer)
+
+Two hand-written JSON deserializers read the leaderboard caches, and both look for a member named
+**`leaderboards`** (also `result`):
+
+- `0x14062cb20` — reads `result`, `leaderboards` (element 0x10 bytes; this is the
+  `LeaderboardInfoCache` path, element size recorded as 0x10 in the service ctor at `0x14069b0d4`).
+- `0x14073d890` — reads `leaderboards` plus `mappings`, `matchTypes`, `races`, `factions`,
+  `leaderboardRegions`, `rankLevels`, `statDefinitions`, `selfAssessmentTiers`.
+
+The per-entry field names are read through a serializer table (`0x14074b8b0` is the item
+parser and contains no inline name strings), so the field set is **not yet extracted**.
+⇒ Next step is a payload whose `leaderboards` member has at least one entry with the right
+fields. That is the last unknown; do not invent it, decode `0x14074b8b0`'s table first
+(`fn.py 0x14074b8b0 --dump`, then the descriptor at `r13+0x50`).
+
+## 28o. Where the session stops
+
+No game file, no `.text`, no XAML was changed. The finding is a relay-side data bug, so the fix
+belongs in `dev/lanhook/loginsrv.c` (route(), the `else` branch that currently answers every
+non-login path with `[0,[]]`), which is ours, not the game's.
+
+Open: (a) the leaderboard entry schema; (b) whether a correct reply alone flips rule 2 — after that,
+re-run `PLAY-stage8-RULES.cmd` and check that the two records read `status=0`.
