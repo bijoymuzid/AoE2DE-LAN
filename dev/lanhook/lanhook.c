@@ -184,6 +184,69 @@ static signed char g_HState[HK_MAX];
 static DWORD g_Stage = 1;
 static signed char g_Only[HK_MAX];   // set when AOE2LAN_HOOKS restricts installs
 
+// ---------------------------------------------------------------- MP unlock
+// Session 23. The Multiplayer button is disabled because rlink's
+// WorldwideAccountService::HasPlatformPrivilege (0x14051a390, ENCRYPTED on
+// disk) needs a live platform user: it calls the platform object's vtable
+// slot 0xb8 ("user signed in"), and only then slot 0xc8 (HasPrivilege).
+// Both answer no without an XAL user, so no privilege ever arrives.
+//
+// We do not touch .text. We re-point three slots of rlink's XboxPlatform
+// vtable (0x143669fc0, plain .rdata, never encrypted) at these stubs.
+// In-memory only, nothing on disk changes, restored by relaunch. Opt-in:
+// AOE2LAN_MPUNLOCK=1.
+typedef int (*PfnPlatBool)(void *self);
+typedef int (*PfnPlatPriv)(void *self, int priv, void *out, unsigned char b);
+typedef int (*PfnPlatState)(void *self, int priv, unsigned char b);
+
+static int pv_signed_in(void *self) { (void)self; return 1; }
+static int pv_has_priv(void *self, int priv, void *out, unsigned char b) {
+    (void)self; (void)priv; (void)out; (void)b; return 1;
+}
+static int pv_priv_state(void *self, int priv, unsigned char b) {
+    (void)self; (void)priv; (void)b; return 0;   // 0 = allowed
+}
+
+static int getenv_flag(const WCHAR *name) {
+    WCHAR v[8]; DWORD n = GetEnvironmentVariableW(name, v, 8);
+    return n > 0 && v[0] != L'0';
+}
+
+static void mp_unlock(void) {
+    static const struct { DWORD64 va; DWORD64 orig; void *repl; const char *what; } P[] = {
+        { 0x14366A078, 0x1403BA0F0, (void*)&pv_signed_in,  "slot 0xb8 user-signed-in" },
+        { 0x14366A080, 0x1403B7200, (void*)&pv_has_priv,   "slot 0xc0 HasPrivilege"    },
+        { 0x14366A088, 0x1403B7270, (void*)&pv_priv_state, "slot 0xc8 privilege state" },
+    };
+    for (unsigned k = 0; k < sizeof(P)/sizeof(P[0]); k++) {
+        DWORD64 *slot = (DWORD64*)(g_Base + (P[k].va - (DWORD64)0x140000000));
+        // the loader relocates every pointer in .rdata with the image, so the
+        // stock slot value is imagebase-relative, not the static 0x140000000 one.
+        if ((*slot - g_Base) != (P[k].orig - (DWORD64)0x140000000)) {
+            char b[160]; int i = 0; const char *m = "mpunlock: slot mismatch, skipped ";
+            while (*m) b[i++]=*m++;
+            for (int j=0; P[k].what[j] && i<90; j++) b[i++]=P[k].what[j];
+            { const char *t="; found rva="; while (*t) b[i++]=*t++;
+              DWORD64 v = *slot - g_Base;
+              for (int s=11;s>=0;s--) b[i++]="0123456789abcdef"[(v>>(s*4))&15]; }
+            b[i]=0; log_line(b); continue;
+        }
+        { DWORD old;
+          if (!VirtualProtect(slot, 8, PAGE_READWRITE, &old)) {
+              log_line("mpunlock: VirtualProtect failed"); continue; }
+          *slot = (DWORD64)P[k].repl;
+          VirtualProtect(slot, 8, old, &old); }
+        { char c[128]; int j=0; const char *t="mpunlock: patched ";
+          while (*t) c[j++]=*t++;
+          for (int q=0; P[k].what[q]; q++) c[j++]=P[k].what[q];
+          c[j++]=' ';
+          { const char *o = (*slot == (DWORD64)P[k].repl) ? "OK" : "VERIFY FAILED";
+            while (*o) c[j++]=*o++; }
+          c[j]=0; log_line(c); }
+    }
+    log_line("mpunlock: platform vtable re-pointed (in-memory only)");
+}
+
 static DWORD WINAPI MainThread(LPVOID p) {
     (void)p;
     { WCHAR v[16]; DWORD sz = 16; v[0]=0;
@@ -312,6 +375,8 @@ install_loop:
           if (!pending) break;
           Sleep(200);
       } }
+    if (getenv_flag(L"AOE2LAN_MPUNLOCK")) mp_unlock();
+    else log_line("mpunlock: off (AOE2LAN_MPUNLOCK unset)");
     log_line("LanHookThread: install loop done");
     return 0;
 }
