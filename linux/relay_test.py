@@ -224,17 +224,30 @@ def run_local():
 def main():
     mode = sys.argv[1] if len(sys.argv) > 1 else "local"
     host = sys.argv[2] if len(sys.argv) > 2 else "127.0.0.1"
+    rj_wait = int(sys.argv[3]) if len(sys.argv) > 3 else None
     if mode == "local":
         sys.exit(run_local())
+    if mode == "relay":
+        # just run the relay in the prefix and sit (cross-machine runs)
+        p = spawn_relay()
+        print("relay up; Ctrl-C to stop")
+        try:
+            p.wait()
+        except KeyboardInterrupt:
+            pass
+        finally:
+            kill_relay(p)
+        return
     if mode == "host":
-        # run joiner on the other machine first, then this within ~8 s
-        saw, funnels = session_flow(host, joiner_already_attached=True, rj_wait=8)
+        # run joiner on the other machine first; our RJ must land AFTER its LC
+        # but BEFORE its RJ -> generous default windows for human coordination
+        saw, funnels = session_flow(host, joiner_already_attached=True,
+                                    rj_wait=rj_wait or 30)
         log(f"host done: saw_b={saw} funnels={funnels}")
         print("PASS" if saw else "FAIL")
         sys.exit(0 if saw else 1)
     if mode == "joiner":
-        # host must finish its LC+RJ within this window
-        saw, funnels = joiner_flow(host, rj_wait=16)
+        saw, funnels = joiner_flow(host, rj_wait=rj_wait or 45)
         log(f"joiner done: saw_a={saw} funnels={funnels}")
         print("PASS" if saw else "FAIL")
         sys.exit(0 if saw else 1)

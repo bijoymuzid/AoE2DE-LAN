@@ -73,9 +73,18 @@ Runs: PASS 8.4 s, PASS 8.4 s (relay up 2.0 s after spawn). Funnel frame carries 
 pings coalesced: `0afe02000900412d47442d50494e47020900422d47442d50494e47000000`.
 Relay stdout: `linux/bs_relay_linux.log`.
 
-Remaining for L3 full: cross-tailnet run — `relay_test.py host` / `joiner` modes are
-in (time-based rendezvous: joiner first, host within ~8 s), needs W1's machine online.
-Which online tailnet box is W1's (64DAV0P vs HUFTPCO): still unknown, ask operator.
+Remaining for L3 full: cross-tailnet run — `relay_test.py relay` (relay only) + `host`
+/ `joiner` modes in, windows widened for human coordination (host RJ at +30 s, joiner RJ
+at +45 s). W1's box identified by operator: **DESKTOP-64DAV0P = 100.79.215.72**.
+
+### Path measurement (2026-11-06, peer online)
+
+`tailscale ping --c 15` total to 100.79.215.72: **all via DERP(bom), ~85 ms RTT**
+(first 181 ms, then 84–90 ms), "direct connection not established" both runs.
+NAT punching failing between these two networks (cause unknown — CGNAT either side is
+the usual suspect, not measured). PLAN §3.5 says derp is acceptable for lockstep and
+must be reported: lanhub reports it. 85 ms is at the GOOD end of the 100–200 ms derp
+estimate — BOM relay is geographically close to both ends.
 
 ## L4 — launcher: written, acceptance blocked on DLL
 
