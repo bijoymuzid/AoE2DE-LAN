@@ -893,7 +893,20 @@ static void rules_probe(void) {
             rl_d("svc", " slot+0x90        (rule 2)", (long long)rl_call1(vt, 0x90, svc));
             rl_d("svc", " slot+0x308 arg 2 (rule 5)", (long long)rl_call2(vt, 0x308, svc, 2));
             rl_d("svc", " slot+0x308 arg 4 (rule 4)", (long long)rl_call2(vt, 0x308, svc, 4));
+            // 0x1418eee60 fills the create-lobby dropdown from the 0x50-stride item
+            // vector at owner+0x2628, then appends "Use Local Lan Server"
+            // (0x143322df0, index -1) only if this slot returns true.
+            { DWORD64 f = 0;
+              __try { f = *(volatile DWORD64*)(vt + 0x418); } __except (EXCEPTION_EXECUTE_HANDLER) { f = 0; }
+              rl_rva("svc", " slot+0x418 fn", f); }
+            rl_d("svc", " slot+0x418 LAN item gate", (long long)rl_call1(vt, 0x418, svc));
         }
+    }
+    if (root) {
+        DWORD64 rb = 0, re = 0;
+        __try { rb = *(volatile DWORD64*)(root + 0x2628); } __except (EXCEPTION_EXECUTE_HANDLER) { rb = 0; }
+        __try { re = *(volatile DWORD64*)(root + 0x2630); } __except (EXCEPTION_EXECUTE_HANDLER) { re = 0; }
+        rl_d("root", " dropdown item count (0x50)", (re >= rb) ? (long long)((re - rb) / 0x50) : -1);
     }
     // rule 2 is "logged in AND leaderboard registry non-empty"; the count is
     // (end-begin)/0xc0 of the vector at 0x1442e18b0.

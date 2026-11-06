@@ -5429,3 +5429,14 @@
 [t=1684.610s] HTTP RESP: sent
 [t=1688.985s] hb alive sec=950
 [t=1693.985s] hb alive sec=955
+[t=1697.547s] srv: connection accepted
+[t=1697.594s] TLS: handshake complete (server side)
+[t=1697.641s] HTTP REQ /game/login/logout
+[t=1697.641s] HTTP BODY callNum=133&connect_id=1193921644&sessionID=1193921644
+[t=1697.641s] HTTP RESP BODY [0,[]
+[t=1697.641s] HTTP RESP: building head
+[t=1697.641s] HTTP RESP: sent
+[t=1697.782s] WS: closed, frames=677
+[t=1697.782s] WS: data frames ignored=1
+[t=1698.219s] HIT LogHelper #87: "WebSocketConnection::Process: Connection closed (State::FreeingSocket); m_resumeState=%d" r8=0x0000000000000000 r9=0x000001a6da3f0b40 a5=0x000001a6e91d6520 a6=0x0000005a370ff650 ret=0x00007ff7815b0f60
+[t=1698.985s] hb alive sec=960

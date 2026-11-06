@@ -6,22 +6,21 @@ tailnet can play co-op vs AI and PvP on Windows and Linux/Proton.
 
 Not a netcode project. The engine already contains LAN multiplayer; only the login/lobby plane is dead.
 
-## Current state (session 22, 2026-11-05)
+## Current state (session 30)
 
 | Area | Status |
 |---|---|
-| RelicLink login (`POST /game/login/platformlogin`) | **done** — served by our in-DLL TLS server on `127.0.0.1:443`, the client parses the reply |
-| Profile selection (`accountInfo.profiles`, `selectProfile`) | **done** — client runs its whole post-login service sweep and PlayFab `/Client/LoginWithCustomID` returns 200 + SessionTicket |
-| WebSocket `/wss/` notification plane | up, pings answered; push ladder off by default (`AOE2LAN_PUSH=1` re-enables) |
-| Relay registration | **done** — client logs `Adding LAN relay server: <lan-ip>, GUID …` |
-| **Multiplayer button** | **still disabled** — a disabled WPF button raises no click, so the gate is the button's enable/visibility state on the main menu, decided by game code from the platform (Xbox-Live) state. Only remaining platform error in the log: `PlatformSetPresenceAsync::Process: No user session.` |
-| M2 (LAN lobby + relay) | not started; `/game/advertisement/*` shapes are mapped and the WS type set is known |
+| RelicLink login (`POST /game/login/platformlogin`) | **done** — served by our in-DLL TLS/HTTP/WS server on `127.0.0.1:443` |
+| Profile selection, service sweep, PlayFab login | **done** |
+| **Multiplayer button (M1)** | **DONE** — button is live and the Multiplayer screen opens. The last missing piece was `getAvailableLeaderboards` returning a well-formed object **with a non-empty `matchTypes` list**: the game installs its leaderboard definitions from that list, and an object with those lists empty parses cleanly and installs nothing |
+| Hosting a lobby | **open bug** — Host Game → Create Lobby fails with `Could not create game. Server Error. AdvertisementJoinEvent Error Code: 0x1`. The game picked *online* hosting and sent no advertisement request at all. The create dialog's Server dropdown does offer **`Use Local Lan Server`** (measured session 30); selecting it is the next test |
+| M2 (LAN lobby + relay) | not started |
 
 ## Read this first
 
 - `PLAN.md` — mission, evidence, architecture, milestones, component contracts (§6.1 is the login-shim contract)
-- `notes/m1-session22.md` — current state, supersedes everything older
-- `notes/m1-session21.md` — full login work: what the login reply must contain and why
+- `notes/m1-session30.md` — current state, supersedes everything older
+- `notes/m1-session29.md` — M1 result (button live) + the hosting failure and its evidence
 - `notes/m0-findings.md` — M0: PE facts, strings, RTTI survey, relay protocol
 
 ## Repo layout
@@ -31,7 +30,7 @@ PLAN.md                      plan + evidence (start here)
 notes/                       session notes, findings, analysis scripts (session notes are the state)
 dev/lanhook/                 the shim: dbghelp.dll proxy -> in-DLL TLS/HTTP/WS server + IAT hooks
   loginsrv.c                 H1 login server: TLS 127.0.0.1:443, DNS redirect, login reply builder
-  lanhook.c, iathook.c       IAT hook set, cert trust injection, wire logging
+  lanhook.c, iathook.c       IAT hook set, cert trust injection, wire logging, read-only rule probes
   hookcore.c, hooks.asm      hook plumbing, stubs
   srvclient.py               offline conformance test for the login server (must print PASS)
   hooktest.c                 offline self-test of the hook set (must print 68/68)
@@ -66,6 +65,25 @@ The game's own verdicts are on disk and are readable without hooking game code:
 
 Game-side log calls go through `0x14101bb50`, **not** rlink's `LogHelper`, so hooks cannot see game
 account lines; telemetry plus our log together are the full picture.
+
+## Working on this from Linux
+
+The shim and the launchers are Windows-only today (`dbghelp.dll` proxy + MSVC build), so a Linux
+machine runs the **game** under Proton, not the build. What is useful and doable from Arch without
+Windows:
+
+- **Analysis.** Everything in `notes/*.py` and `dev/lanhook/*.py` is plain CPython 3: `pip install
+  capstone numpy`, then `python fn.py <hexaddr> --dump`, `python xr.py <hexaddr>`. The disassembly
+  source is the decrypted `.text` dump (`gametext.bin`, git-ignored, VA = `0x140001000 + offset`);
+  `.rdata` strings are read straight out of `AoE2DE_s.exe`.
+- **The native hub.** `lanhub` (peer enumeration via `tailscale status --json`, gossip on 47101,
+  the game-side control protocol on `127.0.0.1:47100`) is a new component with no Windows
+  dependency. It can be written and unit-tested on Linux against the protocol in `PLAN.md` §5.
+- **Running the game.** One Proton prefix shared by game, relay and launcher; `WINEDLLOVERRIDES="dbghelp=n"`
+  so our proxy is used instead of Wine's builtin.
+
+If you want to build the DLL itself on Linux, the build is `ml64` + `cl`, so it needs mingw-w64
+cross-compilation or a Windows VM — nobody has done it yet, and it is not on the critical path.
 
 ## Ground rules that keep this reproducible
 
