@@ -281,5 +281,72 @@ if isinstance(lbd, dict):
     chk(isinstance(e.get("isRanked"), bool), "entry.isRanked")
 print(f"  leaderboards reply: object, {len(lbd.get('leaderboards', [])) if lbd else 0} entry")
 
+# ---- concurrent requests (s30): the request buffer used to be one static shared
+# by every connection thread, so two overlapping requests overwrote each other and
+# the server sat on the bytes without answering (the game's host call timed out).
+# Six overlapping POSTs must all be answered with their own body.
+import threading
+def _conc(k, out):
+    try:
+        c = ctx.wrap_socket(socket.create_connection(("127.0.0.1", PORT), timeout=10),
+                            server_hostname=HOST)
+        b = f"accountType=steam&platformUserID={k}&alias=P{k}&title=age2"
+        c.sendall((f"POST /game/login/platformlogin HTTP/1.1\r\nHost: {HOST}\r\n"
+                   f"Content-Type: application/x-www-form-urlencoded\r\n"
+                   f"Content-Length: {len(b)}\r\nConnection: close\r\n\r\n{b}").encode())
+        r = b""
+        while True:
+            d = c.recv(65536)
+            if not d:
+                break
+            r += d
+        c.close()
+        out[k] = r
+    except Exception as e:
+        out[k] = b"ERR " + str(e).encode()
+_conc_out = {}
+_conc_th = [threading.Thread(target=_conc, args=(k, _conc_out)) for k in range(6)]
+for _t in _conc_th:
+    _t.start()
+for _t in _conc_th:
+    _t.join()
+_conc_bad = [k for k, r in _conc_out.items() if not r.startswith(b"HTTP/1.1 200")]
+chk(not _conc_bad, f"concurrent requests unanswered: {_conc_bad} "
+                   f"({[len(_conc_out[k]) for k in _conc_bad]})")
+print(f"  concurrent requests: {len(_conc_out) - len(_conc_bad)}/{len(_conc_out)} answered")
+
+# ---- Expect: 100-continue (s30): the game's HTTP client (libcurl) adds this
+# header to bodies over 1 KB and waits exactly 1 s for the interim reply before
+# it sends the body. The 3.5 KB host request is the only one that big, and it was
+# the one that never arrived -- so the server must answer "100 Continue".
+c2 = ctx.wrap_socket(socket.create_connection(("127.0.0.1", PORT), timeout=10),
+                     server_hostname=HOST)
+big = "accountType=steam&pad=" + ("x" * 3000)
+c2.sendall((f"POST /game/login/platformlogin HTTP/1.1\r\nHost: {HOST}\r\n"
+            f"Content-Type: application/x-www-form-urlencoded\r\n"
+            f"Expect: 100-continue\r\nContent-Length: {len(big)}\r\n"
+            f"Connection: close\r\n\r\n").encode())
+early = b""
+try:
+    c2.settimeout(2)
+    early = c2.recv(4096)
+except socket.timeout:
+    early = b""
+chk(early.startswith(b"HTTP/1.1 100"), f"no 100 Continue reply ({early[:40]!r})")
+c2.sendall(big.encode())          # the client sends the body only now
+r2 = b""
+try:
+    c2.settimeout(10)
+    while True:
+        d = c2.recv(65536)
+        if not d:
+            break
+        r2 += d
+except socket.timeout:
+    pass
+c2.close()
+chk(r2.startswith(b"HTTP/1.1 200"), f"big POST not answered ({r2[:40]!r})")
+print(f"  expect-100: interim ok, body {len(big)}B answered")
+
 print("PASS" if ok else "FAILED")
 sys.exit(0 if ok else 1)

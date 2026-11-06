@@ -84,3 +84,91 @@ Note on the probe value: the function returns `char` in `al`; the readout prints
   `.text` only). `widgetui/stringreference.json` maps key name → string id, and
   `resources/en/strings/key-value/key-value-strings-utf8.txt` maps id → text; that pair is how
   `300414` became `"Use Local Lan Server"`.
+
+## 30f. MEASURED: the LAN host attempt (operator, pid 12192, Server = `Use Local Lan Server`)
+
+The dropdown works: the log line changed from `starting online hosting` to **`starting LAN
+hosting`** (`0x14035144a`, host mode `[advertSvc+0x1a8]` was NOT 0 and NOT 2). So the UI selection
+reaches the hosting decision.
+
+The create still fails, with the same operator-visible dialog (`Could not create game. Server
+Error. Source: AdvertisementJoinEvent Error Code: 0x00000001`) and a new set of facts:
+
+```
+[t=136.671s] DNS resolve DESKTOP-64DAV0P -> 100.79.215.72 (tailnet) and 192.168.0.104 (LAN)
+[t=136.687s] LogHelper: "starting LAN hosting"
+[t=136.765s] TCP connect 127.0.0.1:443 (ours) -> TLS complete at 136.828
+[t=136.875s] client sends 410B of TLS application data on that connection; our server logs no
+             request and sends no reply
+[t=137.890s] client closes that connection (close_notify)
+[t=137.953s] LogHelper: "HostAsync - completed with HostResult = %d" -> 1
+```
+
+- **Still no advertisement HTTP request**: `/game/advertisement/` appears only at 35.9 s and
+  81.3 s (browsing), never in the host window.
+- **No connection to the relay's raw port 27012** at any point in the session; the 30 connections to
+  27212 are the QoS probe (t=4…33 s). The relay itself was running (the QoS loop proves it).
+- Both s29j mystery strings are referenced from **inside the same function that logs `starting LAN
+  hosting`** (`0x1403503a0..0x1403526fc`): `"join failure - we don't have a slot reservation"`
+  (`0x14367e950`, logged at `0x14035165e` through hooked `LogWarn`) and `"%s: This AsyncJob is not
+  the active connect, waiting..."` (`0x14367e980`, logged at `0x140351606`). Neither fired in this
+  run, so the host job did not take either of those two branches — it failed somewhere else.
+- The host decision then calls `0x14034f240(rcx=advertSvc, edx, r8)` — with `edx = 9` on the
+  normal path, and `0x16` (22) on the "no slot reservation" path. `0x14034f240` is the function that
+  logs `HostAsync - completed with HostResult = %d`.
+- `LANAdvertisementCache - response was not formatted correctly: [0,[]]` is logged twice (at 35.9 s
+  and 81.3 s) — our catch-all reply to `/game/advertisement/getLanAdvertisements` is still malformed.
+
+## 30g. New instrument: per-connection transcript in our own server
+
+`serve_conn()` in `loginsrv.c` now logs, for every connection: `srv: blk#<conn> n=<bytes>` for each
+decrypted block, `srv: req#<conn> n=<request bytes>` just before dispatch, `srv: too big#<conn>`
+when the 8 KB request buffer guard trips, and `srv: closed pending#<conn> n=<unparsed bytes>`.
+It is our own file; no game hook, no game memory. Purpose: settle whether the 410-byte block at
+host time is a request we failed to parse (a shim bug we must fix) or a request the game never
+finished (a game-side abort).
+
+## 30h. FOUND AND FIXED: our server never answered "Expect: 100-continue"
+
+The second run (pid 18384, same click) showed the request arriving:
+
+```
+[t=60.719s] client -> 127.0.0.1:443  3578B TLS record
+[t=60.719s] srv: blk#14 n=3549          <- we decrypted the whole 3.5 KB request
+[t=61.719s] srv: closed pending#14 n=3549   <- and sat on it for exactly 1.000 s
+[t=61.797s] LogWarn "WorldwideHostAsync - failed with reason %d" r8=-1 r9=0x60
+[t=61.797s] LogHelper "HostAsync - completed with HostResult = %d" -> 1
+```
+
+Every other request in the session is answered (`srv: req#N`); this is the only one that is not.
+It is also the only request bigger than 1 KB. The game's HTTP client is **libcurl** (its own
+warnings appear in the log: `curl_easy_setop failed; option=CURLOPT_SSL_CTX_FUNCTION`), and libcurl
+adds **`Expect: 100-continue`** to POST bodies over 1024 bytes, then waits **exactly 1000 ms** for
+the interim `HTTP/1.1 100 Continue` before it sends the body. Our server never implemented the
+interim reply, so the body never came, and the client aborted at its 1 s deadline. That is the whole
+hosting failure: the game tried to create the advertisement and we hung up on it.
+
+Fix (ours, `dev/lanhook/loginsrv.c`):
+
+- when the header block is complete and contains `Expect: 100-continue`, send
+  `HTTP/1.1 100 Continue\r\n\r\n` once, then keep waiting for the body;
+- the per-connection HTTP state is now per connection: the request buffer is a 64 KB heap block
+  (was a `static char req[8192]` shared by every connection thread), `head[512]` moved from static
+  to the stack, and the TLS send scratch buffer is `__declspec(thread)` instead of a plain static.
+  Those were real data races between the ~35 connections the game keeps open, not cosmetic, and the
+  old 8 KB request cap would have truncated larger advertisement bodies.
+
+## 30i. Tests (offline, both new, both fail on the old code)
+
+`dev/lanhook/srvclient.py` now also checks:
+
+- `concurrent requests: 6/6 answered` — six overlapping POSTs, each must get its own 200.
+- `expect-100: interim ok, body 3022B answered` — send headers with `Expect: 100-continue`, read the
+  interim reply, then send the body. Removing the new block makes this one print
+  `FAIL: no 100 Continue reply (b'')`, i.e. the test does catch the bug.
+
+Gates after the fix: `hooktest.exe` 68/68, `srvtest.exe` + `srvclient.py` PASS, `AoE2DE_s.exe` crc
+`4f533b6c` untouched, staged `dbghelp.dll` crc **`883a488f`** (234,496 B — grew by the extra
+per-connection logging and the 64 KB request buffer).
+
+Not yet measured: whether the create now succeeds. That is the next single click.

@@ -443,6 +443,7 @@ static void build_cand(BUF *b, const char *alias, const PUSHCAND *c) {
 
 // ---------------------------------------------------------------- TLS server
 #define TLS_MAX_PLAIN 16384
+#define REQ_MAX (64*1024)   // per-connection request buffer (heap)
 
 typedef struct {
     SOCKET s;
@@ -878,7 +879,7 @@ static int tls_decrypt(TLSSES *t, unsigned char *out, int outCap) {
 static int tls_encrypt_send(TLSSES *t, const char *msg, int len) {
     // canonical SChannel stream pattern (MSDN sample): ONE contiguous block
     // [STREAM_HEADER | DATA | STREAM_TRAILER], encrypt in place, send whole.
-    static unsigned char rec[TLS_MAX_PLAIN + 256];
+    __declspec(thread) static unsigned char rec[TLS_MAX_PLAIN + 256];  // one thread per connection
     SecBuffer bufs[4];
     SecBufferDesc d;
     SECURITY_STATUS st;
@@ -916,7 +917,7 @@ static int tls_encrypt_send(TLSSES *t, const char *msg, int len) {
 
 // ---------------------------------------------------------------- HTTP
 static void http_respond(TLSSES *t, const char *body) {
-    static char head[512];
+    char head[512];   // per call: one thread per connection (session 30: was static)
     int blen = (int)strlen_f(body);
     int hl = 0;
     logn("HTTP RESP: building head");
@@ -943,12 +944,6 @@ static void http_respond(TLSSES *t, const char *body) {
     if (hl + blen < (int)sizeof(head)) {
         memcpy(head + hl, body, (size_t)blen);
         tls_encrypt_send(t, head, hl + blen);
-    } else if (hl + blen <= TLS_MAX_PLAIN - 256) {
-        static char big[TLS_MAX_PLAIN];
-        memcpy(big, head, (size_t)hl);
-        memcpy(big + hl, body, (size_t)blen);
-        logn("HTTP RESP: encrypting from static big[]");
-        tls_encrypt_send(t, big, hl + blen);
     } else {
         tls_encrypt_send(t, head, hl);
         { int off = 0;
@@ -1498,13 +1493,35 @@ static DWORD WINAPI RootRegThread(void *p) {
     return 0;
 }
 
+// per-connection transcript: session 30 — the host attempt sends app data that
+// never becomes a logged request, so each block and each close must be visible.
+static volatile LONG g_connSeq;
+static void log_conn(const char *tag, int id, int n) {
+    char b[112]; int i = 0;
+    while (*tag && i < 70) b[i++] = *tag++;
+    { char t[12]; int tl = 0, v = id;
+      if (v < 0) { b[i++] = '-'; v = -v; }
+      if (!v) t[tl++] = '0';
+      while (v) { t[tl++] = (char)('0' + v % 10); v /= 10; }
+      b[i++] = '#'; while (tl) b[i++] = t[--tl]; }
+    { const char *m = " n="; while (*m) b[i++] = *m++; }
+    { char t[12]; int tl = 0, v = n;
+      if (v < 0) { b[i++] = '-'; v = -v; }
+      if (!v) t[tl++] = '0';
+      while (v) { t[tl++] = (char)('0' + v % 10); v /= 10; }
+      while (tl) b[i++] = t[--tl]; }
+    b[i] = 0; logn(b);
+}
+
 // one connection: handshake → request loop → close
 static void serve_conn(SOCKET s) {
+    int cid = (int)InterlockedIncrement(&g_connSeq);
     TLSSES *t = (TLSSES*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(TLSSES));
     unsigned char *plain = (unsigned char*)HeapAlloc(GetProcessHeap(), 0, TLS_MAX_PLAIN);
-    static char req[8192];
+    char *req = (char*)HeapAlloc(GetProcessHeap(), 0, REQ_MAX);  // per connection
     int reqLen = 0;
-    if (!t || !plain) goto done;
+    int contSent = 0;
+    if (!t || !plain || !req) goto done;
     t->s = s;
     if (!tls_handshake(t)) goto done;
     for (;;) {
@@ -1512,7 +1529,8 @@ static void serve_conn(SOCKET s) {
         if (n == -1) break;
         if (n == -2) continue;
         if (n > 0) {
-            if (reqLen + n > (int)sizeof(req) - 1) { reqLen = 0; }  // overflow guard
+            log_conn("srv: blk", cid, n);
+            if (reqLen + n > REQ_MAX - 1) { reqLen = 0; log_conn("srv: too big", cid, n); }  // overflow guard
             memcpy(req + reqLen, plain, (size_t)n);
             reqLen += n;
             req[reqLen] = 0;
@@ -1524,7 +1542,18 @@ static void serve_conn(SOCKET s) {
                 char *cl = strstr_f(req, "Content-Length:");
                 if (!cl) cl = strstr_f(req, "content-length:");
                 if (cl) contentLen = atoi_f(cl + 15);
+                // libcurl (the game's HTTP client) adds "Expect: 100-continue" to
+                // bodies over 1 KB, then waits exactly 1 s for the interim reply
+                // before sending the body. Without it the host request never
+                // arrives and the host job fails (session 30).
+                if (!contSent && (strstr_f(req, "Expect: 100-continue") ||
+                                  strstr_f(req, "expect: 100-continue"))) {
+                    tls_encrypt_send(t, "HTTP/1.1 100 Continue\r\n\r\n", 25);
+                    contSent = 1;
+                    log_conn("srv: 100-continue", cid, contentLen);
+                }
                 if (reqLen >= headLen + contentLen) {
+                    contSent = 0;
                     char method[12] = {0};
                     char path[256] = {0};
                     { int i = 0; while (req[i] != ' ' && i < 11) { method[i] = req[i]; i++; }
@@ -1535,6 +1564,7 @@ static void serve_conn(SOCKET s) {
                         ws_serve(t, req);
                         break;
                     }
+                    log_conn("srv: req", cid, headLen + contentLen);
                     route(t, method, path, req + headLen, contentLen);
                     // keep-alive: reset for the next request on this connection
                     int leftover = reqLen - headLen - contentLen;
@@ -1546,9 +1576,11 @@ static void serve_conn(SOCKET s) {
         }
     }
 done:
+    log_conn("srv: closed pending", cid, reqLen);
     if (t && t->handshook) pDSC(&t->hCtx);
     if (t) HeapFree(GetProcessHeap(), 0, t);
     if (plain) HeapFree(GetProcessHeap(), 0, plain);
+    if (req) HeapFree(GetProcessHeap(), 0, req);
     p_closesocket(s);
 }
 

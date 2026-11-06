@@ -629,3 +629,63 @@ find its shipped relay binary, repeat M0.1's two-script probe against it with
 `-logLevel debug`, then diff the wire format against this file's notes. The
 seams (S1 provider vtable, S2 service singletons) are expected to be the same
 classes in sibling engines.
+
+---
+
+## 17. Two-worker split (session 30 onward)
+
+From session 30 the project has **two workers on the same repo**:
+
+- **W1 — Windows box** (operator + assistant). Owns everything that needs the live game process on
+  this machine: the injected DLL, the login shim, hook ids, `.text` reverse engineering, and every
+  measurement taken while the game is running.
+- **W2 — Arch Linux** (friend). Owns everything platform-neutral or Linux-side: the native LAN hub,
+  the Linux launcher and Wine prefix, the relay test harness, and Linux documentation.
+
+Why this split: the two kinds of work need different machines and never need the same file. Nobody
+has to wait for the other, and merge conflicts are avoided by file ownership rather than by
+coordination.
+
+### 17.1 File ownership (do not edit the other worker's files)
+
+| Path | Owner |
+|---|---|
+| `dev/lanhook/**` (DLL, login server, hooks, tests) | W1 |
+| `dev/memcheck/**`, `dev/fwdtest/**`, `dev/ghidra*` | W1 |
+| `PLAY-stage*.cmd`, `logs/**` | W1 |
+| `notes/m1-session*.md`, `notes/m0-*.md` | W1 |
+| `lanhub/**` (new: the native hub) | **W2** |
+| `linux/**` (new: launcher, Wine prefix, docs) | **W2** |
+| `notes/linux-*.md` (new: W2 session notes) | **W2** |
+| `PLAN.md`, `README.md` | shared — append only, never rewrite the other's section |
+| `notes/bs_client.py`, `notes/relay-capture.txt`, `notes/m0-findings.md` | shared, read-mostly |
+
+Both workers: `git pull` before you start, small commits, commit message starts with the area
+(`linux: …` / `lanhook: …` / `hub: …`), push before you stop for the day.
+
+### 17.2 W2 workstream, in priority order
+
+| # | Task | Done when |
+|---|---|---|
+| L1 | **`lanhub` skeleton** (Go or C, W2's call): control server on `127.0.0.1:47100` plus node gossip on `:47101`, JSON over TCP, protocols exactly as §5.1 and §5.2. No game involvement at all. | Two `lanhub` instances on one host (different ports) exchange `ANNOUNCE` and one `ADVERT` shows up on the other; a `HELLO`/`HOST`/`FIND`/`JOIN` walk from a command-line client returns the expected JSON |
+| L2 | **Peer enumeration**: `tailscale status --json` → `{nodeGUID, nodeName, tailnetIP, online}`; ini seeds as fallback; report `path=direct` vs `derp`. | `lanhub peers` prints the real tailnet peers on the friend's machine, and printing the route per peer |
+| L3 | **Relay harness regression**: run `notes/bs_client.py` (stdlib only) against `BattleServer/BattleServer.exe` under the same Wine prefix, reproducing the session-3 two-peer `LOBBYCONNECT`/`REQUESTJOIN`/`GAMEDATA` relay, and turn it into `notes/bs_live_test.py`-style PASS/FAIL. | The harness prints PASS on Linux under Wine, and again from a second machine over the tailnet |
+| L4 | **Linux launch path**: a launcher script that copies our `dbghelp.dll` into the game dir, sets `WINEDLLOVERRIDES="dbghelp=n"`, the telemetry env vars and `AOE2LAN_STAGE=8`, starts `lanhub`, starts the game. Plus the ufw/tailnet checklist. | The Multiplayer button is live inside Proton, `logs/lanhook-<pid>.log` is written inside the prefix, and the doc lists the exact commands |
+| L5 | **Analysis W2 can do from Linux**: `.rdata` strings, RTTI, widget XAML/JSON, localization. Not `.text` — that needs a Windows-side decrypted dump. | Any finding recorded in `notes/linux-*.md` with addresses, so W1 can verify it on the dump |
+
+W2 does **not** touch the DLL, the hook table, or the staged `dbghelp.dll`. The DLL is handed over as
+a file (the repo git-ignores binaries): W2 drops it next to the game exe inside the prefix.
+
+### 17.3 W1 workstream, in priority order
+
+| # | Task | Done when |
+|---|---|---|
+| W1-a | **Hosting**: confirm the `Expect: 100-continue` fix (session 30h) makes Create Lobby succeed in LAN mode. | `starting LAN hosting` is followed by a *create advertisement* request, then a visible lobby |
+| W1-b | **LAN advertisement reply**: replace the catch-all `[0,[]]` for `/game/advertisement/getLanAdvertisements` (and `findAdvertisements`) with a well-formed object, schema taken from the game's own parser the same way `getAvailableLeaderboards` was cracked. | `LANAdvertisementCache - response was not formatted correctly` disappears; the browser lists a `[LAN]` lobby |
+| W1-c | **Relay wiring**: make the host's advertisement point at this machine's **tailnet IP**, not `192.168.0.x`, and prove the relay accepts both peers. | a second machine on the tailnet joins and both peers relay `GAMEDATA` |
+| W1-d | **The other caches, one at a time**, each only when a measurement points at it: leaderboard stats, news, community events, item bundles, item categories, challenges, chat channels, achievements, offline messages, cloud credentials. | each cache's `response was not formatted correctly` line goes away and nothing else regresses |
+
+Rules that still apply to both: never patch or hook code that is encrypted on disk; hook ids 4, 5
+and 13 only; no blind patching; no cosmetic fixes; any new detour, `.rdata` re-point or game-file
+edit is the operator's call and needs exact bytes plus a revert story; the game's own files are never
+modified.
