@@ -77,6 +77,18 @@ Remaining for L3 full: cross-tailnet run — `relay_test.py host` / `joiner` mod
 in (time-based rendezvous: joiner first, host within ~8 s), needs W1's machine online.
 Which online tailnet box is W1's (64DAV0P vs HUFTPCO): still unknown, ask operator.
 
+## L4 — launcher: written, acceptance blocked on DLL
+
+`linux/launch.sh` (+ `linux/README.md` with the ufw/tailnet checklist): stages
+`AoE2DE-LAN/dbghelp.dll` (gitignored, delivered by W1) into `C:\Games\AoE2DE`, starts
+native lanhub, sets `WINEDLLOVERRIDES="dbghelp=n"` + `AOE2LAN_STAGE=8`, execs the game
+under the workspace Proton. `bash -n` clean, paths verified. NOT run end-to-end:
+launching the game without the DLL proves nothing (MP stays grey) and opens a GUI on
+the operator's desktop. Telemetry env knobs deliberately unset — semantics unknown,
+H4 owns that in-process.
+
+**Ask W1 for: the current `dbghelp.dll` build, and which tailnet box is theirs.**
+
 ## Open / next
 
 - L2 done; PINGNODE still replies `path: "unknown"` — wiring it to the peer table is M2 polish.
