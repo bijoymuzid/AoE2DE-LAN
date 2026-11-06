@@ -418,6 +418,19 @@ if isinstance(ud, dict):
         chk(isinstance(a.get("matchMembers"), list) and a["matchMembers"], "advert matchMembers")
 print(f"  update reply: result=0, advertisement keys={len(ud.get('updatedAvertisement') or {}) if ud else 0}")
 
+# ---- s32: updateTags/updateState share the update path but carry no hostid;
+# they must echo the lobby this server already knows, never an empty one.
+ut = post("/game/advertisement/updateTags",
+          "advertisementid=1&callNum=39&connect_id=1&sessionID=1")
+chk(isinstance(ut, dict), f"updateTags reply must be an object, got {str(ut)[:40]}")
+if isinstance(ut, dict):
+    a = ut.get("updatedAvertisement") or {}
+    chk(ut.get("result") == 0, f"updateTags result {ut.get('result')!r}")
+    chk(a.get("hostProfileID") == 3842241165083521967,
+        f"updateTags advert hostProfileID {a.get('hostProfileID')!r} (empty advert)")
+    chk(a.get("encodedSlots") == blob, "updateTags advert encodedSlots must stay the hosted blob")
+print(f"  updateTags reply: hostProfileID={((ut or {}).get('updatedAvertisement') or {}).get('hostProfileID')!r}")
+
 # ---- browse (s31): result + advertisements[] + playerRatings[], filled from the
 # lobby this server was last told about.
 lv = post("/game/advertisement/getLanAdvertisements", "lanServerGuids=&callNum=1")

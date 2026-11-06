@@ -1,0 +1,249 @@
+func 0x141aab4a0..0x141aab8b1 (1041 bytes)
+141aab4a0  mov       qword ptr [rsp + 8], rbx
+141aab4a5  mov       qword ptr [rsp + 0x10], rsi
+141aab4aa  push      rdi
+141aab4ab  sub       rsp, 0x50
+141aab4af  movzx     edi, dl
+141aab4b2  mov       rbx, rcx
+141aab4b5  mov       rdx, qword ptr [rip + 0x28a9dfc]   ; 0x1443552b8
+141aab4bc  lea       rcx, [rsp + 0x40]
+141aab4c1  movzx     r8d, dil
+141aab4c5  mov       rdx, qword ptr [rdx + 0x680]
+141aab4cc  call      0x140fa3cd0
+141aab4d1  mov       rdx, qword ptr [rip + 0x2609530]   ; 0x1440b4a08
+141aab4d8  mov       rcx, rbx
+141aab4db  movsd     xmm0, qword ptr [rax]
+141aab4df  movsd     qword ptr [rsp + 0x30], xmm0
+141aab4e5  call      0x140ac4090
+141aab4ea  xor       esi, esi
+141aab4ec  lea       r9, [rip + 0x26ce125]   ; 0x144179618
+141aab4f3  mov       rcx, rax
+141aab4f6  mov       dword ptr [rsp + 0x20], esi
+141aab4fa  lea       r8, [rip + 0x26cde67]   ; 0x144179368
+141aab501  xor       edx, edx
+141aab503  call      0x142d705a5
+141aab508  xor       r8d, r8d
+141aab50b  movzx     edx, dil
+141aab50f  mov       rcx, qword ptr [rax]
+141aab512  mov       r9, qword ptr [rcx + 0x68]
+141aab516  mov       rcx, rax
+141aab519  call      r9
+141aab51c  mov       rdx, qword ptr [rip + 0x260964d]   ; 0x1440b4b70
+141aab523  mov       rcx, rbx
+141aab526  call      0x140ac4090
+141aab52b  mov       rcx, rax
+141aab52e  mov       dword ptr [rsp + 0x20], esi
+141aab532  lea       r9, [rip + 0x26ce0df]   ; 0x144179618
+141aab539  xor       edx, edx
+141aab53b  lea       r8, [rip + 0x26cde26]   ; 0x144179368
+141aab542  call      0x142d705a5
+141aab547  xor       r8d, r8d
+141aab54a  movzx     edx, dil
+141aab54e  mov       rcx, qword ptr [rax]
+141aab551  mov       r9, qword ptr [rcx + 0x68]
+141aab555  mov       rcx, rax
+141aab558  call      r9
+141aab55b  mov       rdx, qword ptr [rip + 0x26097be]   ; 0x1440b4d20
+141aab562  mov       rcx, rbx
+141aab565  call      0x140ac4090
+141aab56a  mov       rcx, rax
+141aab56d  mov       dword ptr [rsp + 0x20], esi
+141aab571  lea       r9, [rip + 0x26ce0a0]   ; 0x144179618
+141aab578  xor       edx, edx
+141aab57a  lea       r8, [rip + 0x26cdde7]   ; 0x144179368
+141aab581  call      0x142d705a5
+141aab586  xor       r8d, r8d
+141aab589  movzx     edx, dil
+141aab58d  mov       rcx, qword ptr [rax]
+141aab590  mov       r9, qword ptr [rcx + 0x68]
+141aab594  mov       rcx, rax
+141aab597  call      r9
+141aab59a  mov       rdx, qword ptr [rip + 0x2609617]   ; 0x1440b4bb8
+141aab5a1  mov       rcx, rbx
+141aab5a4  call      0x140ac4090
+141aab5a9  mov       rcx, rax
+141aab5ac  mov       dword ptr [rsp + 0x20], esi
+141aab5b0  lea       r9, [rip + 0x26ce061]   ; 0x144179618
+141aab5b7  xor       edx, edx
+141aab5b9  lea       r8, [rip + 0x26cdda8]   ; 0x144179368
+141aab5c0  call      0x142d705a5
+141aab5c5  xor       r8d, r8d
+141aab5c8  movzx     edx, dil
+141aab5cc  mov       rcx, qword ptr [rax]
+141aab5cf  mov       r9, qword ptr [rcx + 0x68]
+141aab5d3  mov       rcx, rax
+141aab5d6  call      r9
+141aab5d9  mov       rdx, qword ptr [rip + 0x2609620]   ; 0x1440b4c00
+141aab5e0  mov       rcx, rbx
+141aab5e3  call      0x140ac4090
+141aab5e8  mov       rcx, rax
+141aab5eb  mov       dword ptr [rsp + 0x20], esi
+141aab5ef  lea       r9, [rip + 0x26ce022]   ; 0x144179618
+141aab5f6  xor       edx, edx
+141aab5f8  lea       r8, [rip + 0x26cdd69]   ; 0x144179368
+141aab5ff  call      0x142d705a5
+141aab604  mov       rcx, qword ptr [rax]
+141aab607  mov       r9, qword ptr [rcx + 0x68]
+141aab60b  xor       r8d, r8d
+141aab60e  movzx     edx, dil
+141aab612  mov       rcx, rax
+141aab615  call      r9
+141aab618  mov       rdx, qword ptr [rip + 0x2609749]   ; 0x1440b4d68
+141aab61f  mov       rcx, rbx
+141aab622  call      0x140ac4090
+141aab627  mov       rcx, rax
+141aab62a  mov       dword ptr [rsp + 0x20], esi
+141aab62e  lea       r9, [rip + 0x26cdfe3]   ; 0x144179618
+141aab635  xor       edx, edx
+141aab637  lea       r8, [rip + 0x26cdd2a]   ; 0x144179368
+141aab63e  call      0x142d705a5
+141aab643  xor       r8d, r8d
+141aab646  movzx     edx, dil
+141aab64a  mov       rcx, qword ptr [rax]
+141aab64d  mov       r9, qword ptr [rcx + 0x68]
+141aab651  mov       rcx, rax
+141aab654  call      r9
+141aab657  mov       rdx, qword ptr [rip + 0x2609482]   ; 0x1440b4ae0
+141aab65e  mov       rcx, rbx
+141aab661  call      0x140ac4090
+141aab666  mov       rcx, rax
+141aab669  mov       dword ptr [rsp + 0x20], esi
+141aab66d  lea       r9, [rip + 0x26cdfa4]   ; 0x144179618
+141aab674  xor       edx, edx
+141aab676  lea       r8, [rip + 0x26cdceb]   ; 0x144179368
+141aab67d  call      0x142d705a5
+141aab682  xor       r8d, r8d
+141aab685  movzx     edx, dil
+141aab689  mov       rcx, qword ptr [rax]
+141aab68c  mov       r10, qword ptr [rcx + 0x68]
+141aab690  mov       rcx, rax
+141aab693  call      r10
+141aab696  mov       rdx, qword ptr [rip + 0x2609713]   ; 0x1440b4db0
+141aab69d  mov       rcx, rbx
+141aab6a0  call      0x140ac4090
+141aab6a5  mov       rcx, rax
+141aab6a8  mov       dword ptr [rsp + 0x20], esi
+141aab6ac  lea       r9, [rip + 0x26cdf65]   ; 0x144179618
+141aab6b3  xor       edx, edx
+141aab6b5  lea       r8, [rip + 0x26cdcac]   ; 0x144179368
+141aab6bc  call      0x142d705a5
+141aab6c1  cmp       byte ptr [rsp + 0x30], sil
+141aab6c6  sete      dl
+141aab6c9  xor       r8d, r8d
+141aab6cc  mov       rcx, qword ptr [rax]
+141aab6cf  mov       r9, qword ptr [rcx + 0x68]
+141aab6d3  mov       rcx, rax
+141aab6d6  call      r9
+141aab6d9  cmp       byte ptr [rsp + 0x32], sil
+141aab6de  mov       rcx, rbx
+141aab6e1  sete      dl
+141aab6e4  call      0x141abe230
+141aab6e9  lea       rdx, [rip + 0x18a0c18]   ; 0x14334c308 "Background/Data/GameSettings/Data/StartingAgeDropDown"
+141aab6f0  mov       rcx, rbx
+141aab6f3  call      0x140ac4090
+141aab6f8  mov       rcx, rax
+141aab6fb  mov       dword ptr [rsp + 0x20], esi
+141aab6ff  lea       r9, [rip + 0x26ce082]   ; 0x144179788
+141aab706  xor       edx, edx
+141aab708  lea       r8, [rip + 0x26cdc59]   ; 0x144179368
+141aab70f  call      0x142d705a5
+141aab714  xor       r8d, r8d
+141aab717  movzx     edx, dil
+141aab71b  mov       rcx, qword ptr [rax]
+141aab71e  mov       r9, qword ptr [rcx + 0x68]
+141aab722  mov       rcx, rax
+141aab725  call      r9
+141aab728  lea       rdx, [rip + 0x18a0c11]   ; 0x14334c340 "Background/Data/GameSettings/Data/EndingAgeDropDown"
+141aab72f  mov       rcx, rbx
+141aab732  call      0x140ac4090
+141aab737  mov       rcx, rax
+141aab73a  mov       dword ptr [rsp + 0x20], esi
+141aab73e  lea       r9, [rip + 0x26ce043]   ; 0x144179788
+141aab745  xor       edx, edx
+141aab747  lea       r8, [rip + 0x26cdc1a]   ; 0x144179368
+141aab74e  call      0x142d705a5
+141aab753  xor       r8d, r8d
+141aab756  mov       rcx, qword ptr [rax]
+141aab759  mov       r9, qword ptr [rcx + 0x68]
+141aab75d  movzx     edx, dil
+141aab761  mov       rcx, rax
+141aab764  call      r9
+141aab767  lea       rdx, [rip + 0x18a0af2]   ; 0x14334c260 "Background/Data/GameSettings/Data/PopulationDropDown"
+141aab76e  mov       rcx, rbx
+141aab771  call      0x140ac4090
+141aab776  mov       rcx, rax
+141aab779  mov       dword ptr [rsp + 0x20], esi
+141aab77d  lea       r9, [rip + 0x26ce004]   ; 0x144179788
+141aab784  xor       edx, edx
+141aab786  lea       r8, [rip + 0x26cdbdb]   ; 0x144179368
+141aab78d  call      0x142d705a5
+141aab792  xor       r8d, r8d
+141aab795  movzx     edx, dil
+141aab799  mov       rcx, qword ptr [rax]
+141aab79c  mov       r9, qword ptr [rcx + 0x68]
+141aab7a0  mov       rcx, rax
+141aab7a3  call      r9
+141aab7a6  lea       rdx, [rip + 0x18a0b23]   ; 0x14334c2d0 "Background/Data/GameSettings/Data/RevealMapDropDown"
+141aab7ad  mov       rcx, rbx
+141aab7b0  call      0x140ac4090
+141aab7b5  mov       rcx, rax
+141aab7b8  mov       dword ptr [rsp + 0x20], esi
+141aab7bc  lea       r9, [rip + 0x26cdfc5]   ; 0x144179788
+141aab7c3  xor       edx, edx
+141aab7c5  lea       r8, [rip + 0x26cdb9c]   ; 0x144179368
+141aab7cc  call      0x142d705a5
+141aab7d1  xor       r8d, r8d
+141aab7d4  movzx     edx, dil
+141aab7d8  mov       rcx, qword ptr [rax]
+141aab7db  mov       r9, qword ptr [rcx + 0x68]
+141aab7df  mov       rcx, rax
+141aab7e2  call      r9
+141aab7e5  lea       rdx, [rip + 0x18a0b8c]   ; 0x14334c378 "Background/Data/GameSettings/Data/TreatyLengthDropDown"
+141aab7ec  mov       rcx, rbx
+141aab7ef  call      0x140ac4090
+141aab7f4  mov       rcx, rax
+141aab7f7  mov       dword ptr [rsp + 0x20], esi
+141aab7fb  lea       r9, [rip + 0x26cdf86]   ; 0x144179788
+141aab802  xor       edx, edx
+141aab804  lea       r8, [rip + 0x26cdb5d]   ; 0x144179368
+141aab80b  call      0x142d705a5
+141aab810  xor       r8d, r8d
+141aab813  movzx     edx, dil
+141aab817  mov       rcx, qword ptr [rax]
+141aab81a  mov       r9, qword ptr [rcx + 0x68]
+141aab81e  mov       rcx, rax
+141aab821  call      r9
+141aab824  lea       rdx, [rip + 0x18a09fd]   ; 0x14334c228 "Background/Data/GameSettings/Data/ResourcesDropDown"
+141aab82b  mov       rcx, rbx
+141aab82e  call      0x140ac4090
+141aab833  mov       rcx, rax
+141aab836  mov       dword ptr [rsp + 0x20], esi
+141aab83a  lea       r9, [rip + 0x26cdf47]   ; 0x144179788
+141aab841  xor       edx, edx
+141aab843  lea       r8, [rip + 0x26cdb1e]   ; 0x144179368
+141aab84a  call      0x142d705a5
+141aab84f  xor       r8d, r8d
+141aab852  movzx     edx, dil
+141aab856  mov       rcx, qword ptr [rax]
+141aab859  mov       r10, qword ptr [rcx + 0x68]
+141aab85d  mov       rcx, rax
+141aab860  call      r10
+141aab863  lea       rdx, [rip + 0x18a0bbe]   ; 0x14334c428 "Background/Data/GameSettings/Data/TimeDropDown"
+141aab86a  mov       rcx, rbx
+141aab86d  call      0x140ac4090
+141aab872  mov       rcx, rax
+141aab875  mov       dword ptr [rsp + 0x20], esi
+141aab879  lea       r9, [rip + 0x26cdf08]   ; 0x144179788
+141aab880  xor       edx, edx
+141aab882  lea       r8, [rip + 0x26cdadf]   ; 0x144179368
+141aab889  call      0x142d705a5
+141aab88e  xor       r8d, r8d
+141aab891  movzx     edx, dil
+141aab895  mov       rcx, qword ptr [rax]
+141aab898  mov       r9, qword ptr [rcx + 0x68]
+141aab89c  mov       rcx, rax
+141aab89f  mov       rbx, qword ptr [rsp + 0x60]
+141aab8a4  mov       rsi, qword ptr [rsp + 0x68]
+141aab8a9  add       rsp, 0x50
+141aab8ad  pop       rdi
+141aab8ae  jmp       r9

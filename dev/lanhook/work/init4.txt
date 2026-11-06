@@ -1,0 +1,580 @@
+func 0x140182010..0x140182b7f (2927 bytes)
+140182010  push      rbp
+140182012  push      rbx
+140182013  push      rsi
+140182014  push      rdi
+140182015  push      r14
+140182017  push      r15
+140182019  lea       rbp, [rsp - 0x1b8]
+140182021  sub       rsp, 0x2b8
+140182028  lea       rax, [rsp + 0x70]
+14018202d  mov       qword ptr [rbp + 0x200], rax
+140182034  mov       dword ptr [rsp + 0x50], 0x16
+14018203c  mov       dword ptr [rsp + 0x54], 0x45
+140182044  mov       dword ptr [rsp + 0x58], 0x2a
+14018204c  xorps     xmm0, xmm0
+14018204f  movdqu    xmmword ptr [rsp + 0x70], xmm0
+140182055  xor       r14d, r14d
+140182058  mov       qword ptr [rbp - 0x80], r14
+14018205c  mov       ecx, 0xc
+140182061  call      0x1402aa7d0
+140182066  mov       qword ptr [rsp + 0x70], rax
+14018206b  mov       qword ptr [rsp + 0x78], rax
+140182070  lea       rbx, [rax + 0xc]
+140182074  mov       qword ptr [rbp - 0x80], rbx
+140182078  mov       r8d, 0xc
+14018207e  lea       rdx, [rsp + 0x50]
+140182083  mov       rcx, rax
+140182086  call      0x142d705ab
+14018208b  mov       qword ptr [rsp + 0x78], rbx
+140182090  lea       rax, [rbp - 0x58]
+140182094  mov       qword ptr [rbp + 0x208], rax
+14018209b  mov       dword ptr [rbp + 0x1f8], 3
+1401820a5  mov       byte ptr [rbp + 0x1fc], 1
+1401820ac  mov       ecx, 8
+1401820b1  call      0x1402aa7d0
+1401820b6  mov       rsi, rax
+1401820b9  mov       qword ptr [rbp - 0x18], rax
+1401820bd  lea       rdi, [rax + 8]
+1401820c1  mov       qword ptr [rbp - 8], rdi
+1401820c5  mov       rax, qword ptr [rbp + 0x1f8]
+1401820cc  mov       qword ptr [rsi], rax
+1401820cf  mov       qword ptr [rbp - 0x10], rdi
+1401820d3  mov       dword ptr [rbp - 0x58], r14d
+1401820d7  mov       dword ptr [rbp - 0x54], 8
+1401820de  xorps     xmm0, xmm0
+1401820e1  movups    xmmword ptr [rbp - 0x50], xmm0
+1401820e5  mov       qword ptr [rbp - 0x40], r14
+1401820e9  mov       qword ptr [rbp - 0x38], 0xf
+1401820f1  mov       byte ptr [rbp - 0x50], r14b
+1401820f5  movdqu    xmmword ptr [rbp - 0x30], xmm0
+1401820fa  mov       qword ptr [rbp - 0x20], r14
+1401820fe  sub       rdi, rsi
+140182101  mov       ecx, 8
+140182106  call      0x1402aa7d0
+14018210b  mov       qword ptr [rbp - 0x30], rax
+14018210f  mov       qword ptr [rbp - 0x28], rax
+140182113  lea       rbx, [rax + 8]
+140182117  mov       qword ptr [rbp - 0x20], rbx
+14018211b  mov       r8, rdi
+14018211e  mov       rdx, rsi
+140182121  mov       rcx, rax
+140182124  call      0x142d705ab
+140182129  mov       qword ptr [rbp - 0x28], rbx
+14018212d  lea       rax, [rbp + 0xb0]
+140182134  mov       qword ptr [rbp], rax
+140182138  mov       byte ptr [rbp + 0x10], 1
+14018213c  mov       dword ptr [rbp + 0x14], 0xfffffffe
+140182143  lea       r15, [rip + 0x410b966]   ; 0x14428dab0 "sss"
+14018214a  mov       qword ptr [rbp + 0x18], r15
+14018214e  xorps     xmm0, xmm0
+140182151  movdqa    xmmword ptr [rbp + 0x20], xmm0
+140182156  lea       rdx, [rip + 0x310d2fb]   ; 0x14328f458 "IDS_EVENT_JUNE_2020_OBJECTIVE_01"
+14018215d  lea       rcx, [rbp + 0x18]
+140182161  call      0x140a1b9f0
+140182166  nop       
+140182167  mov       byte ptr [rbp + 0x30], 1
+14018216b  mov       dword ptr [rbp + 0x34], 0xfffffffe
+140182172  mov       qword ptr [rbp + 0x38], r15
+140182176  xorps     xmm0, xmm0
+140182179  movdqa    xmmword ptr [rbp + 0x40], xmm0
+14018217e  lea       rdx, [rip + 0x310d2fb]   ; 0x14328f480 "IDS_EVENT_JUNE_2020_OBJECTIVE_02"
+140182185  lea       rcx, [rbp + 0x38]
+140182189  call      0x140a1b9f0
+14018218e  nop       
+14018218f  mov       byte ptr [rbp + 0x50], 1
+140182193  mov       dword ptr [rbp + 0x54], 0xfffffffe
+14018219a  mov       qword ptr [rbp + 0x58], r15
+14018219e  xorps     xmm0, xmm0
+1401821a1  movdqa    xmmword ptr [rbp + 0x60], xmm0
+1401821a6  lea       rdx, [rip + 0x310d2fb]   ; 0x14328f4a8 "IDS_EVENT_JUNE_2020_OBJECTIVE_03"
+1401821ad  lea       rcx, [rbp + 0x58]
+1401821b1  call      0x140a1b9f0
+1401821b6  nop       
+1401821b7  mov       byte ptr [rbp + 0x70], 1
+1401821bb  mov       dword ptr [rbp + 0x74], 0xfffffffe
+1401821c2  mov       qword ptr [rbp + 0x78], r15
+1401821c6  xorps     xmm0, xmm0
+1401821c9  movdqa    xmmword ptr [rbp + 0x80], xmm0
+1401821d1  lea       rdx, [rip + 0x310d2f8]   ; 0x14328f4d0 "IDS_EVENT_JUNE_2020_LEADERBOARD"
+1401821d8  lea       rcx, [rbp + 0x78]
+1401821dc  call      0x140a1b9f0
+1401821e1  nop       
+1401821e2  lea       rax, [rbp + 0x10]
+1401821e6  mov       qword ptr [rsp + 0x60], rax
+1401821eb  lea       rax, [rbp + 0x90]
+1401821f2  mov       qword ptr [rsp + 0x68], rax
+1401821f7  lea       r8, [rbp + 0x1f0]
+1401821fe  lea       rdx, [rsp + 0x60]
+140182203  lea       rcx, [rbp + 0xb0]
+14018220a  call      0x140f69020
+14018220f  mov       rbx, rax
+140182212  mov       byte ptr [rbp - 0x78], 1
+140182216  mov       dword ptr [rbp - 0x74], 0xfffffffe
+14018221d  mov       qword ptr [rbp - 0x70], r15
+140182221  mov       qword ptr [rbp - 0x68], r14
+140182225  mov       qword ptr [rbp - 0x60], r14
+140182229  lea       rdx, [rip + 0x310d2c0]   ; 0x14328f4f0 "IDS_CHALLENGE_EVENT_TITLE_MONGOL_RAIDERS"
+140182230  lea       rcx, [rbp - 0x70]
+140182234  call      0x140a1b9f0
+140182239  movdqa    xmm0, xmmword ptr [rip + 0x351de0f]   ; 0x1436a0050
+140182241  movdqa    xmmword ptr [rsp + 0x60], xmm0
+140182247  movdqa    xmm1, xmmword ptr [rip + 0x310d661]   ; 0x14328f8b0
+14018224f  movdqa    xmmword ptr [rbp], xmm1
+140182254  lea       rax, [rsp + 0x70]
+140182259  mov       qword ptr [rsp + 0x48], rax
+14018225e  lea       rax, [rbp - 0x58]
+140182262  mov       qword ptr [rsp + 0x40], rax
+140182267  mov       qword ptr [rsp + 0x38], r14
+14018226c  lea       rax, [rsp + 0x60]
+140182271  mov       qword ptr [rsp + 0x30], rax
+140182276  lea       rax, [rbp]
+14018227a  mov       qword ptr [rsp + 0x28], rax
+14018227f  mov       qword ptr [rsp + 0x20], rbx
+140182284  lea       r9, [rbp - 0x78]
+140182288  lea       r8, [rip + 0x310d291]   ; 0x14328f520 "0_June_Event_Scenario.aoe2scenario"
+14018228f  xor       edx, edx
+140182291  lea       rcx, [rip + 0x4168db8]   ; 0x1442eb050
+140182298  call      0x140f691a0
+14018229d  nop       
+14018229e  lea       r9, [rip + 0x67ffdb]   ; 0x140802280
+1401822a5  mov       edx, 0x20
+1401822aa  mov       r8d, 4
+1401822b0  lea       rcx, [rbp + 0x10]
+1401822b4  call      0x142d6e1cc
+1401822b9  nop       
+1401822ba  test      rsi, rsi
+1401822bd  je        0x1401822cc
+1401822bf  mov       edx, 8
+1401822c4  mov       rcx, rsi
+1401822c7  call      0x142d6dc84
+1401822cc  lea       rax, [rsp + 0x70]
+1401822d1  mov       qword ptr [rbp + 0x200], rax
+1401822d8  xorps     xmm0, xmm0
+1401822db  movdqu    xmmword ptr [rsp + 0x70], xmm0
+1401822e1  mov       qword ptr [rbp - 0x80], r14
+1401822e5  lea       rax, [rbp - 0x58]
+1401822e9  mov       qword ptr [rbp + 0x208], rax
+1401822f0  mov       dword ptr [rbp + 0x1f8], 3
+1401822fa  mov       byte ptr [rbp + 0x1fc], 1
+140182301  mov       ecx, 8
+140182306  call      0x1402aa7d0
+14018230b  mov       rsi, rax
+14018230e  mov       qword ptr [rbp - 0x18], rax
+140182312  lea       rdi, [rax + 8]
+140182316  mov       qword ptr [rbp - 8], rdi
+14018231a  mov       rax, qword ptr [rbp + 0x1f8]
+140182321  mov       qword ptr [rsi], rax
+140182324  mov       qword ptr [rbp - 0x10], rdi
+140182328  mov       dword ptr [rbp - 0x58], r14d
+14018232c  mov       dword ptr [rbp - 0x54], 8
+140182333  xorps     xmm0, xmm0
+140182336  movups    xmmword ptr [rbp - 0x50], xmm0
+14018233a  mov       qword ptr [rbp - 0x40], r14
+14018233e  mov       qword ptr [rbp - 0x38], 0xf
+140182346  mov       byte ptr [rbp - 0x50], 0
+14018234a  movdqu    xmmword ptr [rbp - 0x30], xmm0
+14018234f  mov       qword ptr [rbp - 0x20], r14
+140182353  sub       rdi, rsi
+140182356  mov       ecx, 8
+14018235b  call      0x1402aa7d0
+140182360  mov       qword ptr [rbp - 0x30], rax
+140182364  mov       qword ptr [rbp - 0x28], rax
+140182368  lea       rbx, [rax + 8]
+14018236c  mov       qword ptr [rbp - 0x20], rbx
+140182370  mov       r8, rdi
+140182373  mov       rdx, rsi
+140182376  mov       rcx, rax
+140182379  call      0x142d705ab
+14018237e  mov       qword ptr [rbp - 0x28], rbx
+140182382  lea       rax, [rbp + 0xb0]
+140182389  mov       qword ptr [rsp + 0x60], rax
+14018238e  mov       byte ptr [rbp + 0x10], 1
+140182392  mov       dword ptr [rbp + 0x14], 0xfffffffe
+140182399  mov       qword ptr [rbp + 0x18], r15
+14018239d  xorps     xmm0, xmm0
+1401823a0  movdqa    xmmword ptr [rbp + 0x20], xmm0
+1401823a5  lea       rdx, [rip + 0x310d19c]   ; 0x14328f548 "IDS_EVENT_SEPTEMBER_2020_OBJECTIVE_01"
+1401823ac  lea       rcx, [rbp + 0x18]
+1401823b0  call      0x140a1b9f0
+1401823b5  nop       
+1401823b6  mov       byte ptr [rbp + 0x30], 1
+1401823ba  mov       dword ptr [rbp + 0x34], 0xfffffffe
+1401823c1  mov       qword ptr [rbp + 0x38], r15
+1401823c5  xorps     xmm0, xmm0
+1401823c8  movdqa    xmmword ptr [rbp + 0x40], xmm0
+1401823cd  lea       rdx, [rip + 0x310d19c]   ; 0x14328f570 "IDS_EVENT_SEPTEMBER_2020_OBJECTIVE_02"
+1401823d4  lea       rcx, [rbp + 0x38]
+1401823d8  call      0x140a1b9f0
+1401823dd  nop       
+1401823de  mov       byte ptr [rbp + 0x50], 1
+1401823e2  mov       dword ptr [rbp + 0x54], 0xfffffffe
+1401823e9  mov       qword ptr [rbp + 0x58], r15
+1401823ed  xorps     xmm0, xmm0
+1401823f0  movdqa    xmmword ptr [rbp + 0x60], xmm0
+1401823f5  lea       rdx, [rip + 0x310d19c]   ; 0x14328f598 "IDS_EVENT_SEPTEMBER_2020_OBJECTIVE_03"
+1401823fc  lea       rcx, [rbp + 0x58]
+140182400  call      0x140a1b9f0
+140182405  nop       
+140182406  mov       byte ptr [rbp + 0x70], 1
+14018240a  mov       dword ptr [rbp + 0x74], 0xfffffffe
+140182411  mov       qword ptr [rbp + 0x78], r15
+140182415  xorps     xmm0, xmm0
+140182418  movdqa    xmmword ptr [rbp + 0x80], xmm0
+140182420  lea       rdx, [rip + 0x310d199]   ; 0x14328f5c0 "IDS_EVENT_SEPTEMBER_2020_OBJECTIVE_04"
+140182427  lea       rcx, [rbp + 0x78]
+14018242b  call      0x140a1b9f0
+140182430  nop       
+140182431  mov       byte ptr [rbp + 0x90], 1
+140182438  mov       dword ptr [rbp + 0x94], 0xfffffffe
+140182442  mov       qword ptr [rbp + 0x98], r15
+140182449  xorps     xmm0, xmm0
+14018244c  movdqa    xmmword ptr [rbp + 0xa0], xmm0
+140182454  lea       rdx, [rip + 0x310d18d]   ; 0x14328f5e8 "IDS_EVENT_MISC_LEADERBOARD"
+14018245b  lea       rcx, [rbp + 0x98]
+140182462  call      0x140a1b9f0
+140182467  nop       
+140182468  lea       rax, [rbp + 0x10]
+14018246c  mov       qword ptr [rsp + 0x50], rax
+140182471  lea       rax, [rbp + 0xb0]
+140182478  mov       qword ptr [rsp + 0x58], rax
+14018247d  lea       r8, [rbp + 0x1f0]
+140182484  lea       rdx, [rsp + 0x50]
+140182489  lea       rcx, [rbp + 0xb0]
+140182490  call      0x140f69020
+140182495  mov       rbx, rax
+140182498  mov       byte ptr [rbp - 0x78], 1
+14018249c  mov       dword ptr [rbp - 0x74], 0xfffffffe
+1401824a3  mov       qword ptr [rbp - 0x70], r15
+1401824a7  mov       qword ptr [rbp - 0x68], r14
+1401824ab  mov       qword ptr [rbp - 0x60], r14
+1401824af  lea       rdx, [rip + 0x310d152]   ; 0x14328f608 "IDS_CHALLENGE_EVENT_TITLE_BARBAROSSA_BRAWL"
+1401824b6  lea       rcx, [rbp - 0x70]
+1401824ba  call      0x140a1b9f0
+1401824bf  movdqa    xmm0, xmmword ptr [rip + 0x351db89]   ; 0x1436a0050
+1401824c7  movdqa    xmmword ptr [rsp + 0x50], xmm0
+1401824cd  movdqa    xmm1, xmmword ptr [rip + 0x310d3eb]   ; 0x14328f8c0
+1401824d5  movdqa    xmmword ptr [rsp + 0x60], xmm1
+1401824db  lea       rax, [rsp + 0x70]
+1401824e0  mov       qword ptr [rsp + 0x48], rax
+1401824e5  lea       rax, [rbp - 0x58]
+1401824e9  mov       qword ptr [rsp + 0x40], rax
+1401824ee  mov       qword ptr [rsp + 0x38], r14
+1401824f3  lea       rax, [rsp + 0x50]
+1401824f8  mov       qword ptr [rsp + 0x30], rax
+1401824fd  lea       rax, [rsp + 0x60]
+140182502  mov       qword ptr [rsp + 0x28], rax
+140182507  mov       qword ptr [rsp + 0x20], rbx
+14018250c  lea       r9, [rbp - 0x78]
+140182510  lea       r8, [rip + 0x310d121]   ; 0x14328f638 "0_September_Event_Scenario.aoe2scenario"
+140182517  mov       edx, 1
+14018251c  lea       rcx, [rip + 0x4168bf5]   ; 0x1442eb118
+140182523  call      0x140f691a0
+140182528  nop       
+140182529  lea       r9, [rip + 0x67fd50]   ; 0x140802280
+140182530  mov       edx, 0x20
+140182535  mov       r8d, 5
+14018253b  lea       rcx, [rbp + 0x10]
+14018253f  call      0x142d6e1cc
+140182544  nop       
+140182545  test      rsi, rsi
+140182548  je        0x140182557
+14018254a  mov       edx, 8
+14018254f  mov       rcx, rsi
+140182552  call      0x142d6dc84
+140182557  lea       rax, [rsp + 0x70]
+14018255c  mov       qword ptr [rbp + 0x200], rax
+140182563  xorps     xmm0, xmm0
+140182566  movdqu    xmmword ptr [rsp + 0x70], xmm0
+14018256c  mov       qword ptr [rbp - 0x80], r14
+140182570  lea       rax, [rbp - 0x58]
+140182574  mov       qword ptr [rbp + 0x208], rax
+14018257b  mov       dword ptr [rbp + 0x1f8], 3
+140182585  mov       byte ptr [rbp + 0x1fc], 1
+14018258c  mov       ecx, 8
+140182591  call      0x1402aa7d0
+140182596  mov       rsi, rax
+140182599  mov       qword ptr [rbp - 0x18], rax
+14018259d  lea       rdi, [rax + 8]
+1401825a1  mov       qword ptr [rbp - 8], rdi
+1401825a5  mov       rax, qword ptr [rbp + 0x1f8]
+1401825ac  mov       qword ptr [rsi], rax
+1401825af  mov       qword ptr [rbp - 0x10], rdi
+1401825b3  mov       dword ptr [rbp - 0x58], r14d
+1401825b7  mov       dword ptr [rbp - 0x54], 8
+1401825be  xorps     xmm0, xmm0
+1401825c1  movups    xmmword ptr [rbp - 0x50], xmm0
+1401825c5  mov       qword ptr [rbp - 0x40], r14
+1401825c9  mov       qword ptr [rbp - 0x38], 0xf
+1401825d1  mov       byte ptr [rbp - 0x50], 0
+1401825d5  movdqu    xmmword ptr [rbp - 0x30], xmm0
+1401825da  mov       qword ptr [rbp - 0x20], r14
+1401825de  sub       rdi, rsi
+1401825e1  mov       ecx, 8
+1401825e6  call      0x1402aa7d0
+1401825eb  mov       qword ptr [rbp - 0x30], rax
+1401825ef  mov       qword ptr [rbp - 0x28], rax
+1401825f3  lea       rbx, [rax + 8]
+1401825f7  mov       qword ptr [rbp - 0x20], rbx
+1401825fb  mov       r8, rdi
+1401825fe  mov       rdx, rsi
+140182601  mov       rcx, rax
+140182604  call      0x142d705ab
+140182609  mov       qword ptr [rbp - 0x28], rbx
+14018260d  movabs    rdi, 0x1400000001
+140182617  lea       rax, [rbp + 0xb0]
+14018261e  mov       qword ptr [rsp + 0x60], rax
+140182623  mov       byte ptr [rbp + 0xd0], 1
+14018262a  mov       dword ptr [rbp + 0xd4], 0xfffffffe
+140182634  mov       qword ptr [rbp + 0xd8], r15
+14018263b  xorps     xmm0, xmm0
+14018263e  movdqa    xmmword ptr [rbp + 0xe0], xmm0
+140182646  lea       rdx, [rip + 0x310d013]   ; 0x14328f660 "IDS_EVENT_AUGUST_2023_OBJECTIVE_01"
+14018264d  lea       rcx, [rbp + 0xd8]
+140182654  call      0x140a1b9f0
+140182659  nop       
+14018265a  mov       byte ptr [rbp + 0xf0], 1
+140182661  mov       dword ptr [rbp + 0xf4], 0xfffffffe
+14018266b  mov       qword ptr [rbp + 0xf8], r15
+140182672  xorps     xmm0, xmm0
+140182675  movdqa    xmmword ptr [rbp + 0x100], xmm0
+14018267d  lea       rdx, [rip + 0x310d004]   ; 0x14328f688 "IDS_EVENT_AUGUST_2023_OBJECTIVE_02"
+140182684  lea       rcx, [rbp + 0xf8]
+14018268b  call      0x140a1b9f0
+140182690  nop       
+140182691  mov       byte ptr [rbp + 0x110], 1
+140182698  mov       dword ptr [rbp + 0x114], 0xfffffffe
+1401826a2  mov       qword ptr [rbp + 0x118], r15
+1401826a9  xorps     xmm0, xmm0
+1401826ac  movdqa    xmmword ptr [rbp + 0x120], xmm0
+1401826b4  lea       rdx, [rip + 0x310cff5]   ; 0x14328f6b0 "IDS_EVENT_AUGUST_2023_OBJECTIVE_03"
+1401826bb  lea       rcx, [rbp + 0x118]
+1401826c2  call      0x140a1b9f0
+1401826c7  nop       
+1401826c8  mov       byte ptr [rbp + 0x130], 1
+1401826cf  mov       dword ptr [rbp + 0x134], 0xfffffffe
+1401826d9  mov       qword ptr [rbp + 0x138], r15
+1401826e0  xorps     xmm0, xmm0
+1401826e3  movdqa    xmmword ptr [rbp + 0x140], xmm0
+1401826eb  lea       rdx, [rip + 0x310cfe6]   ; 0x14328f6d8 "IDS_EVENT_AUGUST_2023_OBJECTIVE_04"
+1401826f2  lea       rcx, [rbp + 0x138]
+1401826f9  call      0x140a1b9f0
+1401826fe  nop       
+1401826ff  mov       byte ptr [rbp + 0x150], 1
+140182706  mov       dword ptr [rbp + 0x154], 0xfffffffe
+140182710  mov       qword ptr [rbp + 0x158], r15
+140182717  xorps     xmm0, xmm0
+14018271a  movdqa    xmmword ptr [rbp + 0x160], xmm0
+140182722  lea       rdx, [rip + 0x310cfd7]   ; 0x14328f700 "IDS_EVENT_AUGUST_2023_OBJECTIVE_05"
+140182729  lea       rcx, [rbp + 0x158]
+140182730  call      0x140a1b9f0
+140182735  nop       
+140182736  mov       byte ptr [rbp + 0x170], 1
+14018273d  mov       dword ptr [rbp + 0x174], 0xfffffffe
+140182747  mov       qword ptr [rbp + 0x178], r15
+14018274e  xorps     xmm0, xmm0
+140182751  movdqa    xmmword ptr [rbp + 0x180], xmm0
+140182759  lea       rdx, [rip + 0x310cfc8]   ; 0x14328f728 "IDS_EVENT_AUGUST_2023_OBJECTIVE_06"
+140182760  lea       rcx, [rbp + 0x178]
+140182767  call      0x140a1b9f0
+14018276c  nop       
+14018276d  mov       byte ptr [rbp + 0x190], 1
+140182774  mov       dword ptr [rbp + 0x194], 0xfffffffe
+14018277e  mov       qword ptr [rbp + 0x198], r15
+140182785  xorps     xmm0, xmm0
+140182788  movdqa    xmmword ptr [rbp + 0x1a0], xmm0
+140182790  lea       rdx, [rip + 0x310ce51]   ; 0x14328f5e8 "IDS_EVENT_MISC_LEADERBOARD"
+140182797  lea       rcx, [rbp + 0x198]
+14018279e  call      0x140a1b9f0
+1401827a3  nop       
+1401827a4  lea       rax, [rbp + 0xd0]
+1401827ab  mov       qword ptr [rsp + 0x50], rax
+1401827b0  lea       rax, [rbp + 0x1b0]
+1401827b7  mov       qword ptr [rsp + 0x58], rax
+1401827bc  lea       r8, [rbp + 0x1f0]
+1401827c3  lea       rdx, [rsp + 0x50]
+1401827c8  lea       rcx, [rbp + 0xb0]
+1401827cf  call      0x140f69020
+1401827d4  mov       rbx, rax
+1401827d7  mov       byte ptr [rbp - 0x78], 1
+1401827db  mov       dword ptr [rbp - 0x74], 0xfffffffe
+1401827e2  mov       qword ptr [rbp - 0x70], r15
+1401827e6  mov       qword ptr [rbp - 0x68], r14
+1401827ea  mov       qword ptr [rbp - 0x60], r14
+1401827ee  lea       rdx, [rip + 0x310cf5b]   ; 0x14328f750 "IDS_CHALLENGE_EVENT_TITLE_MANGUDAI_MADNESS"
+1401827f5  lea       rcx, [rbp - 0x70]
+1401827f9  call      0x140a1b9f0
+1401827fe  movdqa    xmm0, xmmword ptr [rip + 0x310d0da]   ; 0x14328f8e0
+140182806  movdqa    xmmword ptr [rsp + 0x50], xmm0
+14018280c  movdqa    xmm1, xmmword ptr [rip + 0x310d0bc]   ; 0x14328f8d0
+140182814  movdqa    xmmword ptr [rsp + 0x60], xmm1
+14018281a  lea       rax, [rsp + 0x70]
+14018281f  mov       qword ptr [rsp + 0x48], rax
+140182824  lea       rax, [rbp - 0x58]
+140182828  mov       qword ptr [rsp + 0x40], rax
+14018282d  mov       qword ptr [rsp + 0x38], rdi
+140182832  lea       rax, [rsp + 0x50]
+140182837  mov       qword ptr [rsp + 0x30], rax
+14018283c  lea       rax, [rsp + 0x60]
+140182841  mov       qword ptr [rsp + 0x28], rax
+140182846  mov       qword ptr [rsp + 0x20], rbx
+14018284b  lea       r9, [rbp - 0x78]
+14018284f  lea       r8, [rip + 0x310cf2a]   ; 0x14328f780 "Mangudai Madness.aoe2scenario"
+140182856  mov       edx, 2
+14018285b  lea       rcx, [rip + 0x416897e]   ; 0x1442eb1e0
+140182862  call      0x140f691a0
+140182867  nop       
+140182868  lea       r9, [rip + 0x67fa11]   ; 0x140802280
+14018286f  mov       edx, 0x20
+140182874  mov       r8d, 7
+14018287a  lea       rcx, [rbp + 0xd0]
+140182881  call      0x142d6e1cc
+140182886  nop       
+140182887  test      rsi, rsi
+14018288a  je        0x140182899
+14018288c  mov       edx, 8
+140182891  mov       rcx, rsi
+140182894  call      0x142d6dc84
+140182899  lea       rax, [rbp - 0x18]
+14018289d  mov       qword ptr [rbp + 0x1f8], rax
+1401828a4  xorps     xmm0, xmm0
+1401828a7  movdqu    xmmword ptr [rbp - 0x18], xmm0
+1401828ac  mov       qword ptr [rbp - 8], r14
+1401828b0  lea       rax, [rbp + 0x10]
+1401828b4  mov       qword ptr [rbp + 0x200], rax
+1401828bb  mov       dword ptr [rsp + 0x50], 1
+1401828c3  mov       byte ptr [rsp + 0x54], 0
+1401828c8  mov       dword ptr [rsp + 0x58], 3
+1401828d0  mov       byte ptr [rsp + 0x5c], 1
+1401828d5  movdqu    xmmword ptr [rsp + 0x70], xmm0
+1401828db  mov       qword ptr [rbp - 0x80], r14
+1401828df  mov       ecx, 0x10
+1401828e4  call      0x1402aa7d0
+1401828e9  mov       qword ptr [rsp + 0x70], rax
+1401828ee  mov       qword ptr [rsp + 0x78], rax
+1401828f3  lea       rbx, [rax + 0x10]
+1401828f7  mov       qword ptr [rbp - 0x80], rbx
+1401828fb  mov       r8d, 0x10
+140182901  lea       rdx, [rsp + 0x50]
+140182906  mov       rcx, rax
+140182909  call      0x142d705ab
+14018290e  mov       qword ptr [rsp + 0x78], rbx
+140182913  lea       rdx, [rip + 0x310ce86]   ; 0x14328f7a0 "[THE SIEGE]"
+14018291a  lea       rcx, [rbp - 0x58]
+14018291e  call      0x1402aa4a0
+140182923  mov       rbx, rax
+140182926  mov       qword ptr [rbp + 0x208], rax
+14018292d  mov       dword ptr [rbp + 0x10], 1
+140182934  mov       dword ptr [rbp + 0x14], 6
+14018293b  mov       rdx, rax
+14018293e  lea       rcx, [rbp + 0x18]
+140182942  call      0x1402aa930
+140182947  nop       
+140182948  lea       rdx, [rsp + 0x70]
+14018294d  lea       rcx, [rbp + 0x38]
+140182951  call      0x140f69100
+140182956  nop       
+140182957  mov       rcx, rbx
+14018295a  call      0x1402a9ba0
+14018295f  nop       
+140182960  lea       rax, [rbp + 0xb0]
+140182967  mov       qword ptr [rbp + 0x208], rax
+14018296e  mov       byte ptr [rbp + 0xd0], 1
+140182975  mov       dword ptr [rbp + 0xd4], 0xfffffffe
+14018297f  mov       qword ptr [rbp + 0xd8], r15
+140182986  xorps     xmm0, xmm0
+140182989  movdqa    xmmword ptr [rbp + 0xe0], xmm0
+140182991  lea       rdx, [rip + 0x310ce18]   ; 0x14328f7b0 "IDS_EVENT_MARCH_2024_C1_DESC"
+140182998  lea       rcx, [rbp + 0xd8]
+14018299f  call      0x140a1b9f0
+1401829a4  nop       
+1401829a5  mov       byte ptr [rbp + 0xf0], 1
+1401829ac  mov       dword ptr [rbp + 0xf4], 0xfffffffe
+1401829b6  mov       qword ptr [rbp + 0xf8], r15
+1401829bd  xorps     xmm0, xmm0
+1401829c0  movdqa    xmmword ptr [rbp + 0x100], xmm0
+1401829c8  lea       rdx, [rip + 0x310ce01]   ; 0x14328f7d0 "IDS_EVENT_MARCH_2024_OBJECTIVE_01"
+1401829cf  lea       rcx, [rbp + 0xf8]
+1401829d6  call      0x140a1b9f0
+1401829db  nop       
+1401829dc  mov       byte ptr [rbp + 0x110], 1
+1401829e3  mov       dword ptr [rbp + 0x114], 0xfffffffe
+1401829ed  mov       qword ptr [rbp + 0x118], r15
+1401829f4  xorps     xmm0, xmm0
+1401829f7  movdqa    xmmword ptr [rbp + 0x120], xmm0
+1401829ff  lea       rdx, [rip + 0x310cdf2]   ; 0x14328f7f8 "IDS_EVENT_MARCH_2024_OBJECTIVE_02"
+140182a06  lea       rcx, [rbp + 0x118]
+140182a0d  call      0x140a1b9f0
+140182a12  nop       
+140182a13  mov       byte ptr [rbp + 0x130], 1
+140182a1a  mov       dword ptr [rbp + 0x134], 0xfffffffe
+140182a24  mov       qword ptr [rbp + 0x138], r15
+140182a2b  xorps     xmm0, xmm0
+140182a2e  movdqa    xmmword ptr [rbp + 0x140], xmm0
+140182a36  lea       rdx, [rip + 0x310cde3]   ; 0x14328f820 "IDS_EVENT_MARCH_2024_OBJECTIVE_03"
+140182a3d  lea       rcx, [rbp + 0x138]
+140182a44  call      0x140a1b9f0
+140182a49  nop       
+140182a4a  mov       byte ptr [rbp + 0x150], 1
+140182a51  mov       dword ptr [rbp + 0x154], 0xfffffffe
+140182a5b  mov       qword ptr [rbp + 0x158], r15
+140182a62  xorps     xmm0, xmm0
+140182a65  movdqa    xmmword ptr [rbp + 0x160], xmm0
+140182a6d  lea       rdx, [rip + 0x310cdd4]   ; 0x14328f848 "IDS_EVENT_MARCH_2024_OBJECTIVE_04"
+140182a74  lea       rcx, [rbp + 0x158]
+140182a7b  call      0x140a1b9f0
+140182a80  nop       
+140182a81  lea       rax, [rbp + 0xd0]
+140182a88  mov       qword ptr [rsp + 0x60], rax
+140182a8d  lea       rax, [rbp + 0x170]
+140182a94  mov       qword ptr [rsp + 0x68], rax
+140182a99  lea       r8, [rbp + 0x1f0]
+140182aa0  lea       rdx, [rsp + 0x60]
+140182aa5  lea       rcx, [rbp + 0xb0]
+140182aac  call      0x140f69020
+140182ab1  mov       rbx, rax
+140182ab4  mov       byte ptr [rbp - 0x78], 1
+140182ab8  mov       dword ptr [rbp - 0x74], 0xfffffffe
+140182abf  mov       qword ptr [rbp - 0x70], r15
+140182ac3  mov       qword ptr [rbp - 0x68], r14
+140182ac7  mov       qword ptr [rbp - 0x60], r14
+140182acb  lea       rdx, [rip + 0x310cd9e]   ; 0x14328f870 "IDS_EVENT_MARCH_2024_C1_TITLE"
+140182ad2  lea       rcx, [rbp - 0x70]
+140182ad6  call      0x140a1b9f0
+140182adb  movdqa    xmm0, xmmword ptr [rip + 0x351d56d]   ; 0x1436a0050
+140182ae3  movdqa    xmmword ptr [rsp + 0x60], xmm0
+140182ae9  movdqa    xmmword ptr [rbp], xmm0
+140182aee  lea       rax, [rbp - 0x18]
+140182af2  mov       qword ptr [rsp + 0x48], rax
+140182af7  lea       rax, [rbp + 0x10]
+140182afb  mov       qword ptr [rsp + 0x40], rax
+140182b00  mov       qword ptr [rsp + 0x38], r14
+140182b05  lea       rax, [rsp + 0x60]
+140182b0a  mov       qword ptr [rsp + 0x30], rax
+140182b0f  lea       rax, [rbp]
+140182b13  mov       qword ptr [rsp + 0x28], rax
+140182b18  mov       qword ptr [rsp + 0x20], rbx
+140182b1d  lea       r9, [rbp - 0x78]
+140182b21  lea       r8, [rip + 0x310cd68]   ; 0x14328f890 "The Siege.aoe2scenario"
+140182b28  mov       edx, 3
+140182b2d  lea       rcx, [rip + 0x4168774]   ; 0x1442eb2a8
+140182b34  call      0x140f691a0
+140182b39  nop       
+140182b3a  lea       r9, [rip + 0x67f73f]   ; 0x140802280
+140182b41  mov       edx, 0x20
+140182b46  mov       r8d, 5
+140182b4c  lea       rcx, [rbp + 0xd0]
+140182b53  call      0x142d6e1cc
+140182b58  nop       
+140182b59  lea       rcx, [rsp + 0x70]
+140182b5e  call      0x140a4cb80
+140182b63  nop       
+140182b64  lea       rcx, [rip + 0x2f222c5]   ; 0x1430a4e30
+140182b6b  add       rsp, 0x2b8
+140182b72  pop       r15
+140182b74  pop       r14
+140182b76  pop       rdi
+140182b77  pop       rsi
+140182b78  pop       rbx
+140182b79  pop       rbp
+140182b7a  jmp       0x142d6ded4

@@ -1609,10 +1609,19 @@ static void route(TLSSES *t, const char *method, const char *path,
         // array -> "WorldwideUpdateAdvertisementAsync - response was not formatted
         // correctly: [0,[]]". Parser 0x140579020 wants `result` + `updatedAvertisement`
         // (the game's own typo, one 'd') holding one ADVERTISEMENT object.
+        // `contains` also matches /advertisement/updateTags and updateState, whose
+        // bodies carry no hostid/mapname/options. Building an advertisement from
+        // such a body handed the game a lobby with hostProfileID 0, empty slot blob
+        // and matchState -1 once a second (s32); those calls now echo the lobby we
+        // already have instead of inventing an empty one.
+        char hb[32], ab[8192];
+        const char *src = form_get(body, "hostid", hb, sizeof hb) ? body : 0;
+        if (!src && adv_copy(ab, sizeof ab) > 0) src = ab;
+        if (!src) src = body;
         bs(&resp, "{\"result\":0,\"updatedAvertisement\":");
-        emit_advertisement(&resp, body);
+        emit_advertisement(&resp, src);
         bs(&resp, "}");
-        adv_store(body);
+        if (src == body) adv_store(body);
         log_resp_head(resp.p, (int)resp.len);
         http_respond(t, resp.p);
     } else if (contains(path, "/game/advertisement/getLanAdvertisements") ||
