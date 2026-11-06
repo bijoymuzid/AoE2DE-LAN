@@ -98,6 +98,29 @@ H4 owns that in-process.
 
 **Ask W1 for: the current `dbghelp.dll` build, and which tailnet box is theirs.**
 
+### L3 cross-tailnet run: PASS (2026-11-06 18:27)
+
+Setup: relay (`relay_test.py relay`) + host side (`relay_test.py host 127.0.0.1 600`)
+on this box; joiner (`relay_test.py joiner 100.109.201.126`) on W1's
+**DESKTOP-64DAV0P / 100.79.215.72**. Relay's own connection table showed
+`ESTAB 100.109.201.126:47111 <- 100.79.215.72:61981` before the session opened.
+
+Numbers: A's RJ at 18:27:29 (session created), self-ADDPEER 18:27:30,
+**B-GD-PING inside a type-0x0A funnel at 18:27:32** (=3 s), B intro relay seen
+18:27:33, ADDPEER(B,2) 18:27:33, loop torn down 18:27:38 → **A_saw_B=True, 55
+funnels, PASS**. Frame: `0afe01000900422d47442d50494e47000000`.
+Path: all traffic via DERP(bom) at ~85 ms — no direct path (NAT punching failed,
+cause unknown). The relay does not care; lockstep tolerates it (PLAN §3.5).
+
+Race fixes made during the runs (both pushed): joiner retries RJ every 15 s until
+admitted (start order now self-heals), LOBBYPING keepalive during both wait phases
+(the 60 s silence timeout applies there too), host window 120 s default / joiner 900 s.
+Earlier failures were ours, not the network: (a) relay not yet listening, (b) the
+10-minute run's RJ fired 600 s in while the joiner had given up.
+
+Remaining for L3: nothing. W1 should re-run `joiner` once against a live relay to
+capture his side's PASS line for the record (his side was not read out).
+
 ## Open / next
 
 - L2 done; PINGNODE still replies `path: "unknown"` — wiring it to the peer table is M2 polish.
