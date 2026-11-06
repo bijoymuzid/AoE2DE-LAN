@@ -172,3 +172,63 @@ Gates after the fix: `hooktest.exe` 68/68, `srvtest.exe` + `srvclient.py` PASS, 
 per-connection logging and the 64 KB request buffer).
 
 Not yet measured: whether the create now succeeds. That is the next single click.
+
+## 30j. MEASURED: the fix worked — hosting now sends its request, and fails on our reply
+
+Third run (pid 3124, Server = `Use Local Lan Server`). The `Expect: 100-continue` fix is confirmed
+in game:
+
+```
+[t=538.188s] LogHelper: "starting LAN hosting"
+[t=538.406s] srv: blk#31 n=381
+[t=538.406s] srv: 100-continue#31 n=1383      <- our interim reply, the body follows
+[t=538.500s] srv: req#31 n=1764
+[t=538.500s] HTTP REQ /game/advertisement/host
+[t=538.500s] HTTP BODY advertisementid=-1&appbinarychecksum=188329&automatchPoll_id=-1&
+             callNum=58&connect_id=1193958235&datachecksum=0&description=AnkerGames%27s%20Game&
+             hostid=3842241165083521967&isObservable=0&joinable=1&mapname=my%20map&matchtype=-1&
+             maxplayers=8&moddllchecksum=0&moddllfile=INVALID&modname=INVALID&mo…
+[t=538.500s] HTTP RESP BODY [0,[]]            <- the catch-all, still an array
+```
+
+Downstream, with that reply:
+
+```
+[t=538.610s] "OnlineHostAsync success"
+[t=538.610s] "Created Matchinfo for sessionID %llu"            -> -1
+[t=538.610s] "OnJoinAdvertisementSuccess - joined online match, server leave notification required"
+[t=538.610s] "starting local hosting"
+[t=538.610s] "PeerRemoveAll - flushing local session peer data"
+[t=538.610s] "Destroyed Matchinfo for sessionID %lld"          -> -1
+[t=598.625s] "HostAsync - completed with HostResult = %d"       -> 0xfffffff4 (-12)
+```
+
+Operator dialog this time: **`Could not create game. Request was invalid. Source:
+AdvertisementJoinEvent Error Code: 0xfffffff4 extended code: 0xffffffff`** — a different and later
+error than session 29's `0x00000001`, which is what the fix bought.
+
+⇒ The game does reach the advertisement-create call and the request *is* carried. What is missing is
+the **reply**: with an array reply the host gets advertisement id `-1`, joins with that, and the
+whole chain unwinds. `/game/advertisement/leave` is then retried every ~10 s for the rest of the
+session with `advertisementid=-1` (9 times), i.e. the game is trying to clean up a lobby it never got.
+
+Where the reply is read: `0x140309298` (the message that references `OnJoinAdvertisementSuccess`,
+`0x14367d2d0`) receives the parsed DTO; `0x140351771` (`call 0x1402ff080`) then does
+`rdi+0x358 = rdi+0x80` and passes `&[rdi+0x390]` on, with the success log `OnlineHostAsync success`
+(`0x14367ee90`) at `0x14035171e` in the same function. That function (`0x1403503a0`) is the same one
+that logs `starting LAN hosting`, so the whole host flow is one function.
+
+## 30k. Change made, not yet measured: a real `/game/advertisement/host` reply
+
+`loginsrv.c` now answers that path with an object instead of the catch-all:
+
+```json
+{"result":0,"advertisementid":1,"hostid":<echo of the request's hostid>,
+ "sessionID":1,"maxplayers":8,"matchtype":-1,"slotinfo":null,"encodedSlots":""}
+```
+
+`slotinfo`/`encodedSlots` are a first guess — the real slot layout has to be copied from what the
+create dialog produces (the request's own `slotinfo` field, which our log truncates at 300 chars;
+raise the `log_body_head` cap when the slot error appears). Gates after the change: `hooktest.exe`
+68/68, `srvtest` + `srvclient` PASS (3 checks incl. 100-continue and 6 concurrent), game exe crc
+`4f533b6c` unchanged. Staged `dbghelp.dll` crc `159dcdab` (235,520 B).

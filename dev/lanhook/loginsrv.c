@@ -1421,6 +1421,35 @@ static void route(TLSSES *t, const char *method, const char *path,
             "\"rankLevels\":[],\"statDefinitions\":[],\"selfAssessmentTiers\":[]}";
         log_resp_head(LB, (int)strlen_f(LB));
         http_respond(t, LB);
+    } else if (contains(path, "/game/advertisement/host")) {
+        // LAN hosting: the create request arrives only now that the server answers
+        // libcurl's "Expect: 100-continue" (session 30h). The game reads the reply as
+        // a DTO with named members (0x140309298 parses it, 0x140351771 passes the
+        // address on). With the catch-all array it logged "OnlineHostAsync success"
+        // but then "Created Matchinfo for sessionID -1", "starting local hosting",
+        // "PeerRemoveAll" and finally HostResult 0xfffffff4 ("Request was invalid"),
+        // i.e. the host joined with no advertisement id.
+        // Replied shape = result + the advertisement we were asked to create, echoing
+        // the request's own hostid and connect_id. shortcut: `slotinfo` is passed as
+        // null and the slot layout is not built yet; when the lobby screen reports a
+        // slot error, copy the encodedSlots the create dialog shows instead.
+        static char hr[1024];
+        const char *hid = body ? strstr_f(body, "hostid=") : 0;
+        char hostid[32]; int hi2 = 0;
+        hostid[0] = 0;
+        if (hid) { hid += 7; while (hid[hi2] && hid[hi2] != '&' && hi2 < 31) { hostid[hi2] = hid[hi2]; hi2++; } }
+        hostid[hi2] = 0;
+        { const char *a = "{\"result\":0,\"advertisementid\":1,\"hostid\":";
+          int i = 0; while (*a && i < 1000) hr[i++] = *a++;
+          if (hostid[0]) { for (int k = 0; hostid[k] && i < 1000; k++) hr[i++] = hostid[k]; }
+          else { hr[i++] = '0'; }
+          a = ",\"sessionID\":"; while (*a) hr[i++] = *a++;
+          a = "1"; while (*a) hr[i++] = *a++;
+          a = ",\"maxplayers\":8,\"matchtype\":-1,\"slotinfo\":null,\"encodedSlots\":\"\"}";
+          while (*a) hr[i++] = *a++;
+          hr[i] = 0; }
+        log_resp_head(hr, (int)strlen_f(hr));
+        http_respond(t, hr);
     } else if (contains(path, "/game/news/")) {
         log_resp_head("[0,[]]", 5);
         http_respond(t, "[0,[]]");

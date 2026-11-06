@@ -680,8 +680,8 @@ a file (the repo git-ignores binaries): W2 drops it next to the game exe inside 
 
 | # | Task | Done when |
 |---|---|---|
-| W1-a | **Hosting**: confirm the `Expect: 100-continue` fix (session 30h) makes Create Lobby succeed in LAN mode. | `starting LAN hosting` is followed by a *create advertisement* request, then a visible lobby |
-| W1-b | **LAN advertisement reply**: replace the catch-all `[0,[]]` for `/game/advertisement/getLanAdvertisements` (and `findAdvertisements`) with a well-formed object, schema taken from the game's own parser the same way `getAvailableLeaderboards` was cracked. | `LANAdvertisementCache - response was not formatted correctly` disappears; the browser lists a `[LAN]` lobby |
+| W1-a | **Hosting** — **DONE in session 30**: the `Expect: 100-continue` fix (session 30h) makes the game send `/game/advertisement/host`. | `srv: 100-continue` then `HTTP REQ /game/advertisement/host` with the full body — measured |
+| W1-b | **The host reply**: give `/game/advertisement/host` a real object so the game gets an advertisement id instead of -1 (session 30j/30k; the parse is `0x140309298`, the id lands in `[svc+0x80]`). Then the same for `getLanAdvertisements`, `findAdvertisements`, `join`, `update`, `leave`, one at a time, each measured. | `Created Matchinfo for sessionID` prints a real number and a lobby appears; each cache's `not formatted correctly` line disappears |
 | W1-c | **Relay wiring**: make the host's advertisement point at this machine's **tailnet IP**, not `192.168.0.x`, and prove the relay accepts both peers. | a second machine on the tailnet joins and both peers relay `GAMEDATA` |
 | W1-d | **The other caches, one at a time**, each only when a measurement points at it: leaderboard stats, news, community events, item bundles, item categories, challenges, chat channels, achievements, offline messages, cloud credentials. | each cache's `response was not formatted correctly` line goes away and nothing else regresses |
 

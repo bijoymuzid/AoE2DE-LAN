@@ -29,12 +29,20 @@ parentheses, no colon after NN>"`. In this shell `cmd /c` must be written as
   byte). Do not go looking for a hidden switch: pick the dropdown entry.
 - With `Server = Use Local Lan Server` the log now says **`starting LAN hosting`** instead of
   `starting online hosting`. So the selection reaches the hosting decision.
-- **The hosting failure was ours and is now fixed but NOT yet verified in game.** The game's HTTP
-  client is libcurl; it adds `Expect: 100-continue` to bodies over 1 KB and waits exactly 1000 ms for
-  the interim reply. Our server never sent it, so the 3.5 KB create-advertisement request never
-  reached us and `WorldwideHostAsync` failed with reason -1 / `HostResult = 1`. `loginsrv.c` now
-  sends `HTTP/1.1 100 Continue` (and the per-connection HTTP state is no longer shared between
-  threads). Evidence and the exact log lines are in `notes/m1-session30.md` §30f–30i.
+- **The hosting failure was ours and the fix is verified in game.** The game's HTTP client is
+  libcurl; it adds `Expect: 100-continue` to bodies over 1 KB and waits exactly 1000 ms for the
+  interim reply. Our server never sent it, so the create-advertisement request never reached us.
+  `loginsrv.c` now sends `HTTP/1.1 100 Continue`, and the per-connection HTTP state is no longer
+  shared between threads. Confirmed: `srv: 100-continue#31 n=1383` then
+  `HTTP REQ /game/advertisement/host` with the full body. Evidence: `notes/m1-session30.md` §30f–30j.
+- **The host request now arrives and fails on our reply.** We still answer
+  `/game/advertisement/host` with the catch-all `[0,[]]`. The game then logs `OnlineHostAsync
+  success` but `Created Matchinfo for sessionID -1`, `starting local hosting`, `PeerRemoveAll`,
+  and finally `HostResult = 0xfffffff4` (-12); the operator sees **`Request was invalid Source:
+  AdvertisementJoinEvent Error Code: 0xfffffff4 extended code: 0xffffffff`**, and the game retries
+  `/game/advertisement/leave` with `advertisementid=-1` every 10 s for the rest of the session.
+  A first object reply is in `loginsrv.c` (§30k: result + advertisementid + echoed hostid +
+  sessionID + maxplayers + matchtype, `slotinfo` null) and is **not yet measured**.
 - Current staged DLL crc **`883a488f`** (234,496 B). `AoE2DE_s.exe` crc `4f533b6c` — unchanged.
   XAML stock crc `8398949b` — unchanged. No game file, no `.text` byte, no XAML was ever changed.
 - About 60% of `.text` is encrypted at rest. Never reason about `.text` from `AoE2DE_s.exe`. Use
@@ -46,12 +54,17 @@ parentheses, no colon after NN>"`. In this shell `cmd /c` must be written as
 
 1. Offline gates (`build.cmd`, `hooktest.exe`, `srvtest.exe` + `srvclient.py`).
 2. **One click test, first thing.** Operator: Multiplayer → Host Game → Create Game → Server =
-   `Use Local Lan Server` → Create. In the log, look for `srv: 100-continue`, then a
-   `POST /game/advertisement/...` request, then whether a lobby appears. Report what the screen says.
-3. If the create request now arrives, give it a real reply. `getLanAdvertisements` /
-   `findAdvertisements` / the create and join paths are still the catch-all `[0,[]]`. Crack each
-   reply's schema from the game's own parser the same way `getAvailableLeaderboards` was cracked
-   (element parser address, then the named-field readers). One at a time, each measured.
+   `Use Local Lan Server` → Create. In the log, look for `srv: 100-continue`, then
+   `HTTP REQ /game/advertisement/host`, then our reply, then `Created Matchinfo for sessionID
+   %llu` — if that prints a number instead of -1 the id landed. Report what the screen says.
+3. **Crack the `/game/advertisement/host` reply properly.** The probe reply is a guess. The real
+   parse is `0x140309298` (the handler that references `OnJoinAdvertisementSuccess`,
+   `0x14367d2d0`), and the host flow in `0x1403503a0` copies `[svc+0x80]` into `[svc+0x358]` at
+   `0x14035172d` right after logging `OnlineHostAsync success`. **Find who writes `[svc+0x80]` on
+   the reply path** — that member is the advertisement id, and it is the one that stayed -1. Then
+   copy the request's own `slotinfo` / `encodedSlots` through (raise the `log_body_head` cap from
+   300 chars first so the whole slot blob is in the log). Then the same for `getLanAdvertisements`,
+   `findAdvertisements`, `join`, `update`, `leave`, one at a time, each measured.
 4. Then the relay: the advertisement must carry this machine's **tailnet IP**, not `192.168.0.x`.
    `Adding LAN relay server: <ip>` in the log shows what the game picked up.
 5. Only after a lobby exists, think about the second machine. The success target is unchanged: two
