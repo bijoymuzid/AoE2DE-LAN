@@ -1,105 +1,70 @@
 # Prompt for the next Windows session (paste this into a new chat)
 
-Continue AoE2LAN (AoE2:DE LAN mod). Session 30 is finished. Read `notes/m1-session30.md` in full
-before touching anything — it supersedes everything older. Then `PLAN.md` §0–§2, §6.1 and the new
+Continue AoE2LAN (AoE2:DE LAN mod). Session 31 is finished. Read `notes/m1-session31.md` in full
+before touching anything — it supersedes everything older. Then `PLAN.md` §0–§2, §6.1 and
 **§17 (two-worker split)**.
 
 Say everything to me in plain English: short sentences, no jargon, no code dumps, no leaps. If
 something is unknown, say it is unknown.
 
 Working dir: `D:\Age of Empires II Definitive Edition`. Repo (keep current): `D:\aoe2lan-repo` →
-https://github.com/bijoymuzid/AoE2DE-LAN
+https://github.com/bijoymuzid/AoE2DE-LAN. `git pull` first.
 
-At the end of the session run: `cmd /c D:\aoe2lan-repo\sync.cmd "session 31 - <one line, no
+At the end of the session run: `cmd /c D:\aoe2lan-repo\sync.cmd "session 32 - <one line, no
 parentheses, no colon after NN>"`. In this shell `cmd /c` must be written as
 `/c/WINDOWS/system32/cmd.exe //c`.
 
-## WHERE WE ARE (all measured in session 30, do not re-derive)
+**You cannot launch the game.** `cmd /c start` gives "Access is denied" and a direct launch dies at
+~5 s (no interactive desktop). The operator double-clicks `PLAY-stage*.cmd`. Do not waste turns
+trying; ask the operator instead. If a launch dies at ~3 s, wait ~45 s and ask for a relaunch.
 
-- Login works with `AOE2LAN_STAGE=8` via `PLAY-stage8-LOGIN.cmd`. Offline gates: `hooktest.exe`
-  68/68, `srvtest.exe` + `srvclient.py` PASS (the client now also proves 6 concurrent requests are
-  answered and that an `Expect: 100-continue` request gets its interim reply).
-  `dev/lanhook/build.cmd` builds and stages `dbghelp.dll` into the game dir by itself.
-- M1 is met: the Multiplayer button is live and the Multiplayer screen opens.
-- **The LAN door is real and already offered by the UI.** In the Create Game dialog the **Server**
-  dropdown lists `Default`, `LAN`, **`Use Local Lan Server`**. That last entry is appended by
-  `0x1418eee60` (fills `Background/Settings/RegionAnchor/RegionDropDown`) after the item vector at
-  `[0x1442dc4f0]+0x2628` (stride 0x50), and only when `[svc+0x2e8] -> [[vtbl]+0x418]` (i.e.
-  `0x140f0f5c0`) returns non-zero. It returns true on this install (probe prints `257`, read the low
-  byte). Do not go looking for a hidden switch: pick the dropdown entry.
-- With `Server = Use Local Lan Server` the log now says **`starting LAN hosting`** instead of
-  `starting online hosting`. So the selection reaches the hosting decision.
-- **The hosting failure was ours and the fix is verified in game.** The game's HTTP client is
-  libcurl; it adds `Expect: 100-continue` to bodies over 1 KB and waits exactly 1000 ms for the
-  interim reply. Our server never sent it, so the create-advertisement request never reached us.
-  `loginsrv.c` now sends `HTTP/1.1 100 Continue`, and the per-connection HTTP state is no longer
-  shared between threads. Confirmed: `srv: 100-continue#31 n=1383` then
-  `HTTP REQ /game/advertisement/host` with the full body. Evidence: `notes/m1-session30.md` §30f–30j.
-- **The host request now arrives and fails on our reply.** We still answer
-  `/game/advertisement/host` with the catch-all `[0,[]]`. The game then logs `OnlineHostAsync
-  success` but `Created Matchinfo for sessionID -1`, `starting local hosting`, `PeerRemoveAll`,
-  and finally `HostResult = 0xfffffff4` (-12); the operator sees **`Request was invalid Source:
-  AdvertisementJoinEvent Error Code: 0xfffffff4 extended code: 0xffffffff`**, and the game retries
-  `/game/advertisement/leave` with `advertisementid=-1` every 10 s for the rest of the session.
-  A first object reply is in `loginsrv.c` (§30k: result + advertisementid + echoed hostid +
-  sessionID + maxplayers + matchtype, `slotinfo` null) and is **not yet measured**.
-- Current staged DLL crc **`883a488f`** (234,496 B). `AoE2DE_s.exe` crc `4f533b6c` — unchanged.
-  XAML stock crc `8398949b` — unchanged. No game file, no `.text` byte, no XAML was ever changed.
-- About 60% of `.text` is encrypted at rest. Never reason about `.text` from `AoE2DE_s.exe`. Use
-  `dev/lanhook/gametext.bin` (VA = `0x140001000 + offset`) or `dev/AoE2DE_dec.exe`.
-- `LANAdvertisementCache - response was not formatted correctly: [0,[]]` still fires twice per
-  session (our catch-all reply to `/game/advertisement/getLanAdvertisements`). That is W1-b below.
+## WHERE WE ARE (all measured in session 31, do not re-derive)
 
-## THIS SESSION, in order
+- Offline gates: `hooktest.exe` **68/68**; `srvtest.exe` + `srvclient.py` **PASS**, six checks (TLS,
+  wss + ws ping/pong/close, leaderboards object, 6 concurrent requests, `Expect: 100-continue`, and
+  the host/update/browse advertisement replies). `dev/lanhook/build.cmd` builds and stages
+  `dbghelp.dll` into the game dir by itself. Game exe MD5 `affb19f03ca96965abf9e56775cab688`,
+  untouched. Staged DLL at s31 end: 239,616 B, MD5 `518eb09cfad12fb6cf338a1e1aded275`.
+- **LAN hosting works end to end.** With `AOE2LAN_STAGE=8`, Server = `Use Local Lan Server`, Create:
+  the host request arrives, our reply is accepted, and the log shows
+  `Created Matchinfo for sessionID %llu` with a real id, `HostAsync - completed with HostResult = 0`,
+  `hosting - Session is connected`, and the operator gets a lobby with slots. Evidence:
+  `notes/m1-session31.md` §31c.
+- The three advertisement reply shapes are decoded from the game's own parsers and all three now
+  parse clean in game (§31d–31f): `/game/advertisement/host` is a **join result** (`resultCode`,
+  `gatheringID`, relay endpoints, non-empty `yourMatchMembers[]`), `/game/advertisement/update` is
+  `result` + `updatedAvertisement` (the game's spelling) with one advertisement object, and the four
+  browse endpoints share `result` + `advertisements[]` + `playerRatings[]`. The option blob is passed
+  through as `encodedSlots`, byte for byte.
+- **OPEN, and it is the live blocker: the host lobby's settings panel is locked.** Only the map can
+  be selected; Game/Map Size/Population/Resources/… do not respond. It is definitely the *host*
+  screen (both Ready and Start Game are present, which only the host XAML offers), so hosting is not
+  the problem. Cause UNKNOWN. See §31i: first find out *which* dropdown is dead, then check whether
+  the host simply has its Ready box ticked (in DE a ready host locks settings), then the party plane
+  (`/game/party/peerAdd`, `/game/relationship/setPresence`, `updateTags` still answer `[0,[]]`).
+- A fix landed for an intermittent `SEC_E_UNTRUSTED_ROOT` that killed a whole launch (§31g): the
+  certificate is now added to the user Root store *before* the stale ones are purged, the purge skips
+  our own certificate by exact bytes, and every connection logs `cert: root present=0|1`.
+- Relay: the game finds and connects to `192.168.0.104:27012` by itself; our replies still say
+  `relayIP 127.0.0.1`. Cross-machine play is untested (W1-c in PLAN §17.3).
 
-1. Offline gates (`build.cmd`, `hooktest.exe`, `srvtest.exe` + `srvclient.py`).
-2. **One click test, first thing.** Operator: Multiplayer → Host Game → Create Game → Server =
-   `Use Local Lan Server` → Create. In the log, look for `srv: 100-continue`, then
-   `HTTP REQ /game/advertisement/host`, then our reply, then `Created Matchinfo for sessionID
-   %llu` — if that prints a number instead of -1 the id landed. Report what the screen says.
-3. **Crack the `/game/advertisement/host` reply properly.** The probe reply is a guess. The real
-   parse is `0x140309298` (the handler that references `OnJoinAdvertisementSuccess`,
-   `0x14367d2d0`), and the host flow in `0x1403503a0` copies `[svc+0x80]` into `[svc+0x358]` at
-   `0x14035172d` right after logging `OnlineHostAsync success`. **Find who writes `[svc+0x80]` on
-   the reply path** — that member is the advertisement id, and it is the one that stayed -1. Then
-   copy the request's own `slotinfo` / `encodedSlots` through (raise the `log_body_head` cap from
-   300 chars first so the whole slot blob is in the log). Then the same for `getLanAdvertisements`,
-   `findAdvertisements`, `join`, `update`, `leave`, one at a time, each measured.
-4. Then the relay: the advertisement must carry this machine's **tailnet IP**, not `192.168.0.x`.
-   `Adding LAN relay server: <ip>` in the log shows what the game picked up.
-5. Only after a lobby exists, think about the second machine. The success target is unchanged: two
-   machines on one tailnet, one Windows and one Arch Linux via Proton, a `[LAN]` lobby with 2 human
-   and 6 AI slots, a full skirmish to a victory screen with no desync.
-6. Do not batch the other caches (news, community events, item bundles, item categories, challenges,
-   chat channels, leaderboard stats, achievements, offline messages, cloud credentials). One at a
-   time, own element schema, only when a measurement points at it.
+## THIS SESSION, IN ORDER
 
-## SECOND WORKER
+1. `git pull`, run both gates, confirm the staged DLL hash.
+2. Ask the operator which lobby dropdowns are dead (Game first, then Map Size, Population,
+   Resources, Victory) and whether unticking "I am ready" frees them. Their answer picks the road.
+3. Only after that, chase the enable code for those dropdowns. Static only, read-only instruments in
+   our own DLL. No new detour, no `.text` or `.rdata` change without the operator's explicit go-ahead
+   with exact bytes and a revert story.
+4. Then, one at a time and each measured: `join`, `leave`, then the browse path from a second machine
+   (the friend's Linux box), then the relay address pointed at the tailnet IP instead of loopback.
 
-An Arch Linux worker is now on the same repo, same game build, working the platform-neutral half:
-the native `lanhub`, the Linux launcher and Wine prefix, and the relay regression harness. The split,
-the file ownership table and both workstreams are in `PLAN.md` §17. **Do not edit `lanhub/**`,
-`linux/**` or `notes/linux-*.md`.** Hand over the built `dbghelp.dll` when it is asked for; it is
-git-ignored so it travels as a file. `git pull` at session start.
+## RULES THAT STILL APPLY
 
-## RULES
-
-Never patch or hook code that is encrypted on disk; hook ids 4+5 (LogHelper/LogHelper2) and 13
-(LogWarn) only; no blind patching; no cosmetic fixes (making something look right without fixing the
-behaviour is forbidden); any new detour, `.rdata` re-point or game-file edit is the OPERATOR's call
-and needs exact bytes plus the revert story; if a game launch dies at ~3 s, wait ~45 s with nothing
-running and relaunch.
-
-## TOOLS
-
-`C:/Python314/python.exe` (capstone + numpy). MSVC 14.44 + WinSDK 10.0.26100;
-`dev/lanhook/build.cmd`. Static: `dz.py` (start end), `fn.py` (`<addr>` [--dump]), `xr.py`, `vt.py`,
-`cx.py`, `aoe2re.py`. `xr.py` silently misses some references — verify any "no xref" conclusion
-against a string known to be used in the same `.rdata` block, and re-derive with a backwards capstone
-disassembly that keeps only instructions ending exactly at the disp. Ghidra:
-`dev/ghidra-decomp.cmd` + `dev/ghidra-scripts/PdataDecomp.java` + `targets.txt` (~60–90 s per
-batch). Live: `logs/lanhook-<pid>.log`; the game's `Main.txt` only carries the `[Main]` category and
-is useless for network work; localization strings are in
-`resources/en/strings/key-value/key-value-strings-utf8.txt` and the key→id map is
-`widgetui/stringreference.json`. This model cannot view images, so ask the operator what is on
-screen instead of screenshotting.
+Never patch or hook code encrypted on disk. Hook ids 4, 5 and 13 only. No blind patching. No
+cosmetic fixes. Any new detour or game-file edit is the operator's call and needs exact bytes plus a
+revert story. Use `dev/lanhook/gametext.bin` for code, never the encrypted exe. Do not edit
+`lanhub/**`, `linux/**` or `notes/linux-*.md` — that is the Linux worker (PLAN §17.1). Hand him
+`dbghelp.dll` as a file when he asks; it is git-ignored, so it travels outside the repo
+(`D:\dbghelp-session31-latest.dll` is the s31 copy). Ask the operator what is on screen — you cannot
+see screenshots.

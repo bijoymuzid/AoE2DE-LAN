@@ -5,7 +5,7 @@
 # the platformlogin request and check the NEW object-form response JSON
 # (schema reverse-engineered from the game's own login parser at
 # 0x140615b70: named keys, not a positional array).
-import ssl, socket, json, sys
+import ssl, socket, json, sys, urllib.parse
 
 HOST = "pb-live-release6-api.worldsedgelink.com"
 PORT = 443
@@ -347,6 +347,90 @@ except socket.timeout:
 c2.close()
 chk(r2.startswith(b"HTTP/1.1 200"), f"big POST not answered ({r2[:40]!r})")
 print(f"  expect-100: interim ok, body {len(big)}B answered")
+
+# ---- the host reply (s31): the create call parses this answer with the JOIN
+# RESULT DTO, so the reply must be resultCode + gatheringID + relay endpoints +
+# a non-empty yourMatchMembers list. A bare advertisement object (s31 first try)
+# failed the job step with "WorldwideHostAsync - failed with reason -1".
+blob = '{"slots":[{"p":0,"ai":1},{"p":1,"ai":-1}],"x":"a b+c\\"d"}'
+form = ("advertisementid=-1&hostid=3842241165083521967&connect_id=1193958235"
+        "&sessionID=1193965098&maxplayers=8&matchtype=-1&slotinfo="
+        + urllib.parse.quote(blob, safe=""))
+hsock = ctx.wrap_socket(socket.create_connection(("127.0.0.1", PORT), timeout=10),
+                        server_hostname=HOST)
+hsock.sendall((f"POST /game/advertisement/host HTTP/1.1\r\nHost: {HOST}\r\n"
+               f"Content-Type: application/x-www-form-urlencoded\r\n"
+               f"Content-Length: {len(form)}\r\nConnection: close\r\n\r\n{form}").encode())
+hr = b""
+while True:
+    d = hsock.recv(65536)
+    if not d:
+        break
+    hr += d
+hsock.close()
+_, _, hp = hr.partition(b"\r\n\r\n")
+hd = json.loads(hp) if hp else None
+chk(isinstance(hd, dict), f"host reply must be an object, got {hp[:32]!r}")
+if isinstance(hd, dict):
+    chk(hd.get("resultCode") == 0, f"host reply resultCode {hd.get('resultCode')!r}")
+    chk(hd.get("gatheringID") == 1193965098, f"gatheringID echo {hd.get('gatheringID')!r}")
+    chk(hd.get("relayIP") == "127.0.0.1", f"relayIP {hd.get('relayIP')!r}")
+    for k in ("relayPortRaw", "relayPortWebSockets", "relayPortOutOfBandSocket"):
+        chk(isinstance(hd.get(k), int) and 0 < hd[k] < 65536, f"{k} must be a 16-bit port")
+    m = hd.get("yourMatchMembers")
+    chk(isinstance(m, list) and m, "yourMatchMembers must be a non-empty array")
+    if isinstance(m, list) and m:
+        chk(m[0].get("profileID") == 3842241165083521967, f"member profileID {m[0].get('profileID')!r}")
+        chk(m[0].get("sessionID") == 1193965098, f"member sessionID {m[0].get('sessionID')!r}")
+print(f"  host reply: resultCode={hd.get('resultCode') if hd else '?'}, "
+      f"gatheringID={hd.get('gatheringID') if hd else '?'}, "
+      f"members={len(hd.get('yourMatchMembers') or []) if hd else 0}")
+
+def post(p, b):
+    s = ctx.wrap_socket(socket.create_connection(("127.0.0.1", PORT), timeout=10),
+                        server_hostname=HOST)
+    s.sendall((f"POST {p} HTTP/1.1\r\nHost: {HOST}\r\n"
+               f"Content-Type: application/x-www-form-urlencoded\r\n"
+               f"Content-Length: {len(b)}\r\nConnection: close\r\n\r\n{b}").encode())
+    r = b""
+    while True:
+        d = s.recv(65536)
+        if not d:
+            break
+        r += d
+    s.close()
+    _, _, pay = r.partition(b"\r\n\r\n")
+    return json.loads(pay) if pay else None
+
+# ---- /game/advertisement/update (s31): parser 0x140579020 wants result +
+# updatedAvertisement (the game's own spelling) as one advertisement object,
+# and the advertisement reader wants the option blob under `encodedSlots`.
+ud = post("/game/advertisement/update", form)
+chk(isinstance(ud, dict), f"update reply must be an object, got {str(ud)[:40]}")
+if isinstance(ud, dict):
+    chk(ud.get("result") == 0, f"update reply result {ud.get('result')!r}")
+    a = ud.get("updatedAvertisement")
+    chk(isinstance(a, dict), "updatedAvertisement must be an object")
+    if isinstance(a, dict):
+        chk(a.get("hostProfileID") == 3842241165083521967, f"advert hostProfileID {a.get('hostProfileID')!r}")
+        chk(a.get("maxPlayerCount") == 8, f"advert maxPlayerCount {a.get('maxPlayerCount')!r}")
+        chk(a.get("encodedSlots") == blob, "advert encodedSlots must equal the request slotinfo")
+        chk(isinstance(a.get("matchMembers"), list) and a["matchMembers"], "advert matchMembers")
+print(f"  update reply: result=0, advertisement keys={len(ud.get('updatedAvertisement') or {}) if ud else 0}")
+
+# ---- browse (s31): result + advertisements[] + playerRatings[], filled from the
+# lobby this server was last told about.
+lv = post("/game/advertisement/getLanAdvertisements", "lanServerGuids=&callNum=1")
+chk(isinstance(lv, dict), f"lan list reply must be an object, got {str(lv)[:40]}")
+if isinstance(lv, dict):
+    chk(lv.get("result") == 0, f"lan list result {lv.get('result')!r}")
+    ad = lv.get("advertisements")
+    chk(isinstance(ad, list), "advertisements must be an array")
+    chk(isinstance(ad, list) and len(ad) == 1, f"expected our one advertisement, got {len(ad) if isinstance(ad, list) else '?'}")
+    if isinstance(ad, list) and ad:
+        chk(ad[0].get("encodedSlots") == blob, "listed advertisement must carry the same slot blob")
+    chk(isinstance(lv.get("playerRatings"), list), "playerRatings must be an array")
+print(f"  lan list reply: {len(lv.get('advertisements') or []) if lv else 0} advertisement(s)")
 
 print("PASS" if ok else "FAILED")
 sys.exit(0 if ok else 1)

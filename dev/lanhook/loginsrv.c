@@ -966,30 +966,30 @@ static void log_req(const char *line) {
     logn(b);
 }
 
-static void log_body_head(const char *body, int len) {
-    char b[384]; int i = 0;
-    const char *m = "HTTP BODY ";
-    while (*m && i < 20) b[i++] = *m++;
-    for (int k = 0; k < len && k < 300 && i < 370; k++) {
-        char c = body[k];
-        b[i++] = (c == '\n' || c == '\r') ? ' ' : c;
+// Bodies are dumped WHOLE (session 31): the host request carries the slotinfo
+// blob we have to echo, and s30's 300-char cap hid it. One line per 340 chars,
+// continuation lines marked '+'; '\r'/'\n' become ' ', so join the chunk payloads
+// and the result is the exact body.
+static void log_all(const char *tag, const char *body, int len) {
+    char b[384];
+    for (int off = 0; off < len; off += 340) {
+        int i = 0;
+        for (const char *m = tag; *m && i < 20; m++) b[i++] = *m;
+        if (off) b[i++] = '+';
+        for (int k = off; k < len && k < off + 340; k++) {
+            char c = body[k];
+            b[i++] = (c == '\n' || c == '\r') ? ' ' : c;
+        }
+        b[i] = 0;
+        logn(b);
     }
-    b[i] = 0;
-    logn(b);
 }
+static void log_body_head(const char *body, int len) { log_all("HTTP BODY ", body, len); }
 
 static void log_resp_head(const char *body, int len) {
     // response side: what the game actually received (session 15 — the
     // request side was fully visible, the answer side was dark)
-    char b[384]; int i = 0;
-    const char *m = "HTTP RESP BODY ";
-    while (*m && i < 20) b[i++] = *m++;
-    for (int k = 0; k < len && k < 300 && i < 370; k++) {
-        char c = body[k];
-        b[i++] = (c == '\n' || c == '\r') ? ' ' : c;
-    }
-    b[i] = 0;
-    logn(b);
+    log_all("HTTP RESP BODY ", body, len);
 }
 
 // ---------------------------------------------------------------- mem probe
@@ -1367,6 +1367,176 @@ out:
     if (fb) HeapFree(GetProcessHeap(), 0, fb);
 }
 
+// ------------------------------------------------- host request -> reply
+// The host request is one application/x-www-form-urlencoded line. The reply has
+// to carry the SAME advertisement back, so the slot blob is taken from the
+// request rather than invented (session 31: `slotinfo` is where the slot layout
+// the create dialog built lives). Reads one field and %XX-decodes it in place.
+// shortcut: '+' is passed through literally; the game's own encoder writes
+// spaces as %20, so a real '+' here means '+'. Revisit only if a slot blob with
+// a genuine space shows up.
+static const char *form_get(const char *body, const char *key, char *out, int cap) {
+    int kl = (int)strlen_f(key);
+    out[0] = 0;
+    if (!body) return 0;
+    for (const char *p = body; (p = strstr_f(p, key)) != 0; p += kl) {
+        if (p != body && p[-1] != '&') continue;
+        p += kl;
+        if (*p != '=') continue;
+        p++;
+        int i = 0;
+        while (*p && *p != '&' && i < cap - 1) {
+            if (p[0] == '%' && p[1] && p[2]) {
+                int h = 0;
+                for (int k = 1; k <= 2; k++) {
+                    char c = p[k];
+                    h = h * 16 + (c >= '0' && c <= '9' ? c - '0'
+                                : c >= 'a' && c <= 'f' ? c - 'a' + 10
+                                : c >= 'A' && c <= 'F' ? c - 'A' + 10 : 0);
+                }
+                out[i++] = (char)h;
+                p += 3;
+            } else {
+                out[i++] = *p++;
+            }
+        }
+        out[i] = 0;
+        return out;
+    }
+    return 0;
+}
+
+// JSON string body; slot blobs carry quotes and control bytes, so this is a
+// trust boundary, not decoration.
+static void jstr(BUF *b, const char *s, int n) {
+    char t[8];
+    bput(b, "\"", 1);
+    for (int i = 0; i < n; i++) {
+        unsigned char c = (unsigned char)s[i];
+        if (c == '"' || c == '\\') { bput(b, "\\", 1); bput(b, (const char*)&c, 1); }
+        else if (c < 0x20) {
+            const char *hex = "0123456789abcdef";
+            t[0] = '\\'; t[1] = 'u'; t[2] = '0'; t[3] = '0';
+            t[4] = hex[c >> 4]; t[5] = hex[c & 15];
+            bput(b, t, 6);
+        } else bput(b, (const char*)&c, 1);
+    }
+    bput(b, "\"", 1);
+}
+
+// POST /game/advertisement/... -> the create request as a DTO object: `result`
+// plus the advertisement itself, echoing id/host/connect/slots from the request.
+// s31: the host reply is NOT an advertisement object. The create call parses its
+// answer with the join-result DTO (parser 0x140572540, DTO built by 0x14032f5e0),
+// whose members are, in parser order: resultCode, gatheringID, relayAuthToken,
+// relayIP, relayPortRaw/WebSockets/OutOfBandSocket (WORD), relayRegion,
+// yourMatchMembers[], steamLobbyID..., filteredDescription. With the s31 guess the
+// `result` member was never read, DTO+0 kept its -1 init, and the job step at
+// 0x140334ae0 failed with reason -1 ("WorldwideHostAsync - failed with reason -1").
+// After a good parse the caller requires resultCode == 0 AND a non-empty member
+// vector (DTO+0x78/+0x80), then copies gatheringID (DTO+8) into the service as the
+// session id.
+// Member record = {profileID int64 +8, ranking +0x10, statGroupID +0x18, raceID
+// dword +0x20, sessionID dword +0x24, url string +0x28} - parser 0x14056eb40.
+static void build_host_reply(BUF *b, const char *body) {
+    char hostid[32], sid[32], desc[512];
+    if (!form_get(body, "hostid", hostid, sizeof hostid)) hostid[0] = 0;
+    if (!form_get(body, "sessionID", sid, sizeof sid) || !sid[0])
+        if (!form_get(body, "connect_id", sid, sizeof sid)) sid[0] = 0;
+    const char *dv = form_get(body, "description", desc, sizeof desc);
+    int dl = dv ? (int)strlen_f(dv) : 0;
+    bs(b, "{\"resultCode\":0,\"gatheringID\":");
+    bs(b, sid[0] ? sid : "1");
+    bs(b, ",\"relayAuthToken\":\"lan\",\"relayIP\":\"127.0.0.1\"");
+    bs(b, ",\"relayPortRaw\":27012,\"relayPortWebSockets\":27112");
+    bs(b, ",\"relayPortOutOfBandSocket\":27212,\"relayRegion\":\"LAN\"");
+    bs(b, ",\"yourMatchMembers\":[{\"profileID\":");
+    bs(b, hostid[0] ? hostid : "0");
+    bs(b, ",\"sessionID\":");
+    bs(b, sid[0] ? sid : "1");
+    bs(b, ",\"ranking\":0,\"statGroupID\":0,\"raceID\":-1,\"teamID\":-1,\"url\":\"\"}]");
+    bs(b, ",\"filteredDescription\":");
+    jstr(b, desc, dl);
+    bs(b, "}");
+}
+
+// ------------------------------------------------- advertisement object
+// The list/update replies carry the ADVERTISEMENT dto, whose member names the
+// game's own reader states (parser 0x14056cce0, same order as the writer at
+// 0x14056dda0): steamLobbyID, goodOldGamesLobbyID, psnPlayerSessionID,
+// psnMatchId, xboxSessionID, hostProfileID, matchState, description,
+// filteredDescription, visible, mapName, options, isPassworded, maxPlayerCount,
+// encodedSlots, matchTypeID, matchMembers, observerNum, observerMax,
+// isobservable, observerDelay, isObserverPassworded, service, matchStartTime,
+// matchRegion, matchRegionLocalized.
+// The request sends the same data under different names (`hostid`, `mapname`,
+// `maxplayers`, `slotinfo`), so the reply is translated field by field. Only
+// these are filled; a member we do not fill keeps its default, which the parser
+// accepts (it skips names it does not see).
+static void adv_raw(BUF *b, const char *body, const char *k, const char *name) {
+    char v[8192];
+    const char *p = form_get(body, k, v, sizeof v);
+    bs(b, ",\""); bs(b, name); bs(b, "\":");
+    if (!p) { bs(b, "\"\""); return; }
+    jstr(b, v, (int)strlen_f(v));
+}
+static void adv_num(BUF *b, const char *body, const char *k, const char *name, const char *dflt) {
+    char v[32];
+    const char *p = form_get(body, k, v, sizeof v);
+    bs(b, ",\""); bs(b, name); bs(b, "\":");
+    bs(b, (p && v[0]) ? v : dflt);
+}
+
+static void emit_advertisement(BUF *b, const char *body) {
+    char hostid[32], sid[32];
+    if (!form_get(body, "hostid", hostid, sizeof hostid)) hostid[0] = 0;
+    if (!form_get(body, "sessionID", sid, sizeof sid)) sid[0] = 0;
+    bs(b, "{\"hostProfileID\":");
+    bs(b, hostid[0] ? hostid : "0");
+    adv_raw(b, body, "description", "description");
+    adv_raw(b, body, "description", "filteredDescription");
+    adv_raw(b, body, "mapname", "mapName");
+    adv_raw(b, body, "options", "options");
+    // the create/update request calls the option blob `slotinfo`; the advertisement
+    // reader calls the same blob `encodedSlots` (PLAN 6.2: byte for byte)
+    adv_raw(b, body, "slotinfo", "encodedSlots");
+    adv_num(b, body, "visible", "visible", "1");
+    adv_num(b, body, "passworded", "isPassworded", "0");
+    adv_num(b, body, "maxplayers", "maxPlayerCount", "8");
+    adv_num(b, body, "matchtype", "matchTypeID", "-1");
+    adv_num(b, body, "state", "matchState", "-1");
+    adv_num(b, body, "serviceType", "service", "1");
+    adv_num(b, body, "isObservable", "isobservable", "0");
+    adv_num(b, body, "observerDelay", "observerDelay", "0");
+    bs(b, ",\"observerNum\":0,\"observerMax\":0,\"isObserverPassworded\":0");
+    bs(b, ",\"matchStartTime\":0,\"matchRegion\":\"LAN\"");
+    bs(b, ",\"matchRegionLocalized\":\"LAN\"");
+    bs(b, ",\"matchMembers\":[{\"profileID\":");
+    bs(b, hostid[0] ? hostid : "0");
+    bs(b, ",\"sessionID\":");
+    bs(b, sid[0] ? sid : "0");
+    bs(b, ",\"ranking\":0,\"statGroupID\":0,\"raceID\":-1,\"teamID\":-1,\"url\":\"\"}]}");
+}
+
+// The last advertisement this server created or was told to update. One lobby is
+// all the two-machine test needs; the copy is locked because the connection
+// threads run concurrently.
+static char g_AdvBody[8192];
+static volatile LONG g_AdvLock;
+static void adv_store(const char *body) {
+    if (!body) return;
+    while (InterlockedCompareExchange(&g_AdvLock, 1, 0)) Sleep(1);
+    { int i = 0; while (body[i] && i < (int)sizeof g_AdvBody - 1) { g_AdvBody[i] = body[i]; i++; } g_AdvBody[i] = 0; }
+    InterlockedExchange(&g_AdvLock, 0);
+}
+static int adv_copy(char *out, int cap) {
+    int n;
+    while (InterlockedCompareExchange(&g_AdvLock, 1, 0)) Sleep(1);
+    { int i = 0; while (g_AdvBody[i] && i < cap - 1) { out[i] = g_AdvBody[i]; i++; } out[i] = 0; n = i; }
+    InterlockedExchange(&g_AdvLock, 0);
+    return n;
+}
+
 // ---------------------------------------------------------------- route
 static void route(TLSSES *t, const char *method, const char *path,
                   const char *body, int bodyLen) {
@@ -1424,32 +1594,43 @@ static void route(TLSSES *t, const char *method, const char *path,
     } else if (contains(path, "/game/advertisement/host")) {
         // LAN hosting: the create request arrives only now that the server answers
         // libcurl's "Expect: 100-continue" (session 30h). The game reads the reply as
-        // a DTO with named members (0x140309298 parses it, 0x140351771 passes the
-        // address on). With the catch-all array it logged "OnlineHostAsync success"
-        // but then "Created Matchinfo for sessionID -1", "starting local hosting",
-        // "PeerRemoveAll" and finally HostResult 0xfffffff4 ("Request was invalid"),
-        // i.e. the host joined with no advertisement id.
-        // Replied shape = result + the advertisement we were asked to create, echoing
-        // the request's own hostid and connect_id. shortcut: `slotinfo` is passed as
-        // null and the slot layout is not built yet; when the lobby screen reports a
-        // slot error, copy the encodedSlots the create dialog shows instead.
-        static char hr[1024];
-        const char *hid = body ? strstr_f(body, "hostid=") : 0;
-        char hostid[32]; int hi2 = 0;
-        hostid[0] = 0;
-        if (hid) { hid += 7; while (hid[hi2] && hid[hi2] != '&' && hi2 < 31) { hostid[hi2] = hid[hi2]; hi2++; } }
-        hostid[hi2] = 0;
-        { const char *a = "{\"result\":0,\"advertisementid\":1,\"hostid\":";
-          int i = 0; while (*a && i < 1000) hr[i++] = *a++;
-          if (hostid[0]) { for (int k = 0; hostid[k] && i < 1000; k++) hr[i++] = hostid[k]; }
-          else { hr[i++] = '0'; }
-          a = ",\"sessionID\":"; while (*a) hr[i++] = *a++;
-          a = "1"; while (*a) hr[i++] = *a++;
-          a = ",\"maxplayers\":8,\"matchtype\":-1,\"slotinfo\":null,\"encodedSlots\":\"\"}";
-          while (*a) hr[i++] = *a++;
-          hr[i] = 0; }
-        log_resp_head(hr, (int)strlen_f(hr));
-        http_respond(t, hr);
+        // a DTO with named members. With the catch-all array it logged
+        // "OnlineHostAsync success" but then "Created Matchinfo for sessionID -1",
+        // "starting local hosting", "PeerRemoveAll" and finally HostResult 0xfffffff4
+        // ("Request was invalid"), i.e. the host joined with no advertisement id.
+        // s31: the advertisement is echoed back out of the request itself (id, host,
+        // connect id, slot blob byte for byte) instead of guessed.
+        build_host_reply(&resp, body);
+        adv_store(body);
+        log_resp_head(resp.p, (int)resp.len);
+        http_respond(t, resp.p);
+    } else if (contains(path, "/game/advertisement/update")) {
+        // s31: the host calls this right after hosting and got the catch-all
+        // array -> "WorldwideUpdateAdvertisementAsync - response was not formatted
+        // correctly: [0,[]]". Parser 0x140579020 wants `result` + `updatedAvertisement`
+        // (the game's own typo, one 'd') holding one ADVERTISEMENT object.
+        bs(&resp, "{\"result\":0,\"updatedAvertisement\":");
+        emit_advertisement(&resp, body);
+        bs(&resp, "}");
+        adv_store(body);
+        log_resp_head(resp.p, (int)resp.len);
+        http_respond(t, resp.p);
+    } else if (contains(path, "/game/advertisement/getLanAdvertisements") ||
+               contains(path, "/game/advertisement/findObservableAdvertisements") ||
+               contains(path, "/game/advertisement/findAdvertisements") ||
+               contains(path, "/game/advertisement/getAdvertisements")) {
+        // s31: the browse caches parse this with 0x140571ae0: `result`,
+        // `advertisements` (array of advertisement objects), `playerRatings`.
+        // The catch-all array made every one of them log "response was not
+        // formatted correctly: [0,[]]". Only the lobby we host ourselves is
+        // known here (g_AdvBody); with none hosted the list is simply empty,
+        // which is a valid answer.
+        char ab[8192];
+        bs(&resp, "{\"result\":0,\"advertisements\":[");
+        if (adv_copy(ab, sizeof ab) > 0) emit_advertisement(&resp, ab);
+        bs(&resp, "],\"playerRatings\":[]}");
+        log_resp_head(resp.p, (int)resp.len);
+        http_respond(t, resp.p);
     } else if (contains(path, "/game/news/")) {
         log_resp_head("[0,[]]", 5);
         http_respond(t, "[0,[]]");
@@ -1471,21 +1652,55 @@ static int purge_aoe2lan_roots(void *hStore) {
     typedef void * (WINAPI *Pfree)(void*);
     Penum pEnum = (Penum)GetProcAddress(g_hCrypt, "CertEnumCertificatesInStore");
     Pdel  pDel  = (Pdel) GetProcAddress(g_hCrypt, "CertDeleteCertificateFromStore");
-    Pfree pFree = (Pfree)GetProcAddress(g_hCrypt, "CertFreeCertificateContext");
+    Pfree pFree = (Pfree) GetProcAddress(g_hCrypt, "CertFreeCertificateContext");
     int n = 0;
     if (!pEnum || !pDel || !pFree || !g_ServerCert) return 0;
     CERT_CONTEXT *pc = NULL;
     while ((pc = (CERT_CONTEXT*)pEnum(hStore, pc)) != NULL) {
-        int same = 0;
+        int same = 0, mine = 0;
         { CERT_NAME_BLOB *a = &pc->pCertInfo->Subject;
           CERT_NAME_BLOB *b = &g_ServerCert->pCertInfo->Subject;
           if (a->cbData == b->cbData && a->pbData && b->pbData &&
               !memcmp_f(a->pbData, b->pbData, a->cbData)) same = 1; }
-        if (same) {
+        // The add now runs BEFORE the purge (session 31), so the certificate we
+        // just registered has the same Subject and must not be deleted again.
+        { CERT_CONTEXT *s = g_ServerCert;
+          if (s->cbCertEncoded == pc->cbCertEncoded && s->pbCertEncoded && pc->pbCertEncoded &&
+              !memcmp_f(pc->pbCertEncoded, s->pbCertEncoded, s->cbCertEncoded)) mine = 1; }
+        if (same && !mine) {
             if (pDel(pc)) n++;      // deletion frees this context
             pc = NULL;              // restart the enumeration
         }
     }
+    return n;
+}
+
+// Is OUR certificate really in the CURRENT USER Root store right now? The trust
+// window is the one thing that silently kills a launch: s31 run 3 failed its
+// handshake with SEC_E_UNTRUSTED_ROOT while the log said the root was
+// registered 2 s earlier, so the state has to be read, not assumed.
+static int root_present(void) {
+    typedef void * (WINAPI *PopenSys)(void*, const wchar_t*);
+    typedef void * (WINAPI *Penum)(void*, void*);
+    typedef void * (WINAPI *Pfree)(void*);
+    typedef int    (WINAPI *Pclose)(void*);
+    PopenSys pOpen = (PopenSys)GetProcAddress(g_hCrypt, "CertOpenSystemStoreW");
+    Penum pEnum = (Penum)GetProcAddress(g_hCrypt, "CertEnumCertificatesInStore");
+    Pfree pFree = (Pfree)GetProcAddress(g_hCrypt, "CertFreeCertificateContext");
+    Pclose pClose = (Pclose)GetProcAddress(g_hCrypt, "CertCloseStore");
+    int n = -1;
+    if (!pOpen || !pEnum || !pFree || !pClose || !g_ServerCert) return -1;
+    { void *h = pOpen(NULL, L"Root");
+      if (!h) return -1;
+      n = 0;
+      { CERT_CONTEXT *pc = NULL;
+        while ((pc = (CERT_CONTEXT*)pEnum(h, pc)) != NULL) {
+            CERT_CONTEXT *s = g_ServerCert;
+            if (s->cbCertEncoded == pc->cbCertEncoded && s->pbCertEncoded && pc->pbCertEncoded &&
+                !memcmp_f(pc->pbCertEncoded, s->pbCertEncoded, s->cbCertEncoded)) { n = 1; break; }
+        }
+        if (pc) pFree(pc); }
+      pClose(h); }
     return n;
 }
 
@@ -1503,18 +1718,22 @@ static DWORD WINAPI RootRegThread(void *p) {
         if (pOpenSys && pAddCtx) {
             void *hRoot = pOpenSys(NULL, L"Root");
             if (hRoot) {
-                int old = purge_aoe2lan_roots(hRoot);
-                if (old) { char b[56]; int i = 0; const char *m = "cert: purged stale roots=";
-                           while (*m) b[i++] = *m++;
-                           { char t[8]; int tl = 0; int v = old;
-                             if (!v) t[tl++] = '0';
-                             while (v) { t[tl++] = (char)('0' + v % 10); v /= 10; }
-                             while (tl) b[i++] = t[--tl]; }
-                           b[i] = 0; logn(b); }
+                // Add FIRST, purge after (session 31): purging first left the
+                // store without our root for ~0.7 s while the game was already
+                // doing its own crypt32 work, and one run then handshook with
+                // SEC_E_UNTRUSTED_ROOT.
                 if (pAddCtx(hRoot, (void*)g_ServerCert, 1, (void**)0))
                     logn("cert: user-Root registered (schannel trust path live)");
                 else
                     logn("cert: user-Root add returned 0 (already present or denied)");
+                { int old = purge_aoe2lan_roots(hRoot);
+                  if (old) { char b[56]; int i = 0; const char *m = "cert: purged stale roots=";
+                             while (*m) b[i++] = *m++;
+                             { char t[8]; int tl = 0; int v = old;
+                               if (!v) t[tl++] = '0';
+                               while (v) { t[tl++] = (char)('0' + v % 10); v /= 10; }
+                               while (tl) b[i++] = t[--tl]; }
+                             b[i] = 0; logn(b); } }
                 g_hRootStore = hRoot;
             } else logn("cert: user-Root open failed");
         } else logn("cert: user-Root fns missing");
@@ -1662,6 +1881,14 @@ static DWORD WINAPI ServerThread(LPVOID p) {
         if (c == INVALID_SOCKET) continue;
         { char b[80]; int i=0; const char *m="srv: connection accepted";
           while (*m) b[i++]=*m++; b[i]=0; logn(b); }
+        // Trust state at the exact moment a client is about to handshake: a
+        // missing root here is the SEC_E_UNTRUSTED_ROOT we saw once in s31.
+        { int rp = root_present();
+          char b[48]; int i = 0;
+          const char *m = "cert: root present=";
+          while (*m) b[i++] = *m++;
+          b[i++] = (char)('0' + (rp < 0 ? 9 : rp));
+          b[i] = 0; logn(b); }
         { HANDLE h = CreateThread(NULL, 0, ConnWorker, (LPVOID)(DWORD_PTR)c, 0, NULL);
           if (h) CloseHandle(h);
           else serve_conn(c);   // thread failed: serve inline (old behavior)
