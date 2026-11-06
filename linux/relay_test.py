@@ -87,13 +87,17 @@ def funnel_has(frame, needle):
     return len(frame) >= 2 and frame[0] == 0x0A and frame[1] == 0xFE and needle in frame
 
 
-def session_flow(host, joiner_already_attached, rj_wait):
+def session_flow(host, joiner_already_attached, rj_wait, obs=30):
     """Host-side flow shared by local + cross modes. Returns (saw_other, stats)."""
     a = peer_attach(host, bs.A_SECRET)
     log(f"A: LC sent (secret=0x{bs.A_SECRET:016x}); waiting {rj_wait}s (B LC must land first)")
     t0 = time.time()
+    last_ping = time.time()
     while time.time() - t0 < rj_wait:  # keep the socket warm, eat echoes
         a.drain(0.5)
+        if time.time() - last_ping >= 15:  # 60 s silence timeout counts here too
+            a.send_bin(bs.build_lobbyping())
+            last_ping = time.time()
     a.send_bin(a.ph(bs.build_requestjoin(peerIdentifier=bs.A_PID)))
     log("A: RJ sent (creates session)")
     a.drain(1.0)
@@ -102,7 +106,7 @@ def session_flow(host, joiner_already_attached, rj_wait):
     admitted = saw_b = False
     funnels = 0
     t0, last_gd, last_ping = time.time(), 0, 0
-    while time.time() - t0 < 30:
+    while time.time() - t0 < obs:
         for f in a.drain(0.5):
             if is_intro(f, bs.B_PID):
                 log(f"A: B intro relay seen ({len(f)}B)")
@@ -116,10 +120,9 @@ def session_flow(host, joiner_already_attached, rj_wait):
             elif len(f) >= 2 and f[0] == 0x0A:
                 funnels += 1
         now = time.time() - t0
-        if not admitted and joiner_already_attached and now >= 5:
-            a.send_bin(a.ph(bs.build_addpeer(2, bs.B_PID)))
-            admitted = True
-            log("A: ADDPEER(B,2) sent (backstop)")
+        # no admit backstop here: with the joiner retrying RJ every 15 s the intro
+        # recurs on its own, and a premature ADDPEER blocks the real one (the
+        # session-6 double-ADDPEER funnel-killer)
         if now - last_gd >= 2:
             a.send_bin(bs.build_gamedata(bs.A_PING))
             last_gd = now
@@ -135,14 +138,20 @@ def joiner_flow(host, rj_wait):
     b = peer_attach(host, bs.B_SECRET)
     log(f"B: LC sent (secret=0x{bs.B_SECRET:016x}); RJ in {rj_wait}s (after host session)")
     t0 = time.time()
+    last_ping = time.time()
     while time.time() - t0 < rj_wait:
         b.drain(0.5)
+        if time.time() - last_ping >= 15:
+            b.send_bin(bs.build_lobbyping())
+            last_ping = time.time()
     b.send_bin(b.ph(bs.build_requestjoin(peerIdentifier=bs.B_PID)))
     log("B: RJ sent")
     admitted = saw_a = False
     funnels = 0
-    t0, last_gd, last_ping = time.time(), 0, 0
-    while time.time() - t0 < 30:
+    t0 = time.time()
+    last_gd = last_ping = 0.0  # relative-to-t0 below; wait-phase last_ping is done
+    last_rj = time.time()  # absolute
+    while time.time() - t0 < 900:  # long window: host may still be in its wait phase
         for f in b.drain(0.5):
             if len(f) >= 2 and f[0] == 0x0A and f[1] == 0xFE:
                 funnels += 1
@@ -153,6 +162,12 @@ def joiner_flow(host, rj_wait):
                     saw_a = True
                     log(f"B: *** A-GD-PING inside 0x0A funnel: {f.hex()}")
         now = time.time() - t0
+        if not admitted and time.time() - last_rj >= 15:
+            # RJ before the host's session exists is dropped server-side; retry
+            # until the admission funnel shows up. Self-heals any start-order race.
+            b.send_bin(b.ph(bs.build_requestjoin(peerIdentifier=bs.B_PID)))
+            last_rj = time.time()
+            log("B: RJ resent (not admitted yet)")
         if now - last_gd >= 2:
             b.send_bin(bs.build_gamedata(bs.B_PING))
             last_gd = now
@@ -239,10 +254,10 @@ def main():
             kill_relay(p)
         return
     if mode == "host":
-        # run joiner on the other machine first; our RJ must land AFTER its LC
-        # but BEFORE its RJ -> generous default windows for human coordination
+        # joiner can start any time inside our rj_wait window; its RJ retries
+        # every 15 s until we create the session, so the ordering self-heals
         saw, funnels = session_flow(host, joiner_already_attached=True,
-                                    rj_wait=rj_wait or 30)
+                                    rj_wait=rj_wait or 120, obs=200)
         log(f"host done: saw_b={saw} funnels={funnels}")
         print("PASS" if saw else "FAIL")
         sys.exit(0 if saw else 1)
