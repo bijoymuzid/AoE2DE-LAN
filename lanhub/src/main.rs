@@ -76,6 +76,72 @@ struct State {
     peer_subs: Vec<(u64, String, Sender<String>)>, // (conn id, advertisementID, chan)
 }
 
+struct PeerInfo {
+    name: String,
+    ip4: String,
+    online: bool,
+    path: &'static str, // direct | derp | unknown
+}
+
+// L2: peer enumeration from `tailscale status --json` (PLAN §3.7). Path rule:
+// CurAddr set => direct WireGuard path; else Relay set => DERP relay (+100-200 ms, §3.5);
+// else unknown (offline / never contacted).
+fn tailscale_peers() -> Option<Vec<PeerInfo>> {
+    let out = std::process::Command::new("tailscale")
+        .args(["status", "--json"])
+        .output()
+        .ok()?;
+    if !out.status.success() {
+        return None;
+    }
+    let st: Value = serde_json::from_slice(&out.stdout).ok()?;
+    let mut peers = vec![];
+    for p in st["Peer"].as_object()?.values() {
+        let ip4 = p["TailscaleIPs"]
+            .as_array()
+            .and_then(|a| a.iter().find_map(|i| i.as_str().map(str::to_string).filter(|s| s.starts_with("100."))))
+            .unwrap_or_default();
+        let online = p["Online"].as_bool().unwrap_or(false);
+        // Relay keeps the last-used DERP region even for offline peers — don't report it as live
+        let path = if !online {
+            "unknown"
+        } else if !p["CurAddr"].as_str().unwrap_or("").is_empty() {
+            "direct"
+        } else if !p["Relay"].as_str().unwrap_or("").is_empty() {
+            "derp"
+        } else {
+            "unknown"
+        };
+        peers.push(PeerInfo {
+            name: p["HostName"].as_str().unwrap_or("?").to_string(),
+            ip4,
+            online,
+            path,
+        });
+    }
+    peers.sort_by(|a, b| b.online.cmp(&a.online).then(a.name.cmp(&b.name)));
+    Some(peers)
+}
+
+fn cmd_peers(ini_peers: &[String]) {
+    match tailscale_peers() {
+        Some(peers) => {
+            println!("{:<22} {:<16} {:<8} {}", "PEER", "TAILNET-IP", "ONLINE", "PATH");
+            for p in peers {
+                let warn = if p.online && p.path == "derp" { "  WARN derp adds 100-200 ms (PLAN §3.5)" } else { "" };
+                println!("{:<22} {:<16} {:<8} {}{}", p.name, p.ip4, p.online, p.path, warn);
+            }
+        }
+        None => {
+            // ini fallback for machines without the tailscale CLI (PLAN §5.4)
+            println!("tailscale CLI unavailable - manual seeds from ini:");
+            for p in ini_peers {
+                println!("{:<22} {}", p, "unknown (ini seed)");
+            }
+        }
+    }
+}
+
 fn relay_ports() -> Value {
     // PLAN §5.3
     json!({"bs": 47110, "webSocket": 47111, "outOfBand": 47112, "lobby": 47114})
@@ -462,7 +528,13 @@ fn seed_loop(st: Arc<Mutex<State>>, addr: String) {
     }
 }
 
-fn read_ini(path: &str, base_port: &mut Option<u16>, peers: &mut Vec<String>, name: &mut Option<String>) {
+fn read_ini(
+    path: &str,
+    base_port: &mut Option<u16>,
+    peers: &mut Vec<String>,
+    name: &mut Option<String>,
+    autodiscover: &mut bool,
+) {
     let Ok(txt) = std::fs::read_to_string(path) else { return };
     let mut sec = String::new();
     for raw in txt.lines() {
@@ -474,6 +546,7 @@ fn read_ini(path: &str, base_port: &mut Option<u16>, peers: &mut Vec<String>, na
         let Some((k, val)) = l.split_once('=') else { continue };
         match (sec.as_str(), k.trim()) {
             ("hub", "basePort") => *base_port = val.trim().parse().ok(),
+            ("tailscale", "autodiscover") => *autodiscover = val.trim() != "false",
             ("tailscale", "peers") => {
                 for p in val.split(',') {
                     let p = p.trim();
@@ -495,13 +568,25 @@ fn main() {
     let mut peers: Vec<String> = vec![];
     let mut ini_path = "aoe2lan.ini".to_string();
 
+    if std::env::args().nth(1).as_deref() == Some("peers") {
+        // subcommand: `lanhub peers` (L2 acceptance)
+        let mut ini_base = None;
+        let mut ini_peers = vec![];
+        let mut ad = true;
+        read_ini(&ini_path, &mut ini_base, &mut ini_peers, &mut None, &mut ad);
+        cmd_peers(&ini_peers);
+        return;
+    }
+
     let args: Vec<String> = std::env::args().skip(1).collect();
     let mut i = 0;
     let mut ini_base: Option<u16> = None;
     let mut ini_peers: Vec<String> = vec![];
     let mut ini_name: Option<String> = None;
+    let mut autodiscover = true;
     while i < args.len() {
         match args[i].as_str() {
+            "--no-autodiscover" => autodiscover = false,
             "--control-port" => control_port = args.get(i + 1).and_then(|s| s.parse().ok()),
             "--node-port" => node_port = args.get(i + 1).and_then(|s| s.parse().ok()),
             "--nick" => nick = args.get(i + 1).cloned(),
@@ -515,12 +600,25 @@ fn main() {
         }
         i += if matches!(args[i].as_str(), "--control-port" | "--node-port" | "--nick" | "--peer" | "--ini") { 2 } else { 1 };
     }
-    read_ini(&ini_path, &mut ini_base, &mut ini_peers, &mut ini_name);
+    read_ini(&ini_path, &mut ini_base, &mut ini_peers, &mut ini_name, &mut autodiscover);
 
     let control_port = control_port.or(ini_base).unwrap_or(47100);
     let node_port = node_port.or(ini_base.map(|b| b + 1)).unwrap_or(47101);
     let nick = nick.or(ini_name).unwrap_or_else(|| std::env::var("USER").unwrap_or("Player".into()));
     peers.extend(ini_peers);
+    if autodiscover {
+        // PLAN §5.4: online tailnet peers become gossip seeds automatically
+        if let Some(ts) = tailscale_peers() {
+            for p in ts {
+                if p.online && !p.ip4.is_empty() {
+                    let addr = format!("{}:47101", p.ip4);
+                    if !peers.contains(&addr) {
+                        peers.push(addr);
+                    }
+                }
+            }
+        }
+    }
     for p in &mut peers {
         if !p.contains(':') {
             p.push_str(":47101");

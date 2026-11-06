@@ -24,6 +24,21 @@ python3 test_walk.py
 Spawns two seeded instances on one machine and runs the L1 acceptance walk
 (HELLO → HOST → FIND → JOIN, plus UPDATE / PEERS / PING / LEAVE / WITHDRAW).
 
+## Peers (L2)
+
+```sh
+lanhub peers
+```
+
+Prints each tailnet peer from `tailscale status --json` with its 100.x address, online
+state, and path: `direct` (real WireGuard path, CurAddr set), `derp` (relayed via
+Tailscale's DERP servers, +100–200 ms — printed with a WARN, PLAN §3.5), `unknown`
+(offline). Without the tailscale CLI, falls back to `[tailscale] peers` from the ini
+and marks them `unknown (ini seed)`.
+
+While running as a hub, online tailnet peers are auto-added as gossip seeds
+(`[tailscale] autodiscover = true`, default on; `--no-autodiscover` to disable).
+
 ## Wire conventions (spec gaps we had to fill)
 
 PLAN §5.1/§5.2 fix the verbs and fields; these are the choices we made where it is silent:
@@ -41,7 +56,8 @@ PLAN §5.1/§5.2 fix the verbs and fields; these are the choices we made where i
 
 - Remote JOIN is answered from the cached ADVERT (`slot: null, peers: []`); real slot
   allocation across nodes needs a join round-trip §5.2 does not define. M2 work.
-- `PINGNODE` replies `path: "unknown"` until L2 wires `tailscale status --json`.
+- `PINGNODE` replies `path: "unknown"` until it is wired to the `tailscale_peers()`
+  table (L2 built the table; the wiring is M2 polish).
 - A node GUID is random per run (not persisted); duplicate seed pairs can hold two
   connections (one per direction) — harmless with dedup, cosmetic.
 - No reconnect backoff cap, no auth on the node port (tailnet ACLs own that, §3.6).

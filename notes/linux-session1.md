@@ -44,10 +44,23 @@ empty `lanServerGuids="[]"` → return nothing), `server/resources/config/age2/l
 knobs). Conflicts with our rules: it appends its CA to the game's `certificates/cacert.pem` on
 disk (rule 1) and its discovery is broadcast rebroadcast (rule 4). Reference only.
 
+## L2 — peer enumeration: DONE (same session, after tailscaled came up)
+
+Tailscale is up: self `cachyos-x8664-1` = `100.109.201.126`, tailnet `tail9ccab8`.
+`lanhub peers` prints all 7 peers; **2 online: DESKTOP-64DAV0P (`100.79.215.72`) and
+DESKTOP-HUFTPCO (`100.122.146.107`), both `path=derp` with WARN** (CurAddr empty,
+Relay set: bom / sin). Which one is W1's box: **unknown — ask operator.**
+Path rule: online + CurAddr → direct; online + Relay only → derp; offline → unknown
+(Relay keeps the last-used region even when offline — measured, would have been a
+false "derp" report). Ini fallback (`[tailscale] peers`) verified by hiding the CLI
+via PATH: prints seeds as `unknown (ini seed)`.
+Hub auto-seeds gossip connections to online tailnet peers (§5.4 autodiscover, default
+on; `--no-autodiscover` flag; test_walk.py uses it to stay hermetic). L1 walk re-run
+after the change: 11/11 PASS.
+
 ## Open / next
 
-- L2: peer enumeration from `tailscale status --json` — **blocked on tailscaled login** (unknown:
-  whether the tailnet is even created yet).
+- L2 done; PINGNODE still replies `path: "unknown"` — wiring it to the peer table is M2 polish.
 - Remote JOIN returns `slot: null, peers: []` from the cached ADVERT — documented shortcut; real
   cross-node slot allocation is undefined in §5.2, flag for W1 discussion before M2.
 - Node GUID is per-run (not persisted).

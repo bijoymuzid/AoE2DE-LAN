@@ -26,9 +26,9 @@ def call(s, f, msg):
     return json.loads(f.readline())
 
 def main():
-    a = subprocess.Popen([HUB, "--control-port", "47100", "--node-port", "47101",
+    a = subprocess.Popen([HUB, "--no-autodiscover", "--control-port", "47100", "--node-port", "47101",
                           "--nick", "Alice", "--peer", "127.0.0.1:47201"])
-    b = subprocess.Popen([HUB, "--control-port", "47200", "--node-port", "47201",
+    b = subprocess.Popen([HUB, "--no-autodiscover", "--control-port", "47200", "--node-port", "47201",
                           "--nick", "Bob", "--peer", "127.0.0.1:47101"])
     try:
         sa, fa = None, None
