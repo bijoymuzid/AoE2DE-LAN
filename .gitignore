@@ -10,3 +10,4 @@ pdata_funcs.json
 
 # local logs
 linux/*.log
+bsmunin_*
