@@ -7,3 +7,6 @@
 *.npy
 gametext.bin
 pdata_funcs.json
+
+# local logs
+linux/*.log

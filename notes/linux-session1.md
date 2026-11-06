@@ -58,10 +58,29 @@ Hub auto-seeds gossip connections to online tailnet peers (§5.4 autodiscover, d
 on; `--no-autodiscover` flag; test_walk.py uses it to stay hermetic). L1 walk re-run
 after the change: 11/11 PASS.
 
+## L3 (local half) — relay regression harness: DONE
+
+`linux/relay_test.py local`: spawns stock `BattleServer.exe` (in-prefix,
+`C:\Games\AoE2DE\BattleServer\BattleServer.exe`) via the workspace GE-Proton with the
+M0 port set (`-bsPort 47110 -webSocketPort 47111 -outOfBandPort 47112 -lobbyPort 47114
+-relayBroadcastPort 47113 -logLevel debug`), runs both synthetic peers from one process
+(builders imported read-only from `notes/bs_live_test.py`), asserts bidirectional
+GAMEDATA inside type-0x0A funnels, prints PASS/FAIL, exit 0/1.
+Session-5/6 rules baked in: B attaches before session creation, distinct secrets/pidents,
+single ADDPEER on intro (5 s backstop), GAMEDATA keepalive every 2 s.
+
+Runs: PASS 8.4 s, PASS 8.4 s (relay up 2.0 s after spawn). Funnel frame carries both
+pings coalesced: `0afe02000900412d47442d50494e47020900422d47442d50494e47000000`.
+Relay stdout: `linux/bs_relay_linux.log`.
+
+Remaining for L3 full: cross-tailnet run — `relay_test.py host` / `joiner` modes are
+in (time-based rendezvous: joiner first, host within ~8 s), needs W1's machine online.
+Which online tailnet box is W1's (64DAV0P vs HUFTPCO): still unknown, ask operator.
+
 ## Open / next
 
 - L2 done; PINGNODE still replies `path: "unknown"` — wiring it to the peer table is M2 polish.
 - Remote JOIN returns `slot: null, peers: []` from the cached ADVERT — documented shortcut; real
   cross-node slot allocation is undefined in §5.2, flag for W1 discussion before M2.
 - Node GUID is per-run (not persisted).
-- L3: bs_client.py vs BattleServer.exe in the prefix — not started.
+- L3 local done; cross-tailnet PASS pending W1 coordination.
