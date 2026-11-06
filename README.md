@@ -68,6 +68,11 @@ account lines; telemetry plus our log together are the full picture.
 
 ## Working on this from Linux
 
+**Two people work on this repo now.** The split, the file-ownership table and both workstreams are
+in `PLAN.md` §17. If you are the Linux worker, read `notes/prompt-linux-worker.md` first — it is the
+whole brief. Your paths are `lanhub/**`, `linux/**` and `notes/linux-*.md`; the rest belongs to the
+Windows worker.
+
 The shim and the launchers are Windows-only today (`dbghelp.dll` proxy + MSVC build), so a Linux
 machine runs the **game** under Proton, not the build. What is useful and doable from Arch without
 Windows:
