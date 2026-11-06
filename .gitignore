@@ -11,3 +11,7 @@ pdata_funcs.json
 # local logs
 linux/*.log
 bsmunin_*
+linux/*.out
+linux/*.pid
+__pycache__/
+*.pyc
