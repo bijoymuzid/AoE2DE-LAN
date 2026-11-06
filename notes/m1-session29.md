@@ -1,7 +1,7 @@
-# Session-29 — the rubbish reply is fixed; the button stays grey for a second reason
+# Session-29 — M1 DONE: the Multiplayer screen opens
 
 Supersedes `notes/m1-session28.md` for state. Everything below is MEASURED unless the line says
-INFERRED. No game file, no `.text` byte, no XAML was changed. The only code changes are in
+INFERRED. **Read 29i for the result, 29c for the fix, 29f/29g for what was behind it.** No game file, no `.text` byte, no XAML was changed. The only code changes are in
 `dev/lanhook/loginsrv.c` (ours) and a read-only readout added to `lanhook.c` (ours).
 
 ## 29a. Offline gates (re-run, pass)
@@ -12,8 +12,9 @@ INFERRED. No game file, no `.text` byte, no XAML was changed. The only code chan
   `{leaderboardID:int, leaderboardName:str, isRanked:bool}` (`leaderboards reply: object, 1 entry`).
 - `AoE2DE_s.exe` crc **`4f533b6c`** — untouched. `dev/AoE2DE_dec.exe` `487054ce`.
 - `dev/lanhook/gametext.bin` crc `ca040d52`. XAML stock crc `8398949b` — untouched.
-- game-dir `dbghelp.dll` = `dev/lanhook/dbghelp.dll` = crc **`617d80f3`** (216,576 B, final build of
-  this session; the two probe runs used `bbfeec88`, which differs only in the added readout).
+- game-dir `dbghelp.dll` = `dev/lanhook/dbghelp.dll` = crc **`06472804`** (217,088 B, final build of
+  this session — the build that made the button live; earlier in-session builds were `bbfeec88`
+  and `617d80f3`).
 
 ## 29b. MEASURED: the reply schema of `getAvailableLeaderboards`
 
@@ -53,9 +54,15 @@ hand anything to the leaderboard-definition registry.
 ```json
 {"result":0,
  "leaderboards":[{"leaderboardID":1,"leaderboardName":"1v1","isRanked":true}],
- "mappings":[],"matchTypes":[],"races":[],"factions":[],
- "leaderboardRegions":[],"rankLevels":[],"statDefinitions":[],"selfAssessmentTiers":[]}
+ "mappings":[{"leaderboardID":1,"matchTypeID":1,"statType":0,"raceID":0}],
+ "matchTypes":[{"matchTypeID":1,"name":"1v1","teamSize":1,"numTeams":2,"localizedName":"1v1"}],
+ "races":[{"raceID":0,"name":"random","factionID":0,"localizedName":"Random"}],
+ "factions":[{"factionID":0,"name":"random","localizedName":"Random"}],
+ "leaderboardRegions":[{"leaderboardRegionID":2,"name":"LAN","localizedName":"LAN"}],
+ "rankLevels":[],"statDefinitions":[],"selfAssessmentTiers":[]}
 ```
+
+The second version (with the id lists filled in) is the one that works — see 29i.
 
 Every other path is byte-for-byte what it was (the catch-all `[0,[]]` is untouched).
 
@@ -125,10 +132,92 @@ from the engine's own 0xb0 definition list. Our relay reply feeds neither.
 
 ## 29h. Where the session stops
 
-The relay no longer lies about this request. The Multiplayer button is still grey, and the reason is
-now a *different*, precisely measured one: the leaderboard-definition registry that rule 2 counts is
-empty and nothing on this reply path fills it. M2 is untouched.
+**Superseded by 29i — M1 is met.** For the record, the state before the second half of the fix: the
+reply was well formed but every list in it was empty, so the game accepted it and installed no
+definitions. The registry that rule 2 counts was fed by `0x140e84190`, driven from the `matchTypes`
+vector, so an object with an empty `matchTypes` cannot work no matter how correct the rest is.
+M2 is untouched.
 
 Tooling notes: `cmd /c` from this shell needs `/c/WINDOWS/system32/cmd.exe //c` (plain `cmd` starts
 an interactive shell and ignores the argument). Launching the game twice in a row still needs the
 ~45-50 s pause after a ~3 s death; the first launch this session died at 2.7 s.
+## 29i. MEASURED, end to end: the Multiplayer button is LIVE and the screen opens
+
+Same run, pid 1624, with the reply from 29c **plus non-empty `matchTypes` / `mappings` /
+`races` / `factions` / `leaderboardRegions`** (this was the missing half):
+
+| what | before | after |
+|---|---|---|
+| `LeaderboardInfoCache - response was not formatted correctly` | every run | **gone** |
+| leaderboard definition count (`0x1442e18b0`, stride 0xc0) | 0 | **1** |
+| rule 2 = `[svc][vtbl+0x90]` (`0x140f12e80` = `[vtbl+0x88]` && count!=0; vtable slot identity verified from the file) | 0 | **1** |
+| both Multiplayer twin records (`ids 2,8,4,5,11,12,13` minus skip 12) | status=2 | **status=0** |
+
+Operator, at the main menu: **the plate is no longer grey, the tooltip shows, and clicking
+Multiplayer opens the Multiplayer screen and it stays open** (Host Game / Find Custom Game /
+Ranked visible, no freeze, no crash, no bounce back).
+
+⇒ M1's stated exit condition is met. The s28 chain was right about the *cause* and wrong about the
+*sufficiency*: the reply has to be a well-formed object **and** carry at least one entry in
+`matchTypes` (plus the id lists it resolves against), because the game-side installer
+`0x140e84190` is driven from the `matchTypes` vector. An object with those lists empty parses
+cleanly and installs nothing — that is the trap a future session must not fall into.
+
+Evidence: `logs/lanhook-1624.log` (readouts at 25/40/70 s, record scan at 126 s).
+
+## 29j. MEASURED: the first host attempt, and where it dies
+
+Operator, still in the live session (pid 1624), clicked Host Game → Create Lobby in the working
+Multiplayer screen. Result: dialog `Could not create game. Server Error. Source: AdvertisementJoinEvent
+Error Code: 0x00000001`. No crash, no freeze.
+
+What the log shows for that moment (`logs/lanhook-1624.log`):
+
+```
+[t=791.844s] LogHelper: "starting online hosting"
+[t=791.953s] srv: connection accepted  -> TLS handshake complete -> NO HTTP REQUEST (and no bytes)
+[t=793.125s] LogHelper: "HostAsync - completed with HostResult = %d"  -> 1
+[t=793.125s] LogHelper: "WorldwideAutomatchService::OnHostComplete - automatcher is no longer active"
+```
+
+Facts, all measured:
+
+- The game chose **online** hosting, not LAN: `[advertSvc+0x1a8]` host mode 0 → online, 2 → offline,
+  anything else → LAN (`0x140351343`, log lines at `0x14367ee40/58/78`).
+- **No advertisement HTTP request was ever sent.** `/game/advertisement/` appears exactly twice in the
+  whole session, both before the click (`getLanAdvertisements` at 677.578 s, `findAdvertisements` at
+  677.782 s). No connect, no DNS, no send to any address in the 791-794 s window.
+- `WorldwideHostAsync`'s own failure log (`0x140335926`, "WorldwideHostAsync - failed with reason %d",
+  through **hooked** LogWarn `0x1402bcc00`) did **not** fire ⇒ the rlink host call did not take its
+  normal failure branch.
+- "srv: connection accepted, TLS complete, then no request" is NOT special: 8 such connections occur
+  across the session (4.0 s, 4.5 s, 28.1 s, 28.7 s, 38.1 s, 91.2 s, 154.3 s, 792.0 s), i.e. each
+  HTTP request opens a fresh connection and some are preconnect/warm-up.
+- About 30 connections went to the relay's out-of-band port 27212 (the QoS probe started at 4.172 s);
+  **nothing ever connected to 27012 (raw) or 27112 (websockets)**, and the stock `BattleServer.exe`
+  (pid 6160, started by the game) listens on 27012 + 27212 only.
+- Two leads printed by the game's own code and not yet explained: `"HostAsync: This AsyncJob is not the
+  active connect, waiting..."` (`0x14367e980`) and `"join failure - we don't have a slot reservation"`
+  (`0x14367e950`). Both suggest the host is an AsyncJob queued behind "the active connect", so the
+  question is whether the job ever runs.
+
+### 29j.1 The LAN door the UI already has
+
+`.rdata` proves the create-lobby screen carries a lobby-type selector:
+`IDS_LOBBY_CREATE_USE_LOCAL_LAN_DROPDOWN_ITEM` at `0x143322df0`, immediately followed by the widget
+path `Background/Settings/LobbyTypeAnchor/LobbyTypeDropDown/DropDownListBox`. So the UI itself can ask
+for **local LAN hosting** — which is exactly the mod's target and skips the online advertisement
+service that just failed. Next session tries that dropdown before reverse-engineering the online host
+path any further.
+
+### 29j.2 Tooling trap found this session
+
+`xr.py` and my own disp32 scanners silently miss references in some cases (e.g. they report
+`adc byte ptr [rip+...]`); the reliable check is: candidate disp32 → disassemble backwards with
+capstone → keep only instructions whose end equals the disp end. Re-test any "no xref" conclusion
+against a string known to be used in the same `.rdata` block before believing it.
+
+Also: `0x140f19210` (the game's own `Network`-category logger, used by all `TComm_*` code) is
+**encrypted on disk** (`disk` bytes differ from `gametext.bin`), so it can never be hooked under the
+standing Arxan rule. Everything the game's comm layer says is therefore permanently invisible to the
+log hooks; only the rlink SDK's loggers (`0x1402bcb30`, `0x1402abc80`, `0x1402bcc00`) are usable.

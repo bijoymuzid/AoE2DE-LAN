@@ -1409,12 +1409,21 @@ static void route(TLSSES *t, const char *method, const char *path,
         // the list is never empty.
         // shortcut: this reply alone does NOT fill the leaderboard-definition
         // registry that rule 2 counts, see notes/m1-session29.md 29f.
+        // The game-side consumer (TComm_Leaderboard_RL::OnGetLeaderboardInfo,
+        // 0x140edd4f0) installs its definitions from the `matchTypes` vector
+        // and reads `mappings`/`races`/`factions`/`leaderboardRegions` to
+        // resolve ids, so every one of those carries one entry.
         static const char LB[] =
             "{\"result\":0,"
             "\"leaderboards\":[{\"leaderboardID\":1,\"leaderboardName\":\"1v1\",\"isRanked\":true}],"
-            "\"mappings\":[],\"matchTypes\":[],\"races\":[],\"factions\":[],"
-            "\"leaderboardRegions\":[],\"rankLevels\":[],\"statDefinitions\":[],"
-            "\"selfAssessmentTiers\":[]}";
+            "\"mappings\":[{\"leaderboardID\":1,\"matchTypeID\":1,\"statType\":0,\"raceID\":0}],"
+            "\"matchTypes\":[{\"matchTypeID\":1,\"name\":\"1v1\",\"teamSize\":1,\"numTeams\":2,"
+            "\"localizedName\":\"1v1\"}],"
+            "\"races\":[{\"raceID\":0,\"name\":\"random\",\"factionID\":0,\"localizedName\":\"Random\"}],"
+            "\"factions\":[{\"factionID\":0,\"name\":\"random\",\"localizedName\":\"Random\"}],"
+            "\"leaderboardRegions\":[{\"leaderboardRegionID\":2,\"name\":\"LAN\","
+            "\"localizedName\":\"LAN\"}],"
+            "\"rankLevels\":[],\"statDefinitions\":[],\"selfAssessmentTiers\":[]}";
         log_resp_head(LB, (int)strlen_f(LB));
         http_respond(t, LB);
     } else if (contains(path, "/game/news/")) {
