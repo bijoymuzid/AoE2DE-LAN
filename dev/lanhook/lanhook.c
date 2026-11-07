@@ -75,6 +75,7 @@ static const BYTE EXP_SETVERIFY[8] = {0x89,0x91,0x58,0x01,0x00,0x00,0x4C,0x89};
 static const BYTE EXP_SETSTORE[8]   = {0x48,0x89,0x5C,0x24,0x08,0x57,0xB8,0x20};
 static const BYTE EXP_ADDCERT[8]    = {0xB8,0x28,0x00,0x00,0x00,0xE8,0x56,0x0E};
 static const BYTE EXP_WSET[8]       = {0x48,0x8B,0x81,0xD8,0x03,0x00,0x00,0x90}; // 0x140ab6300 widget SetStateFlags
+static const BYTE EXP_AISLOT[8]     = {0x48,0x83,0xEC,0x28,0x48,0x81,0xC1,0x80}; // 0x140d62260 sub rsp,0x28; add rcx,0x680
 
 HOOKDEF g_Hooks[] = {
     // ids 0-3: provider cluster, CLEAN ON DISK (stage 4). Tolerated by the
@@ -110,6 +111,12 @@ HOOKDEF g_Hooks[] = {
     // id 14: widget SetStateFlags (0x140ab6300), CLEAN ON DISK, grp=0 (opt-in via
     // AOE2LAN_HOOKS=4,5,13,14 only). Logs (name, oldf, newf, caller) deduped.
     {"WidgetSetEn",     0x140AB6300, EXP_WSET,  600000,  0, HK_WSET  },
+    // id 15: the AI-slot picker 0x140d62260, CLEAN ON DISK, grp=0 (opt-in via
+    // AOE2LAN_HOOKS). The multiplayer host lobby's NameDropDown builder
+    // (0x1ab4bd0) fills its AI items from table[kind].vec, so this logs the kind
+    // the lobby asks for and how many AIs that slot holds. Read-only unless
+    // AOE2LAN_AIKIND=n is set.
+    {"AISlotPick",      0x140D62260, EXP_AISLOT, 600000, 0, HK_AISLOT },
 };
 const int g_NHooks = (int)(sizeof(g_Hooks)/sizeof(g_Hooks[0]));
 

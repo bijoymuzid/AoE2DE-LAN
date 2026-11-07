@@ -421,6 +421,116 @@ void lanhook_log_hit(int id, const unsigned long long *ctx) {
           b[i] = 0; log_line(b); }
         return;
     }
+    if (g_Hooks[id].kind == HK_AISLOT) {
+        // 0x140d62260 (CLEAN, 26 call sites): kind = getter(rcx+0x680), then
+        // return &g_aiTable[kind]. g_aiTable = 3 slots of 0x110 at RVA 0x4356760
+        // (dispatcher 0x14100b560), lazily built by 0x14100b5a0. slot+0x28 is a
+        // vector<AiEntry(0x40)>; getter 0x14100b4c0 returns slot+0x28 and the
+        // AI-list builder 0x140bf3c30 copies it into every NameDropDown.
+        // One slot holds {"PromiDE"->NEW_AI_TAG, "RandomGame"->ORIG_AI_TAG}.
+        // getter 0x140fa46c0: tag=byte[+4]; tag0->dword[+0]; tag1->(dword==3)?2:0;
+        // else->0x1408f6a00.
+        // Read-only by default. AOE2LAN_AIKIND=n substitutes a fake variant so the
+        // original itself computes slot n; nothing in game memory is written and
+        // only the AI-list builder's own call (ret RVA 0xbf3c8b) is affected.
+        static DWORD64 s_Seen[256];
+        static volatile LONG s_NSeen = 0;
+        static volatile LONG s_Init = 0;
+        static int s_Force = -1;
+        static BYTE s_Fake[8];
+        DWORD64 obj = ctx[17];
+        DWORD64 caller = ctx[19] - g_ModBase();
+        DWORD64 tbl = g_ModBase() + 0x4356760;
+        DWORD tag = 0xFFFFFFFF, val = 0, cnt = 0xFFFFFFFF;
+        DWORD via = 0;
+        int kind = -1;
+        if (!s_Init) {
+            char v[16];
+            s_Fake[4] = 0; s_Fake[5] = 0; s_Fake[6] = 0; s_Fake[7] = 0;
+            if (GetEnvironmentVariableA("AOE2LAN_AIKIND", v, sizeof v) &&
+                v[0] >= '0' && v[0] <= '2' && !v[1]) {
+                *(DWORD *)s_Fake = (DWORD)(v[0] - '0');
+                s_Force = v[0] - '0';
+            }
+            InterlockedExchange(&s_Init, 1);
+            { char bb[96]; int j = bsput(bb, 0, "AISlotPick: force=");
+              j = (s_Force < 0) ? bsput(bb, j, "off (log only)") : bnput(bb, j, (DWORD)s_Force);
+              bb[j] = 0; log_line(bb); }
+        }
+        __try {
+            tag = *(const volatile BYTE *)(obj + 0x684);
+            val = *(const volatile DWORD *)(obj + 0x680);
+            if (tag == 0) kind = (int)val;
+            else if (tag == 1) kind = (val == 3) ? 2 : 0;
+            if ((unsigned)kind < 3u) {
+                DWORD64 s = tbl + (DWORD64)kind * 0x110;
+                DWORD64 vb = *(const volatile DWORD64 *)(s + 0x28);
+                DWORD64 ve = *(const volatile DWORD64 *)(s + 0x30);
+                cnt = (ve >= vb) ? (DWORD)((ve - vb) / 0x40) : 0xFFFFFFFE;
+            }
+        } __except (EXCEPTION_EXECUTE_HANDLER) { kind = -1; cnt = 0xFFFFFFFF; }
+        // s40b: the slot table is fine (kind=2, nAI=2 in both screens), so the
+        // question is WHO runs the AI-list builder. Scan this frame's stack for
+        // one of the builder's 7 known call-site return addresses. The builder's
+        // frame is fixed (7 pushes + sub rsp,0x1d0) so its return address sits at
+        // picker_rsp+0x210 = ctx[85]; scanning a window avoids trusting that.
+        // 0x1ab4c59 = the NameDropDown filler 0x1ab4bd0, whose widget-path string
+        // lives in the ScreenSinglePlayerCreate cluster.
+        {
+            static const DWORD s_Via[7] = { 0xe730d8, 0xe73287, 0xe7388a,
+                                            0xe79002, 0x13d4564, 0x1ab4c59,
+                                            0x1c93e78 };
+            if (caller == 0xbf3c8b) {
+                __try {
+                    const volatile DWORD64 *sp = (const volatile DWORD64 *)(ctx + 20);
+                    DWORD64 mb = g_ModBase();
+                    for (int k = 0; k < 200 && !via; k++) {
+                        DWORD64 v = sp[k];
+                        DWORD r;
+                        if (v < mb + 0x1000 || v > mb + 0x4000000) continue;
+                        r = (DWORD)(v - mb);
+                        for (int j = 0; j < 7; j++)
+                            if (r == s_Via[j]) { via = r; break; }
+                    }
+                } __except (EXCEPTION_EXECUTE_HANDLER) { via = 0; }
+            }
+        }
+        if (s_Force >= 0 && caller == 0xbf3c8b && kind != s_Force)
+            ((unsigned long long *)ctx)[17] = (DWORD64)s_Fake - 0x680;
+        // same boot-window rule as HK_WSET: menu construction would otherwise eat
+        // the cap (and poison the dedup set) before the operator reaches a lobby.
+        // Logging only — the force above deliberately stays live from t=0.
+        if (GetTickCount() - g_t0 < 20000) return;
+        { DWORD64 h = (1469598103934665603ULL ^ caller) * 1099511628211ULL;
+          h = (h ^ (tag & 0xFF)) * 1099511628211ULL;
+          h = (h ^ (val & 0xFFFF)) * 1099511628211ULL;
+          h = (h ^ cnt) * 1099511628211ULL;
+          h = (h ^ via) * 1099511628211ULL;
+          LONG cur = s_NSeen;
+          for (LONG k = 0; k < cur && k < 256; k++) if (s_Seen[k] == h) return;
+          { LONG idx = InterlockedIncrement(&s_NSeen) - 1;
+            if (idx < 256) s_Seen[idx] = h; } }
+        { LONG ln = InterlockedIncrement(&g_HLines[id]);
+          if (ln > 256) {
+              if (ln == 257) log_line("HIT AISlotPick log capped at 256 lines");
+              return;
+          }
+          i = bsput(b, 0, "HIT AISlotPick #"); i = bnput(b, i, (DWORD)n);
+          i = bsput(b, i, " caller=0x"); i = bxput(b, i, caller);
+          i = bsput(b, i, " obj=0x"); i = bxput(b, i, obj);
+          i = bsput(b, i, " tag=0x"); i = bxput(b, i, tag);
+          i = bsput(b, i, " val=0x"); i = bxput(b, i, val);
+          i = bsput(b, i, " kind=");
+          if (kind < 0) i = bsput(b, i, "?"); else i = bnput(b, i, (DWORD)kind);
+          i = bsput(b, i, " nAI=0x"); i = bxput(b, i, cnt);
+          if (caller == 0xbf3c8b) {
+              i = bsput(b, i, " via=");
+              if (!via) i = bsput(b, i, "?"); else { i = bsput(b, i, "0x"); i = bxput(b, i, via); }
+          }
+          if (s_Force >= 0) { i = bsput(b, i, " FORCE="); i = bnput(b, i, (DWORD)s_Force); }
+          b[i] = 0; log_line(b); }
+        return;
+    }
     { LONG ln = InterlockedIncrement(&g_HLines[id]);
       if (ln > 64) {
           if (ln == 65) { i = bsput(b, 0, "HIT ");
