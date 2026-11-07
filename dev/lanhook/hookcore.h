@@ -8,6 +8,7 @@
 #define HK_RDSTR 1   // rdx = char* log/format string, keyword-filtered
 #define HK_R8STR 2   // r8  = char* field key, "relay"-filtered
 #define HK_TLS   3   // OpenSSL TLS fns: log rcx/rdx/r8/r9 + ret, cap 256
+#define HK_WSET  4   // widget SetEnabled (0x140a74ca0): rcx=widget, dl=en, deduped
 
 typedef struct {
     const char *name;

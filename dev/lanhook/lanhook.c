@@ -74,6 +74,7 @@ static const BYTE EXP_LOGH[8] = {0x48,0x89,0x54,0x24,0x10,0x4C,0x89,0x44}; // rl
 static const BYTE EXP_SETVERIFY[8] = {0x89,0x91,0x58,0x01,0x00,0x00,0x4C,0x89};
 static const BYTE EXP_SETSTORE[8]   = {0x48,0x89,0x5C,0x24,0x08,0x57,0xB8,0x20};
 static const BYTE EXP_ADDCERT[8]    = {0xB8,0x28,0x00,0x00,0x00,0xE8,0x56,0x0E};
+static const BYTE EXP_WSET[8]       = {0x48,0x8B,0x81,0xD8,0x03,0x00,0x00,0x90}; // 0x140ab6300 widget SetStateFlags
 
 HOOKDEF g_Hooks[] = {
     // ids 0-3: provider cluster, CLEAN ON DISK (stage 4). Tolerated by the
@@ -106,6 +107,9 @@ HOOKDEF g_Hooks[] = {
     //   "WebSocketConnection - failed to parse notification messages [%s]"
     //   "Enum changed on the server <Event>::Result" (the resultCode probe)
     {"LogWarn",         0x1402BCC00, EXP_LOGH,  600000,  2, HK_RDSTR },
+    // id 14: widget SetStateFlags (0x140ab6300), CLEAN ON DISK, grp=0 (opt-in via
+    // AOE2LAN_HOOKS=4,5,13,14 only). Logs (name, oldf, newf, caller) deduped.
+    {"WidgetSetEn",     0x140AB6300, EXP_WSET,  600000,  0, HK_WSET  },
 };
 const int g_NHooks = (int)(sizeof(g_Hooks)/sizeof(g_Hooks[0]));
 
@@ -365,7 +369,8 @@ static DWORD WINAPI MainThread(LPVOID p) {
               char b[192]; int i=0; const char *m="hook filter: only ";
               while(*m) b[i++]=*m++;
               for (int k=0;k<g_NHooks && i<180;k++) if (g_Only[k]) {
-                  b[i++]=(char)('0'+k); b[i++]=':';
+                  if (k >= 10) b[i++]=(char)('0'+(k/10));
+                  b[i++]=(char)('0'+(k%10)); b[i++]=':';
                   { const char *nm = g_Hooks[k].name; int j=0;
                     while (nm[j] && i<186) b[i++]=nm[j++]; }
                   b[i++]=','; }

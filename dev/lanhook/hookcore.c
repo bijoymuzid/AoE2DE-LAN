@@ -328,6 +328,66 @@ void lanhook_log_hit(int id, const unsigned long long *ctx) {
         b[i]=0; log_line(b);
         return;
     }
+    if (g_Hooks[id].kind == HK_WSET) {
+        // 0x140ab6300: rcx = widget, rdx = new flags at [rcx+0x3d8] (old flags at [rcx+0x3d8]).
+        // Bit 4 (0x4) = disabled/locked (dl=1 sets 0x4, dl=0 clears 0x4), bit 8 (0x8) = hidden.
+        // Widget path is an MSVC std::string at rcx + 0x3e8 (s33c).
+        static DWORD64 s_Seen[512];
+        static volatile LONG s_NSeen = 0;
+        DWORD64 w = ctx[17];
+        DWORD64 newf = ctx[16];
+        DWORD64 oldf = 0;
+        DWORD64 vt = 0;
+        DWORD64 caller = ctx[19];
+        DWORD64 lcaller = 0;
+        char nm[96]; int nml = 0;
+        // Skip boot-time screen creation (first 20 s) so Options/QueueButton0..63 don't eat the cap
+        if (GetTickCount() - g_t0 < 20000) return;
+        if (w < 0x10000) return;
+        __try {
+            vt = *(const volatile DWORD64*)w;
+            oldf = *(const volatile DWORD64*)(w + 0x3d8);
+            const volatile BYTE *s = (const volatile BYTE*)(w + 0x3e8);
+            DWORD64 sz = *(const volatile DWORD64*)(s + 0x10);
+            DWORD64 cap = *(const volatile DWORD64*)(s + 0x18);
+            const void *p = (cap > 15) ? (const void*)*(const volatile DWORD64*)s : (const void*)s;
+            if (sz > 0 && sz < 256 && cap >= sz && cap < 4096 && (DWORD64)p > 0x10000) {
+                int r = read_cstr(p, nm, 96);
+                if (r > 0) nml = r;
+            }
+            const volatile DWORD64 *sp = (const volatile DWORD64*)(ctx + 20);
+            for (int k = 0; k < 12; k++) {
+                DWORD64 v = sp[k];
+                if (v >= g_ModBase() + 0x1aa0000 && v < g_ModBase() + 0x1ad0000) {
+                    lcaller = v - g_ModBase();
+                    break;
+                }
+            }
+        } __except (EXCEPTION_EXECUTE_HANDLER) { nml = 0; }
+        if (((oldf ^ newf) & 4) == 0 && !lcaller) return;
+        if (!nml) return;
+        { DWORD64 h = 1469598103934665603ULL;
+          for (int k = 0; k < nml; k++) h = (h ^ (BYTE)nm[k]) * 1099511628211ULL;
+          h = (h << 8) | (newf & 0xFF);
+          LONG cur = s_NSeen;
+          for (LONG k = 0; k < cur && k < 512; k++) if (s_Seen[k] == h) return;
+          { LONG idx = InterlockedIncrement(&s_NSeen) - 1;
+            if (idx < 512) s_Seen[idx] = h; } }
+        { LONG ln = InterlockedIncrement(&g_HLines[id]);
+          if (ln > 512) {
+              if (ln == 513) log_line("HIT WidgetSetEn log capped at 512 lines");
+              return;
+          }
+          i = bsput(b, 0, "HIT WidgetSetEn #"); i = bnput(b, i, (DWORD)n);
+          i = bsput(b, i, " old=0x"); i = bxput(b, i, oldf);
+          i = bsput(b, i, " new=0x"); i = bxput(b, i, newf);
+          i = bsput(b, i, " name=\""); i = bsput(b, i, nm); i = bsput(b, i, "\"");
+          i = bsput(b, i, " vt=0x"); i = bxput(b, i, vt - g_ModBase());
+          i = bsput(b, i, " ret=0x"); i = bxput(b, i, caller - g_ModBase());
+          if (lcaller) { i = bsput(b, i, " lobby_caller=0x"); i = bxput(b, i, lcaller); }
+          b[i] = 0; log_line(b); }
+        return;
+    }
     { LONG ln = InterlockedIncrement(&g_HLines[id]);
       if (ln > 64) {
           if (ln == 65) { i = bsput(b, 0, "HIT ");
