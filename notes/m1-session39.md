@@ -281,6 +281,16 @@ one of the three entries.
 
 ## 39k. Next session, in order
 
+**Operator priority, stated explicitly: the AI work comes FIRST, ahead of M2.** Reason: there are not
+enough human players, so the target match is operator + one friend + AI in the host lobby. The
+operator also wants to confirm that a match containing AI actually starts and runs. So N5/N6 below
+outrank N7.
+
+0. **N0 — chase the best lead first (see 39l).** Read `0x1ab4bd0..0x1ab6ab9` from `gametext.bin`:
+   it is the only caller of a tag function inside the lobby widget range, calling the HD_AI_TAG
+   function at `0x1ab4c54`. Find the condition under which that call is reached, and find a **clean**
+   function on that path that can be hooked caller-filtered. That is the only shape of fix available,
+   because the builder itself is encrypted.
 1. **N5 — measure before patching.** Add a read-only hook on the clean getter `0x140fa46c0` that
    logs `(caller RVA, returned eax)` and is **filtered to caller `0x18aed32`** (plus a small cap),
    opt-in by a new hook id. Run it twice: once in Single Player → Skirmish, once in a LAN host
@@ -296,10 +306,49 @@ one of the three entries.
    and **9684**, and both screens' `DropDownListBox` child is the same widget. Find the code that
    adds those two ids, then read forward to where the AI entries would be appended — that is the
    lobby-specific builder, and its own gate is the answer.
-3. **N7 — M2 is still unblocked and is the bigger prize.** The settings rows respond and 39i proves
-   the lobby round-trips its settings. Start an actual LAN game and confirm the sim loads and nothing
-   desyncs. Co-op-vs-AI needs the AI list, but a 2-human LAN match does not, and M2 is the next
-   milestone in PLAN.md §9.
+3. **N7 — M2, unblocked but ranked BELOW the AI work by operator request.** The settings rows respond
+   and 39i proves the lobby round-trips its settings. Start an actual LAN game and confirm the sim
+   loads and nothing desyncs. Co-op-vs-AI needs the AI list; a 2-human LAN match does not.
 4. **N4 (unchanged, optional)** — the real source fix for the row locks: find the clean writer of
    `this->field_0x1cf8` and why it differs from the sentinel `[0x14326b258]` for LAN.
 5. **Do not re-open the four-row fix**, and do not re-add ranges without a specific log line (39f).
+
+## 39l. Two more anchors tried, and the encryption wall (last work of s39)
+
+Goal restated by the operator: **AI must appear in the multiplayer host lobby's slot dropdown**, so a
+match can be you + one friend + AI. The operator also wants to know whether a match with AI actually
+starts. This is now the top priority, ahead of M2.
+
+**Anchor A — the `Open`/`Closed` string-table ids (9685 / 9684).** Searched `gametext.bin` for both
+4-byte immediates and grouped by `.pdata` function: 34 raw hits for 9684, 22 for 9685, **17
+functions contain both**. Too many to be a clean anchor — those small integers collide with ordinary
+immediates. Best candidate by count and location: **`0x1a344f0..0x1a362aa`** (3x each id), which sits
+immediately after the Victory/Team locker `0x1a31940..0x1a32e31`, i.e. inside lobby UI code.
+Second candidate `0x1a1b6e0..0x1a1ea60`. Both are **encrypted on disk**.
+
+**Anchor B — callers of the three tag functions.** This is the more useful result:
+
+| tag function | callers | where |
+|---|---|---|
+| `0xbf3c30` HD_AI_TAG | **7** | `0xe72660` x2, `0xe733a0`, `0xe789d0`, `0x13d44f0`, **`0x1ab4bd0`**, `0x1c93cc0` |
+| `0x18aeb10` ORIG_AI_TAG | 1 | `0x18ac240` (call at `0x18ad22c`) |
+| `0x192a4f0` NEW_AI_TAG | **0** | — |
+
+**`0x1ab4bd0..0x1ab6ab9` is the lead to chase.** It is the only caller inside the lobby widget range
+(`0x1aa0000..0x1ad0000` — the same window the `lcaller` filter in `HK_WSET` uses), and it calls the
+HD_AI_TAG function at `0x1ab4c54`. It is **encrypted on disk**, so readable from `gametext.bin` only.
+
+Encryption status of every candidate checked: `0x1ab4bd0`, `0x1ab4c54`, `0x1a344f0`, `0x18ac240`,
+`0x1a1b6e0` all `disk != run`. The **only clean** function on this whole path is the generic getter
+`0x140fa46c0` (182 callers — caller-filtered only).
+
+Consequence for method: the AI-list builder can be **read** but not **hooked**. So the fix has to be
+either (a) a caller-filtered hook on a clean function that the builder itself calls — the `HK_WSET`
+bit-`0x4` trick is the template — or (b) something server-side. `NEW_AI_TAG`'s function having zero
+callers means at least one of the three tag sites is reached indirectly or is dead; do not assume the
+three sites are one list.
+
+Untested server-side idea, recorded so it is not lost: our shim already echoes the host's `slotinfo`
+back as `encodedSlots`. Rewriting that blob to insert AI occupants would change what a **joining**
+client sees, but the host's local lobby state is authoritative, so it probably does not make the host
+actually run the AI. Low confidence; only worth trying if the code path proves unreachable.
