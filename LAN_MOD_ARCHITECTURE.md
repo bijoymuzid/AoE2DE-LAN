@@ -316,7 +316,7 @@ baked into the design rather than discovered in testing:
 * `lanhook.dll` loads identically (it is PE, executed by Wine). Use the same proxy-DLL trick —
   `WINEDLLOVERRIDES` is not needed and Proton's builtin d3d11 would shadow a proxy, so prefer
   `dbghelp` (Wine's builtin can be overridden per-app with
-  `WINEDLLOVERRIDES="dbghelp=n"`).
+  `WINEDLLOVERRIDES="dbghelp=n,b"`).
 * LanHub may run natively on the Linux host (`lanhub-linux`) with the in-prefix game talking to
   `host.docker`-style loopback — simplest, and it makes mixed Windows+Linux LANs trivial because
   the relay protocol is plain TCP/UDP.

@@ -1,7 +1,7 @@
 # linux/ — Linux-side launch path (W2)
 
 - `launch.sh` — the L4 launcher: stages W1's `dbghelp.dll` next to the game exe in the
-  prefix, starts the native `lanhub`, sets `WINEDLLOVERRIDES="dbghelp=n"` +
+  prefix, starts the native `lanhub`, sets `WINEDLLOVERRIDES="dbghelp=n,b"` +
   `AOE2LAN_STAGE=8`, launches `AoE2DE_s.exe` under the workspace GE-Proton.
   Expects the DLL at `AoE2DE-LAN/dbghelp.dll` (override: `AOE2LAN_DLL`).
 - `relay_test.py` — the L3 relay harness. `python3 relay_test.py local` spawns stock
@@ -14,6 +14,17 @@
 - Prefix: `~/Games/aoe/winepfx` (`STEAM_COMPAT_DATA_PATH`; real prefix at `…/pfx`)
 - Game: `C:\Games\AoE2DE` = `~/Games/aoe/winepfx/pfx/drive_c/Games/AoE2DE`
 - Proton: `~/Games/aoe/Proton-GE Latest` (GE-Proton11-12) — no other Proton/Wine used
+
+## Privileged port (required, one time)
+
+The in-DLL login server binds `127.0.0.1:443`; on Linux that is privileged, so it fails
+with `srv: bind 127.0.0.1:443 FAILED` (really EACCES). Allow unprivileged binds:
+
+    echo 'net.ipv4.ip_unprivileged_port_start=0' | sudo tee /etc/sysctl.d/99-aoe2lan.conf
+    sudo sysctl --system
+
+Alternative if that is unacceptable: listen on 4443 and rewrite the port in the
+`getaddrinfo` hook (`dev/lanhook/iathook.c`) — not done, the sysctl is one line.
 
 ## Firewall / tailnet checklist (PLAN §3.6, §8)
 

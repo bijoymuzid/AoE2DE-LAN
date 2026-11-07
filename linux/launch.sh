@@ -35,7 +35,9 @@ echo "launch: lanhub pid $HUBPID (control 127.0.0.1:47100, node :47101)"
 cd "$GAMEDIR"
 export STEAM_COMPAT_DATA_PATH="$PFX"
 export STEAM_COMPAT_CLIENT_INSTALL_PATH="$HOME/.steam/steam"
-export WINEDLLOVERRIDES="dbghelp=n"
+#    "n,b" not "n": the proxy LoadLibraryExW(system32\dbghelp.dll) for forwarding, so
+#    Wine's builtin must stay loadable or the DLL dies with "could not load real dbghelp"
+export WINEDLLOVERRIDES="dbghelp=n,b"
 # telemetry env knobs: unknown semantics beyond PLAN §2.5 names — H4 owns silence
 # in-process; nothing set here until a measurement says otherwise.
 exec "$PROTON" run AoE2DE_s.exe "$@"

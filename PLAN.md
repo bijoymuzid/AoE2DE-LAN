@@ -355,7 +355,7 @@ lanhub marks the lobby migrated. Save/restore uses the engine's own `Restore Mul
 ### Linux (Proton)
 - Everything inside one Proton prefix (`STEAM_COMPAT_DATA_PATH` / `WINEPREFIX` shared) so
   `127.0.0.1` and the `Documents` mapping are shared between game, relay and launcher.
-- Same PE DLL via `dbghelp` proxy; override Wine's builtin with `WINEDLLOVERRIDES="dbghelp=n"`.
+- Same PE DLL via `dbghelp` proxy; override Wine's builtin with `WINEDLLOVERRIDES="dbghelp=n,b"`.
 - `lanhub-linux` runs **natively** (needs `tailscale status --json` and the real `tailscale0`); the
   shim inside the prefix reaches it at `127.0.0.1:47100` (Wine shares host loopback).
 - ufw: 47101/tcp + 47110–47114. Multi-homed hosts: pin `[net] iface`.
@@ -670,7 +670,7 @@ Both workers: `git pull` before you start, small commits, commit message starts 
 | L1 | **`lanhub` skeleton** (Go or C, W2's call): control server on `127.0.0.1:47100` plus node gossip on `:47101`, JSON over TCP, protocols exactly as §5.1 and §5.2. No game involvement at all. | Two `lanhub` instances on one host (different ports) exchange `ANNOUNCE` and one `ADVERT` shows up on the other; a `HELLO`/`HOST`/`FIND`/`JOIN` walk from a command-line client returns the expected JSON |
 | L2 | **Peer enumeration**: `tailscale status --json` → `{nodeGUID, nodeName, tailnetIP, online}`; ini seeds as fallback; report `path=direct` vs `derp`. | `lanhub peers` prints the real tailnet peers on the friend's machine, and printing the route per peer |
 | L3 | **Relay harness regression**: run `notes/bs_client.py` (stdlib only) against `BattleServer/BattleServer.exe` under the same Wine prefix, reproducing the session-3 two-peer `LOBBYCONNECT`/`REQUESTJOIN`/`GAMEDATA` relay, and turn it into `notes/bs_live_test.py`-style PASS/FAIL. | The harness prints PASS on Linux under Wine, and again from a second machine over the tailnet |
-| L4 | **Linux launch path**: a launcher script that copies our `dbghelp.dll` into the game dir, sets `WINEDLLOVERRIDES="dbghelp=n"`, the telemetry env vars and `AOE2LAN_STAGE=8`, starts `lanhub`, starts the game. Plus the ufw/tailnet checklist. | The Multiplayer button is live inside Proton, `logs/lanhook-<pid>.log` is written inside the prefix, and the doc lists the exact commands |
+| L4 | **Linux launch path**: a launcher script that copies our `dbghelp.dll` into the game dir, sets `WINEDLLOVERRIDES="dbghelp=n,b"`, the telemetry env vars and `AOE2LAN_STAGE=8`, starts `lanhub`, starts the game. Plus the ufw/tailnet checklist. | The Multiplayer button is live inside Proton, `logs/lanhook-<pid>.log` is written inside the prefix, and the doc lists the exact commands |
 | L5 | **Analysis W2 can do from Linux**: `.rdata` strings, RTTI, widget XAML/JSON, localization. Not `.text` — that needs a Windows-side decrypted dump. | Any finding recorded in `notes/linux-*.md` with addresses, so W1 can verify it on the dump |
 
 W2 does **not** touch the DLL, the hook table, or the staged `dbghelp.dll`. The DLL is handed over as

@@ -84,7 +84,7 @@ Windows:
 - **The native hub.** `lanhub` (peer enumeration via `tailscale status --json`, gossip on 47101,
   the game-side control protocol on `127.0.0.1:47100`) is a new component with no Windows
   dependency. It can be written and unit-tested on Linux against the protocol in `PLAN.md` §5.
-- **Running the game.** One Proton prefix shared by game, relay and launcher; `WINEDLLOVERRIDES="dbghelp=n"`
+- **Running the game.** One Proton prefix shared by game, relay and launcher; `WINEDLLOVERRIDES="dbghelp=n,b"`
   so our proxy is used instead of Wine's builtin.
 
 If you want to build the DLL itself on Linux, the build is `ml64` + `cl`, so it needs mingw-w64

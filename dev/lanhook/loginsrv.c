@@ -909,9 +909,12 @@ static int tls_encrypt_send(TLSSES *t, const char *msg, int len) {
           b[i]=0; logn(b); }
         return 0;
     }
-    // after the call the DATA slot holds the ciphertext; sizes unchanged for
-    // stream buffers � send the whole contiguous record
-    if (!tls_send_all(t->s, (char*)rec, n0 + n1 + n2)) return 0;
+    // Send the sizes AS ADJUSTED BY EncryptMessage: Windows leaves cbHeader/
+    // cbTrailer alone, Wine shrinks cbTrailer (256 -> 24 for GCM). The pre-call
+    // total ships the zero tail of rec and corrupts record framing (session 31).
+    { int total = (int)(bufs[0].cbBuffer + bufs[1].cbBuffer + bufs[2].cbBuffer);
+      if (total <= 0 || total > (int)sizeof(rec)) { logn("TLS: bad record size"); return 0; }
+      if (!tls_send_all(t->s, (char*)rec, total)) return 0; }
     return 1;
 }
 

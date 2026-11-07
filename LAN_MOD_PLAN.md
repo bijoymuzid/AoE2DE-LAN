@@ -89,7 +89,7 @@ relay session (ground truth for the fallback relay).
   desync, checksums equal, `PINGNODE` shows `direct`.
 
 ### M2.5 — Linux / Proton parity (2–3 days) ← moved early, deliberately
-* Same `lanhook.dll` via `dbghelp` proxy inside one Proton prefix; `WINEDLLOVERRIDES="dbghelp=n"`.
+* Same `lanhook.dll` via `dbghelp` proxy inside one Proton prefix; `WINEDLLOVERRIDES="dbghelp=n,b"`.
 * `lanhub-linux` **native** build (runs outside the prefix, owns Tailscale enumeration; the shim
   inside the prefix talks to it at `127.0.0.1:47100`, which Wine shares with the host).
 * Exit: Windows↔Linux in the same co-op lobby over the tailnet, `PINGNODE` correct, ufw rules
