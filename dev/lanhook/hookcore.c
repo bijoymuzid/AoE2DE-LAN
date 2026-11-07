@@ -340,6 +340,8 @@ void lanhook_log_hit(int id, const unsigned long long *ctx) {
         DWORD64 vt = 0;
         DWORD64 caller = ctx[19];
         DWORD64 lcaller = 0;
+        DWORD64 l24 = 0, l25 = 0, l26 = 0;   // s38: thunk-frame window, see below
+        int suppressed = 0;                  // s38: set when we refuse a lobby lock
         char nm[96]; int nml = 0;
         // Skip boot-time screen creation (first 20 s) so Options/QueueButton0..63 don't eat the cap
         if (GetTickCount() - g_t0 < 20000) return;
@@ -363,8 +365,35 @@ void lanhook_log_hit(int id, const unsigned long long *ctx) {
                     break;
                 }
             }
+            // s38: proven frame. locker -> [vt+0x68] thunk 0x140acc950 -> WSE.
+            // thunk prologue (push rsi; sub rsp,0x20) puts thunk_entry_rsp =
+            // WSE_entry_rsp + 0x30 = ctx + 0xC8, so ctx[25] = return address into
+            // the locker. The range filter above hid it (locker is outside
+            // 0x1aa0000..0x1ad0000), so read the slot directly plus its neighbours.
+            #define LKMOD(v) (((v) >= g_ModBase() && (v) < g_ModBase() + 0x4000000) ? (v) - g_ModBase() : (v))
+            l24 = LKMOD(sp[4]);   // ctx[24]
+            l25 = LKMOD(sp[5]);   // ctx[25] = locker return address
+            l26 = LKMOD(sp[6]);   // ctx[26]
+            #undef LKMOD
         } __except (EXCEPTION_EXECUTE_HANDLER) { nml = 0; }
-        if (((oldf ^ newf) & 4) == 0 && !lcaller) return;
+        // s38 FIX: the host lobby locks every match-settings row in one pass. The
+        // locker (entry 0x141a2ce20, gate `cmp [this+0x1cf8],[0x14326b258]` -> je
+        // skips the locking) and the Victory/Team locker (0x141a31940) are both
+        // ENCRYPTED ON DISK, so they cannot be hooked or patched. WidgetSetEn
+        // (0x140ab6300) IS clean and already hooked (id 14), so refuse the lock
+        // here: when the caller (ctx[25] = the [vt+0x68] thunk's saved return addr)
+        // is inside a locker and bit 0x4 is being SET, clear it in rdx (ctx[16]).
+        // hooks.asm restores rdx from ctx[16], so the original stores enabled flags.
+        if ((newf & 4) &&
+            ((l25 >= 0x1a2ce20 && l25 < 0x1a2d2dd) ||    // main match-settings locker
+             (l25 >= 0x1a31940 && l25 < 0x1a32e31) ||    // Victory / Team locker
+             (l25 >= 0x1a2e250 && l25 < 0x1a2f5e2) ||    // re-lock pass: Start/EndAge, Victory, Resources
+             (l25 >= 0x1a48820 && l25 < 0x1a48cc2))) {   // ButtonCiv (civ / add-AI button)
+            ((unsigned long long *)ctx)[16] = newf & ~4ULL;
+            newf &= ~4ULL;
+            suppressed = 1;
+        }
+        if (((oldf ^ newf) & 4) == 0 && !lcaller && !suppressed) return;
         if (!nml) return;
         { DWORD64 h = 1469598103934665603ULL;
           for (int k = 0; k < nml; k++) h = (h ^ (BYTE)nm[k]) * 1099511628211ULL;
@@ -384,7 +413,11 @@ void lanhook_log_hit(int id, const unsigned long long *ctx) {
           i = bsput(b, i, " name=\""); i = bsput(b, i, nm); i = bsput(b, i, "\"");
           i = bsput(b, i, " vt=0x"); i = bxput(b, i, vt - g_ModBase());
           i = bsput(b, i, " ret=0x"); i = bxput(b, i, caller - g_ModBase());
+          if (suppressed) { i = bsput(b, i, " SUPPRESSED"); }
           if (lcaller) { i = bsput(b, i, " lobby_caller=0x"); i = bxput(b, i, lcaller); }
+          i = bsput(b, i, " l24=0x"); i = bxput(b, i, l24);
+          i = bsput(b, i, " l25=0x"); i = bxput(b, i, l25);
+          i = bsput(b, i, " l26=0x"); i = bxput(b, i, l26);
           b[i] = 0; log_line(b); }
         return;
     }

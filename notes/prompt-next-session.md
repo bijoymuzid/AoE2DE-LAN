@@ -1,68 +1,81 @@
 # Prompt for the next Windows session (paste this into a new chat)
 
-Continue AoE2LAN (AoE2:DE LAN mod). Read `notes/m1-session37.md` in full before touching anything; it
-supersedes `notes/m1-session36.md`. Then read `PLAN.md` §0–§2, §6.1 and §17.
+Continue AoE2LAN (AoE2:DE LAN mod). Read `notes/m1-session38.md` in full before touching anything; it
+supersedes `notes/m1-session37.md`. Then read `PLAN.md` §0–§2, §6.1 and §17.
 
 Say everything to me in plain English: short sentences, no jargon, no code dumps, no leaps. If
 something is unknown, say it is unknown.
 
 Working dir: `D:\Age of Empires II Definitive Edition`. Repo: `D:\aoe2lan-repo` →
 https://github.com/bijoymuzid/AoE2DE-LAN. `git pull` first. At the end run
-`cmd /c D:\aoe2lan-repo\sync.cmd "session 38 - <one line, no parentheses, no colon after NN>"`
+`cmd /c D:\aoe2lan-repo\sync.cmd "session 39 - <one line, no parentheses, no colon after NN>"`
 (in this shell `cmd /c` must be written as `/c/WINDOWS/system32/cmd.exe //c`).
 
 ## WHERE WE ARE (do not re-derive)
 
-- **Gates:** `hooktest.exe` PASS (68/68), `srvtest.exe` + `srvclient.py` PASS. Game exe MD5
-  `affb19f03ca96965abf9e56775cab688`, untouched. Staged `dbghelp.dll` = 241,664 B, MD5
-  `5ca2dadf03b0f9951ed0a0dbb61592d6`, unchanged since session 36.
-- **The one blocker:** in the host lobby only Location (map) and Map Size work. Difficulty, Resources,
-  Population, Game Speed, Reveal Map, Starting/Ending Age, Treaty Length, Victory, Teams, the Advanced
-  checkboxes and the add-AI offer are all dead.
-- **What session 37 measured (`logs/lanhook-13752.log`) — this is the new, decisive fact:**
-  - At **t=75.438s**, seconds after the host lobby is built, exactly **twelve** match-settings
-    dropdowns get **bit `0x4` SET** (`old=0x8 -> new=0xc`) through the DropDown `[vt+0x68]` thunk
-    `0x140acc950`, and that bit is **never cleared again**: `GameDropDown`, `DifficultyDropDown`,
-    `ResourcesDropDown`, `PopulationDropDown`, `RevealMapDropDown`, `StartingAgeDropDown`,
-    `EndingAgeDropDown`, `TreatyLengthDropDown`, `BattleRoyaleTimeDropDown`, `TimeDropDown`,
-    `GameSpeedDropDown`, `VictoryDropDown`.
-  - `MapSizeDropDown` and `ButtonLocation` are **never touched** after the 20 s boot window, so they
-    keep bit `0x4` clear = enabled. That is exactly why those two rows work.
-  - So the rows are not "never unlocked by us" — **the engine deliberately locks them**, once, in one
-    pass, and `NameDropDown` (own seat) gets locked *and* unlocked in the same pass.
-- **Not captured yet:** which function does the locking. `ret=` in those lines is the setter thunk,
-  not the caller. Reason: `hooks.asm` makes entry `rsp = ctx + 0x98`, so the existing `ctx[20..31]`
-  scan only reads the caller's shadow space; `lobby_caller` was empty on all 141 lines. Widening that
-  scan is a 3-line change in `hookcore.c` `HK_WSET` (see 37d).
-- **Launching the game from the agent:** a game started with `cmd /c PLAY-*.cmd` dies after ~1 s
-  (job-object teardown). Use `dev/lanhook/work/launch-detached.ps1`
-  (`powershell -NoProfile -ExecutionPolicy Bypass -File "dev\lanhook\work\launch-detached.ps1"`),
-  which spawns through WMI. Wait ~10 s, then ask me to click Multiplayer -> Host Game.
+- **Gates:** `hooktest.exe` PASS (68/68), `srvtest.exe` PASS. Game exe MD5
+  `affb19f03ca96965abf9e56775cab688`, untouched. Staged `dbghelp.dll` = 242,176 B, MD5
+  `d313af6964b08e0ab4fe6d908a6f1a01`. The last-known-good s37 DLL is backed up at
+  `dev/lanhook/dbghelp.dll.prev-s37-5ca2`.
+- **The blocker is mostly FIXED.** In the host lobby, the match-settings rows were dead because the
+  engine locks them (sets bit `0x4` on the widget) in a pass right after the lobby is built. Session
+  38 found the lockers and now suppresses the lock at the clean `WidgetSetEn` hook (id 14).
+- **Verified working in-game (operator):** Difficulty, Resources, Population, Game Speed, Reveal Map,
+  Treaty Length, Teams, and the Advanced checkboxes all respond now. Location and Map Size still work.
+- **NOT yet verified (code-complete, rebuilt, but the operator did not re-test):** Starting Age,
+  Ending Age, Victory, and the add-AI button. These needed a 3rd and 4th locker range because a second
+  pass re-locks them; that fix is in the staged DLL but unconfirmed in-game.
+
+## THE MECHANISM (do not re-derive — it is proven)
+
+- Hook id 14 = `WidgetSetEn` at the CLEAN `0x140ab6300`. `rdx` = new flags for `[widget+0x3d8]`;
+  bit `0x4` = disabled/locked.
+- `ctx[25]` (module-relative) = the return address of whoever called the `[vt+0x68]` DropDown thunk =
+  **the locker**. (Frame math in 38b. The old s37 scan missed it only because it filtered to
+  `0x1aa0000..0x1ad0000` and the lockers are below that.)
+- `hooks.asm` restores `rdx` from `ctx[16]`, so writing `ctx[16]` in the logger changes what the
+  original stores. The fix clears bit `0x4` in `ctx[16]` when `l25` is inside a known locker.
+- Locker ranges already in the predicate (see 38e): `0x1a2ce20..0x1a2d2dd`, `0x1a31940..0x1a32e31`,
+  `0x1a2e250..0x1a2f5e2`, `0x1a48820..0x1a48cc2`.
+- The real source gate is `cmp [this+0x1cf8],[0x14326b258]; je skip-locking` at locker entry
+  `0x141a2ce20` — but that code is **encrypted on disk**, so it cannot be hooked. Suppression at the
+  clean `WidgetSetEn` is the authorized fallback.
 
 ## THIS SESSION, IN ORDER
 
-1. `git pull`. Confirm staged `dbghelp.dll` is 241,664 B / `5ca2dadf03b0f9951ed0a0dbb61592d6`.
-2. **Cheap route first — static, no game run, no DLL change.** Run the rip-relative xref scan on the
-   thirteen multiplayer lobby widget-path strings listed in 37e, e.g.
-   `python xr.py 0x14334c1b8 0x14334c1f0 0x14334c228 0x14334c260 0x14334c298 0x14334c2d0 0x14334c308 0x14334c340 0x14334c378 0x14334c3b0 0x14334c3f0 0x14334c428 0x14334c148`
-   (from `dev/lanhook`). The function that looks up `MapSizeDropDown` **and** the twelve, and calls
-   `[vt+0x68](w, 1)` on the twelve only, is the locker. Disassemble it from `gametext.bin`
-   (`python fn.py <hexva> --dump`) and read its gate: a bool field, a call result, or a matchtype test.
-3. **If step 2 does not produce the gate in one pass, go live:** widen the `HK_WSET` stack scan to
-   ~1024 slots as described in 37d, rebuild + retest (`hooktest.exe`), re-stage `dbghelp.dll`, launch
-   via `launch-detached.ps1`, and have me sit in the host lobby. Read `lobby_caller` off the twelve
-   `0x8 -> 0xc` lines.
-4. **Then fix at the source, not with a cosmetic unlock:** find what makes the lobby treat the match
-   settings as fixed (the `IsEventScenario`-shaped flag from s36d is the prime suspect) and clear it for
-   the LAN lobby. Only if the test lives in encrypted code that cannot be reached cleanly, fall back to
-   suppressing the `bit 0x4` set inside the already-hooked CLEAN `0x140ab6300` — and then verify in-game
-   that the rows actually respond, because a cleared flag may not be the only gate.
+1. `git pull`. Confirm staged `dbghelp.dll` = 242,176 B / `d313af6964b08e0ab4fe6d908a6f1a01`.
+2. **Verify the last four rows.** Launch with
+   `powershell -NoProfile -ExecutionPolicy Bypass -File "dev\lanhook\work\launch-detached.ps1"`
+   (runs `PLAY-stage8-SETEN.cmd`, hooks `4,5,13,14`). Wait ~12 s, confirm `AoE2DE_s.exe` is alive and
+   `logs/lanhook-<pid>.log` is growing. Ask me to click Multiplayer → Host Game and test **Starting
+   Age, Ending Age, Victory, and the add-AI button**.
+   - If a row still dead: `grep name="<Widget>" logs/lanhook-<pid>.log`, read the `l25` on its final
+     `new=0x…4` line → that is the next re-lock site. Get its function bounds
+     (`cd dev/lanhook && python fn.py 0x1<l25>`), add the range to the 38e predicate in
+     `hookcore.c` `HK_WSET`, rebuild (`cmd /c build.cmd`), re-run `hooktest.exe` (must stay 68/68),
+     relaunch, re-test. Repeat until all rows respond.
+   - "AI" is assumed to be `ButtonCiv`. If the add-AI offer is a different widget, find its name in the
+     log and handle its locker the same way.
+3. **Then prove it is not cosmetic.** Once every row responds, start an actual LAN match (change a
+   setting, start the game) and confirm the setting takes effect in the sim and there is no desync.
+   A cleared bit `0x4` makes the row editable; it does not by itself prove the click handler commits
+   the value. This is the gate to M2.
+4. Only if suppression keeps whack-a-moling (a new re-lock pass every time), consider the harder source
+   route: find what writes `this->field_0x1cf8` on the lobby screen and why it differs from the
+   sentinel `[0x14326b258]` for LAN. The writer may also be encrypted — check disk-vs-`gametext.bin`
+   before trying.
+
+## HOW TO LAUNCH (do not use `cmd /c PLAY-*.cmd` directly — it dies in ~1 s)
+
+`powershell -NoProfile -ExecutionPolicy Bypass -File "dev\lanhook\work\launch-detached.ps1"` spawns
+through WMI (parented to `WmiPrvSE`, outside the agent's job object). Wait ~12 s, then ask me to click.
+To stop: `taskkill /PID <gamepid> /F` (write it as `/c/WINDOWS/system32/taskkill.exe //PID <pid> //F`).
 
 ## RULES THAT STILL APPLY
 
 Never patch or hook code encrypted on disk (`0x141aab4a0`, `0x141abc6c0`, `0x140ac4090`, `0x140ab02a0`,
-`0x140acc950`) — read those from `dev/lanhook/gametext.bin` only. (`0x140ab6300` IS clean on disk.)
-**No whole-memory sweeps and never set `AOE2LAN_UIW=1` or `rules_scan()`.** Default stage-8 hooks stay
-ids 4, 5 and 13; id 14 (`WidgetSetEn`, `grp=0`) only via `AOE2LAN_HOOKS=4,5,13,14`. Do not edit
-`lanhub/**`, `linux/**` or `notes/linux-*.md`. Edit the game-dir tree
-(`D:\Age of Empires II Definitive Edition\dev\lanhook`), then sync with `sync.cmd`.
+`0x140acc950`, and the lockers `0x141a2ce20` / `0x141a31940` / `0x141a2e250` / `0x141a48820`) — read
+those from `dev/lanhook/gametext.bin` only. `0x140ab6300` IS clean. No whole-memory sweeps; never set
+`AOE2LAN_UIW=1` or `rules_scan()`. Default stage-8 hooks stay 4, 5, 13; id 14 only via
+`AOE2LAN_HOOKS=4,5,13,14`. Do not edit `lanhub/**`, `linux/**`, `notes/linux-*.md`. Edit the game-dir
+tree (`D:\Age of Empires II Definitive Edition\dev\lanhook`), then sync with `sync.cmd`.
