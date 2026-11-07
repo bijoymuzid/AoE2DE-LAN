@@ -135,3 +135,50 @@ Windows Process-Monitor trace of the same step.
 - Housekeeping: `launch.sh` `exec`s proton, so its EXIT trap never runs and `lanhub` is orphaned on
   every launch. Kill it before relaunching (`pkill -f 'lanhub --ini'`) or the new one cannot bind
   47100/47101.
+
+## 2g. MEASURED: the exit is a decision inside protected code, not a failed syscall
+
+`Exit=0` in `steam_emu.ini` unmasks the exit code: **0 -> 5** (`ERROR_ACCESS_DENIED`). With the
+stock `Exit=1` the emu rewrites it to 0, which is why every run looked like a clean voluntary quit.
+(`steam_emu.ini` was restored from backup afterwards; `Offline=1`, `LobbyEnabled=0` and
+`WINEDLLOVERRIDES=...;lsteamclient=d` were each tried and each changed nothing — still 18 lines.)
+
+`strace -f -tt -y` over the whole tree (game pid found via its `AoE2DE_s.exe` references — note
+`winedevice.exe` is a sibling, not the game) shows **no failing syscall at the end**: the only
+`EACCES`/`EPERM` in the whole run are `/dev/input/event*` and `/dev/bus/usb/*` probes during
+startup, which every Wine game produces. No socket error, no denied file, nothing.
+
+What the game's main thread does in its last ~20 ms instead:
+
+```
+SIGSYS {si_code=SYS_USER_DISPATCH, si_call_addr=0x1700402, si_syscall=__NR_shmat}
+SIGSYS {si_code=SYS_USER_DISPATCH, si_call_addr=0x1700402, si_syscall=__NR_rt_sigreturn}
+SIGSYS {si_code=SYS_USER_DISPATCH, si_call_addr=0x1700402, si_syscall=__NR_tuxcall}
+SIGSYS {si_code=SYS_USER_DISPATCH, si_call_addr=0x1700402, si_syscall=__NR_alarm}
+    ... same 4-cycle repeating ...
+SIGILL si_addr=0x142ba15c4 ; SIGILL si_addr=0x142ba189e
+SIGSYS {si_call_addr=0x1700402, si_syscall=__NR_sendto}
+exit_group(0)      <- 2 ms later
+```
+
+Read it as: code running from a JIT page at `0x1700402` issues **raw `syscall` instructions**, which
+Wine catches via `PR_SET_SYSCALL_USER_DISPATCH` and emulates one by one. The names strace prints are
+the *Linux* decode of the numbers in `rax`; the caller means them as NT syscall numbers, so the names
+are misleading (`tuxcall` is a removed i386 syscall — a number no real Windows has). Two `ud2`-style
+`SIGILL`s at the same addresses seen all run long are the protector's own VEH trick. Then the process
+exits.
+
+Conclusion (INFERRED from the above, and it is the only reading consistent with all of it): nothing
+on Linux refused the game anything. The game's protection ran its probes, compared the answers with
+what real Windows returns, and shut the process down cleanly and silently — the same signature
+`PLAN.md` M0.3 records for a tampered encrypted region ("clean exit ~5.6 s"). This also explains the
+two facts that puzzled us: the exit is identical with and without `dbghelp.dll` (the probe has
+nothing to do with our code), and the official Steam build runs on Proton (with real Steam the
+protection's environment checks are consistent; here the emulated SteamAPI says "online, ticket
+valid" while the low-level probes say otherwise).
+
+Consequence: this is **crack-vs-Wine**, not mod-vs-Wine, and it is not reachable from
+`dev/lanhook/**`. Both Protons available locally are wine-11.0 (`GE-Proton11-12`,
+`cachyos-11.0-20261015-slr`) and behave identically, so there is no cheap Linux lever left: no
+prefix setting, no `WINEDLLOVERRIDES`, no `steam_emu.ini` knob and no network block changes it. Linux
+parity therefore waits on M2.5 as `PLAN.md` R9 intends, and M2 should be finished on Windows.
