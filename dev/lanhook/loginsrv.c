@@ -1643,6 +1643,21 @@ static void route(TLSSES *t, const char *method, const char *path,
         bs(&resp, "],\"playerRatings\":[]}");
         log_resp_head(resp.p, (int)resp.len);
         http_respond(t, resp.p);
+    } else if (contains(path, "/game/party/peerAdd") ||
+               contains(path, "/game/party/peerUpdate")) {
+        // s42: the party peer ops parse their reply with a result-only DTO reader
+        // (peerAdd 0x1404d01b0 from the completion handler 0x140313810, peerUpdate
+        // 0x1404d05a0 from 0x140312620). One member, "result", read into DTO+0x30 by
+        // the PartyPeerAddEvent::Result enum reader 0x1404cb930, which accepts a
+        // number in [-1,4] and otherwise logs "Enum changed on the server" and clamps
+        // to 4. Unknown members are skipped, so nothing else is required. The
+        // catch-all "[0,[]]" is an ARRAY: the reader never found the object it wanted
+        // and logged "WorldwideOnPartyPeerAddAsync - response was not formatted
+        // correctly: [0,[]]", so the party kept no peer list and the match never
+        // assembled after Start was accepted.
+        static const char POK[] = "{\"result\":0}";
+        log_resp_head(POK, (int)strlen_f(POK));
+        http_respond(t, POK);
     } else if (contains(path, "/game/news/")) {
         log_resp_head("[0,[]]", 5);
         http_respond(t, "[0,[]]");

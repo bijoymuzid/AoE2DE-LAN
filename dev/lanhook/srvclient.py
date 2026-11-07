@@ -445,5 +445,24 @@ if isinstance(lv, dict):
     chk(isinstance(lv.get("playerRatings"), list), "playerRatings must be an array")
 print(f"  lan list reply: {len(lv.get('advertisements') or []) if lv else 0} advertisement(s)")
 
+# ---- s42: /game/party/peerAdd + peerUpdate. Each op reads a result-only DTO
+# (peerAdd 0x1404d01b0 from completion handler 0x140313810, peerUpdate 0x1404d05a0
+# from 0x140312620): one member, "result", an enum the reader accepts in [-1,4].
+# The old catch-all "[0,[]]" is an array, so the read failed and the party kept no
+# peer list -- that was the blocker between "Start accepted" and a running match.
+for pth, body in (("/game/party/peerAdd",
+                   "callNum=35&connect_id=1194088482&match_id=1194088482"
+                   "&profile_ids=%5B3842241165083521967%5D&race_ids=%5B-1%5D"
+                   "&sessionID=1194088482&statGroup_ids=%5B0%5D&teamIDs=%5B-1%5D"),
+                  ("/game/party/peerUpdate",
+                   "callNum=47&connect_id=1194088482&isNonParticipants=%5B0%5D"
+                   "&match_id=1194088482&profile_ids=%5B3842241165083521967%5D"
+                   "&race_ids=%5B43%5D&sessionID=1194088482&teamIDs=%5B5%5D")):
+    pr = post(pth, body)
+    chk(isinstance(pr, dict), f"{pth} reply must be an object, got {str(pr)[:40]}")
+    if isinstance(pr, dict):
+        chk(pr.get("result") == 0, f"{pth} result {pr.get('result')!r}")
+    print(f"  {pth} reply: {pr}")
+
 print("PASS" if ok else "FAILED")
 sys.exit(0 if ok else 1)
