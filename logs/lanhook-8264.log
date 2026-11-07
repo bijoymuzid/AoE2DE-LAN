@@ -5220,3 +5220,162 @@
 [t=565.266s] hb alive sec=565
 [t=570.266s] hb alive sec=570
 [t=575.266s] hb alive sec=575
+[t=580.266s] hb alive sec=580
+[t=585.282s] hb alive sec=585
+[t=590.282s] hb alive sec=590
+[t=595.282s] hb alive sec=595
+[t=600.282s] hb alive sec=600
+[t=605.282s] hb alive sec=605
+[t=605.329s] HIT LogHelper #160: "%s" r8=0x000002669d11bca0 s8="MessageCounts: inval=0/0, seek=0/0, join=0/0, ichk=0/0, sk_r=0/0, deny=" r9=0x00007ffa702adc0d s9="H" a5=0x00007ff648750000 a6=0x00007ff64bdd43b8 ret=0x00007ff648b79657
+[t=610.282s] hb alive sec=610
+[t=615.282s] hb alive sec=615
+[t=620.297s] hb alive sec=620
+[t=625.297s] hb alive sec=625
+[t=630.297s] hb alive sec=630
+[t=635.297s] hb alive sec=635
+[t=640.297s] hb alive sec=640
+[t=645.297s] hb alive sec=645
+[t=650.297s] hb alive sec=650
+[t=655.297s] hb alive sec=655
+[t=660.313s] hb alive sec=660
+[t=665.313s] hb alive sec=665
+[t=666.329s] HIT LogHelper #161: "%s" r8=0x000002669d11adc0 s8="MessageCounts: inval=0/0, seek=0/0, join=0/0, ichk=0/0, sk_r=0/0, deny=" r9=0x00007ffa702adc0d s9="H" a5=0x00007ff648750000 a6=0x00007ff64bdd43b8 ret=0x00007ff648b79657
+[t=670.313s] hb alive sec=670
+[t=675.313s] hb alive sec=675
+[t=680.313s] hb alive sec=680
+[t=685.313s] hb alive sec=685
+[t=690.313s] hb alive sec=690
+[t=695.313s] hb alive sec=695
+[t=700.313s] hb alive sec=700
+[t=705.329s] hb alive sec=705
+[t=710.329s] hb alive sec=710
+[t=715.329s] hb alive sec=715
+[t=720.329s] hb alive sec=720
+[t=725.329s] hb alive sec=725
+[t=727.329s] HIT LogHelper #162: "%s" r8=0x000002669d119aa0 s8="MessageCounts: inval=0/0, seek=0/0, join=0/0, ichk=0/0, sk_r=0/0, deny=" r9=0x00007ffa702adc0d s9="H" a5=0x00007ff648750000 a6=0x00007ff64bdd43b8 ret=0x00007ff648b79657
+[t=728.813s] HIT LogHelper #163: "Delisting Invisible match" r8=0x0000000000000000 r9=0x00000265899e0000 s9="Xm" a5=0x0000026598ab9b00 a6=0x00000000472c5488 ret=0x00007ff648a42d72
+[t=728.813s] HIT LogHelper #164: "SessionID : %llx - Disconnect called with reasonID %d - %s" r8=0x00000000472c5488 r9=0x00000000000003e8 a5=0x00000266cb015cd0 a6=0x0000026598cccf90 ret=0x00007ff648a3fb69
+[t=728.813s] HIT LogHelper #165: "Sending matchinfo change #%d" r8=0x00000000000000db r9=0x000000007ffe4000 s9="HalT" a5=0x00000007d00e0d90 a6=0x0000026691475320 ret=0x00007ff648a5bd4c
+[t=728.829s] HIT LogHelper #166: "WorldwideAdvertisementService::Process - EVENT_DESTROYPEER" r8=0x0000026589af6fc0 s8="P" r9=0x0000000000000003 a5=0x00000265a2d4c980 a6=0x0000000000000009 ret=0x00007ff648aa8797
+[t=728.829s] HIT LogHelper #167: "WorldwidePartyService::PeerRemove, Removing peer ID: %lld" r8=0x0000000000000001 r9=0x00000078be9ff1c0 s9="(E" a5=0x0000026598cce0d0 a6=0x00000078be9ff230 ret=0x00007ff648a598e9
+[t=728.829s] HIT LogHelper #168: "peerremove - peerIDRemoved=%s, reasonID=%d, reason debug hint - %s" r8=0x00000266cb20f0f0 s8="3842241165083521967" r9=0x00000000000003e8 a5=0x00000266f38da020 a6=0x00007ff64bdcd60c ret=0x00007ff648a5a753
+[t=728.875s] srv: connection accepted
+[t=728.875s] cert: root present=1
+[t=728.922s] TLS: handshake complete (server side)
+[t=728.969s] srv: blk#25 n=5936
+[t=728.969s] srv: req#25 n=5936
+[t=728.969s] HTTP REQ /game/CommunityEvent/getAvailableCommunityEvents
+[t=728.969s] HTTP RESP BODY [0,[]
+[t=728.969s] HTTP RESP: building head
+[t=728.969s] HTTP RESP: sent
+[t=729.172s] HIT LogHelper #169: "PeerRemoveAll - flushing local session peer data" r8=0x00000000000003e8 r9=0x00000265a302fc48 a5=0x00000265978c6d48 a6=0x0000000000000000 ret=0x00007ff648a5b124
+[t=729.172s] HIT LogHelper #170: "Destroyed Matchinfo for sessionID %lld" r8=0x00000000472c5488 r9=0x00000265899e0f40 s9="Xm" a5=0x0000000000000000 a6=0x00000000000003b4 ret=0x00007ff648a50088
+[t=729.172s] HIT LogHelper #171: "OnDestroyPartyNotification - partyID = %s, prevID = %s" r8=0x00000078be9ff4a8 s8="1194087560" r9=0x00000078be9ff488 s9="-1" a5=0x00000265936ab930 a6=0x00007ff64bdcd60c ret=0x00007ff648c93e0d
+[t=729.172s] HIT LogHelper #172: "OnDestroyPartyNotification - partyID = %lld, prevID = %lld" r8=0x00000000472c5488 r9=0xffffffffffffffff a5=0x0000000000000000 a6=0x0000000000000000 ret=0x00007ff648c353c6
+[t=729.172s] srv: blk#25 n=401
+[t=729.172s] srv: req#25 n=401
+[t=729.172s] HTTP REQ /game/relationship/getRelationships
+[t=729.172s] HTTP RESP BODY [0,[]
+[t=729.172s] HTTP RESP: building head
+[t=729.172s] HTTP RESP: sent
+[t=729.422s] srv: blk#25 n=371
+[t=729.422s] srv: blk#25 n=89
+[t=729.422s] srv: req#25 n=460
+[t=729.422s] HTTP REQ /game/account/FindProfilesByPlatformID
+[t=729.422s] HTTP BODY callNum=94&connect_id=1194087560&platformIDs=%5B76561197960273920%5D&sessionID=1194087560
+[t=729.422s] HTTP RESP BODY [0,[]
+[t=729.422s] HTTP RESP: building head
+[t=729.422s] HTTP RESP: sent
+[t=729.610s] HIT WidgetSetEn #2240802 old=0x0000000000000010 new=0x000000000000001c name="ListScrollBar" vt=0x000000000321c528 ret=0x0000000000ae149e l24=0x00000078bfcff740 l25=0x0000000000aaab14 l26=0x0000000000000000
+[t=729.688s] srv: blk#25 n=618
+[t=729.688s] srv: req#25 n=618
+[t=729.688s] HTTP REQ /game/advertisement/getLanAdvertisements
+[t=729.688s] HTTP RESP BODY {"result":0,"advertisements":[{"hostProfileID":3842241165083521967,"description":"AnkerGames's Game","filteredDescription":"AnkerGames's Game","mapName":"my map","options":"eNpNU8tu3DAM/Jd8gR+7uuWghbyNg1CqE+mwx9YphMppvUCSyvbXhxIpb30aiOTM8OG7lzhI/Bqw8yojIiUFSH4L189TgqqLGF92rMr7tJoAkeo68dPnuoPersdTQuoSTZBdgtpOhfdg7PWTagahn9/TW41aDz/ax/n17Nq
+[t=729.688s] HTTP RESP BODY +hfT3rt7fedYtwDfzTtX7+bitFPPNK2m4xYaxYpzJ/DlnH2MvNh50j+6zN72qhXN+YvxN78gIot0GuljyNAob8VuuAWsRf7zXhIn4NjvoI3QoSEj5in30CYHF+Ns1gOpMfEE+2I4z93nB+Z85dszFqrlkTOR3FN+QkzTbtAWTGC4S55pkusO37qbCXePIZ18mjJu4F++EZdK0JviO/OIPBEzfGQclYOE2aX87vcY/kG0InNO8UQo/zy15W1G9AXogHvUBwnD8I2PNd6WNFLw3PftXbvJHOiN79N8r1qY71oSn71ZvD+ee6I+AdcRz7Ad7/VHZ6RF7e3/jfzl25jwp
+[t=729.688s] HTTP RESP BODY +nybpTvPGPJd4aVe7YtfsdbxPGaf+g5g/e2yH/H3Rf+E/07MWj1/v7uy84cAWm","encodedSlots":"eNrt0FtrwjAUB/B9ljzX0aTqtLAXp5GWdbPpZerYQ2xTGnqlzQZO9t1HM2XsUoas+OTTOeR/khx+ECmPO1BWRcRTZuRRcclDoGujPkJ9CIcDdaQNEBwPrxRQCyp4kRtToEMFCEazfRvR4BCoCqhowGSAmj5PbtkLS/dJnlhUBLG7LeVIr3mHZ2zBKlzRjFmOnOM1YTTcyrebT59reZwxQadUUKADI8Ea8fDE9rBm+7LObJ80deK75v1mbgqSp7H/mpJVE
+[t=729.688s] HTTP RESP BODY +s7v/HLlJCXf+Ga99jBu5uxleCOrt3Y2OF1aM1Pedx+C8cIxrsGb8hOmB7849FohmuQgMVD/LaF+SqA/JcjREnGnEqhVAp1YwjlaIv1dYtm1xIkh3KMhyk4h1FaIj74rCfhdYrJwVX7e9rztYduni3fneyv1","visible":1,"isPassworded":0,"maxPlayerCount":8,"matchTypeID":-1,"matchState":0,"service":1,"isobservable":0,"observerDelay":0,"observerNum":0,"observerMax":0,"isObserverPassworded":0
+[t=729.688s] HTTP RESP BODY +,"matchStartTime":0,"matchRegion":"LAN","matchRegionLocalized":"LAN","matchMembers":[{"profileID":3842241165083521967,"sessionID":1194087560,"ranking":0,"statGroupID":0,"raceID":-1,"teamID":-1,"url":""}]}],"playerRatings":[]}
+[t=729.688s] HTTP RESP: building head
+[t=729.688s] HTTP RESP: sent
+[t=729.938s] srv: blk#25 n=576
+[t=729.938s] srv: req#25 n=576
+[t=729.938s] HTTP REQ /game/advertisement/findAdvertisements
+[t=729.938s] HTTP RESP BODY {"result":0,"advertisements":[{"hostProfileID":3842241165083521967,"description":"AnkerGames's Game","filteredDescription":"AnkerGames's Game","mapName":"my map","options":"eNpNU8tu3DAM/Jd8gR+7uuWghbyNg1CqE+mwx9YphMppvUCSyvbXhxIpb30aiOTM8OG7lzhI/Bqw8yojIiUFSH4L189TgqqLGF92rMr7tJoAkeo68dPnuoPersdTQuoSTZBdgtpOhfdg7PWTagahn9/TW41aDz/ax/n17Nq
+[t=729.938s] HTTP RESP BODY +hfT3rt7fedYtwDfzTtX7+bitFPPNK2m4xYaxYpzJ/DlnH2MvNh50j+6zN72qhXN+YvxN78gIot0GuljyNAob8VuuAWsRf7zXhIn4NjvoI3QoSEj5in30CYHF+Ns1gOpMfEE+2I4z93nB+Z85dszFqrlkTOR3FN+QkzTbtAWTGC4S55pkusO37qbCXePIZ18mjJu4F++EZdK0JviO/OIPBEzfGQclYOE2aX87vcY/kG0InNO8UQo/zy15W1G9AXogHvUBwnD8I2PNd6WNFLw3PftXbvJHOiN79N8r1qY71oSn71ZvD+ee6I+AdcRz7Ad7/VHZ6RF7e3/jfzl25jwp
+[t=729.938s] HTTP RESP BODY +nybpTvPGPJd4aVe7YtfsdbxPGaf+g5g/e2yH/H3Rf+E/07MWj1/v7uy84cAWm","encodedSlots":"eNrt0FtrwjAUB/B9ljzX0aTqtLAXp5GWdbPpZerYQ2xTGnqlzQZO9t1HM2XsUoas+OTTOeR/khx+ECmPO1BWRcRTZuRRcclDoGujPkJ9CIcDdaQNEBwPrxRQCyp4kRtToEMFCEazfRvR4BCoCqhowGSAmj5PbtkLS/dJnlhUBLG7LeVIr3mHZ2zBKlzRjFmOnOM1YTTcyrebT59reZwxQadUUKADI8Ea8fDE9rBm+7LObJ80deK75v1mbgqSp7H/mpJVE
+[t=729.938s] HTTP RESP BODY +s7v/HLlJCXf+Ga99jBu5uxleCOrt3Y2OF1aM1Pedx+C8cIxrsGb8hOmB7849FohmuQgMVD/LaF+SqA/JcjREnGnEqhVAp1YwjlaIv1dYtm1xIkh3KMhyk4h1FaIj74rCfhdYrJwVX7e9rztYduni3fneyv1","visible":1,"isPassworded":0,"maxPlayerCount":8,"matchTypeID":-1,"matchState":0,"service":1,"isobservable":0,"observerDelay":0,"observerNum":0,"observerMax":0,"isObserverPassworded":0
+[t=729.938s] HTTP RESP BODY +,"matchStartTime":0,"matchRegion":"LAN","matchRegionLocalized":"LAN","matchMembers":[{"profileID":3842241165083521967,"sessionID":1194087560,"ranking":0,"statGroupID":0,"raceID":-1,"teamID":-1,"url":""}]}],"playerRatings":[]}
+[t=729.938s] HTTP RESP: building head
+[t=729.938s] HTTP RESP: sent
+[t=730.188s] srv: blk#25 n=363
+[t=730.188s] srv: blk#25 n=67
+[t=730.188s] srv: req#25 n=430
+[t=730.188s] HTTP REQ /game/relationship/setPresence
+[t=730.188s] HTTP BODY callNum=97&connect_id=1194087560&presence_id=4&sessionID=1194087560
+[t=730.188s] HTTP RESP BODY [0,[]
+[t=730.188s] HTTP RESP: building head
+[t=730.188s] HTTP RESP: sent
+[t=730.329s] hb alive sec=730
+[t=730.438s] srv: blk#25 n=430
+[t=730.438s] srv: req#25 n=430
+[t=730.438s] HTTP REQ /game/advertisement/getAdvertisements
+[t=730.438s] HTTP RESP BODY {"result":0,"advertisements":[{"hostProfileID":3842241165083521967,"description":"AnkerGames's Game","filteredDescription":"AnkerGames's Game","mapName":"my map","options":"eNpNU8tu3DAM/Jd8gR+7uuWghbyNg1CqE+mwx9YphMppvUCSyvbXhxIpb30aiOTM8OG7lzhI/Bqw8yojIiUFSH4L189TgqqLGF92rMr7tJoAkeo68dPnuoPersdTQuoSTZBdgtpOhfdg7PWTagahn9/TW41aDz/ax/n17Nq
+[t=730.438s] HTTP RESP BODY +hfT3rt7fedYtwDfzTtX7+bitFPPNK2m4xYaxYpzJ/DlnH2MvNh50j+6zN72qhXN+YvxN78gIot0GuljyNAob8VuuAWsRf7zXhIn4NjvoI3QoSEj5in30CYHF+Ns1gOpMfEE+2I4z93nB+Z85dszFqrlkTOR3FN+QkzTbtAWTGC4S55pkusO37qbCXePIZ18mjJu4F++EZdK0JviO/OIPBEzfGQclYOE2aX87vcY/kG0InNO8UQo/zy15W1G9AXogHvUBwnD8I2PNd6WNFLw3PftXbvJHOiN79N8r1qY71oSn71ZvD+ee6I+AdcRz7Ad7/VHZ6RF7e3/jfzl25jwp
+[t=730.438s] HTTP RESP BODY +nybpTvPGPJd4aVe7YtfsdbxPGaf+g5g/e2yH/H3Rf+E/07MWj1/v7uy84cAWm","encodedSlots":"eNrt0FtrwjAUB/B9ljzX0aTqtLAXp5GWdbPpZerYQ2xTGnqlzQZO9t1HM2XsUoas+OTTOeR/khx+ECmPO1BWRcRTZuRRcclDoGujPkJ9CIcDdaQNEBwPrxRQCyp4kRtToEMFCEazfRvR4BCoCqhowGSAmj5PbtkLS/dJnlhUBLG7LeVIr3mHZ2zBKlzRjFmOnOM1YTTcyrebT59reZwxQadUUKADI8Ea8fDE9rBm+7LObJ80deK75v1mbgqSp7H/mpJVE
+[t=730.438s] HTTP RESP BODY +s7v/HLlJCXf+Ga99jBu5uxleCOrt3Y2OF1aM1Pedx+C8cIxrsGb8hOmB7849FohmuQgMVD/LaF+SqA/JcjREnGnEqhVAp1YwjlaIv1dYtm1xIkh3KMhyk4h1FaIj74rCfhdYrJwVX7e9rztYduni3fneyv1","visible":1,"isPassworded":0,"maxPlayerCount":8,"matchTypeID":-1,"matchState":0,"service":1,"isobservable":0,"observerDelay":0,"observerNum":0,"observerMax":0,"isObserverPassworded":0
+[t=730.438s] HTTP RESP BODY +,"matchStartTime":0,"matchRegion":"LAN","matchRegionLocalized":"LAN","matchMembers":[{"profileID":3842241165083521967,"sessionID":1194087560,"ranking":0,"statGroupID":0,"raceID":-1,"teamID":-1,"url":""}]}],"playerRatings":[]}
+[t=730.438s] HTTP RESP: building head
+[t=730.438s] HTTP RESP: sent
+[t=730.688s] srv: blk#25 n=359
+[t=730.688s] srv: blk#25 n=80
+[t=730.688s] srv: req#25 n=439
+[t=730.688s] HTTP REQ /game/advertisement/leave
+[t=730.688s] HTTP BODY advertisementid=1194087560&callNum=99&connect_id=1194087560&sessionID=1194087560
+[t=730.688s] HTTP RESP BODY [0,[]
+[t=730.688s] HTTP RESP: building head
+[t=730.688s] HTTP RESP: sent
+[t=730.938s] srv: blk#25 n=402
+[t=730.938s] srv: req#25 n=402
+[t=730.938s] HTTP REQ /game/relationship/getPresenceData
+[t=730.938s] HTTP RESP BODY [0,[]
+[t=730.938s] HTTP RESP: building head
+[t=730.938s] HTTP RESP: sent
+[t=731.250s] srv: blk#25 n=386
+[t=731.250s] srv: req#25 n=386
+[t=731.250s] HTTP REQ /game/news/getNews
+[t=731.250s] HTTP RESP BODY [0,[]
+[t=731.250s] HTTP RESP: building head
+[t=731.250s] HTTP RESP: sent
+[t=731.500s] srv: blk#25 n=475
+[t=731.500s] srv: req#25 n=475
+[t=731.500s] HTTP REQ /game/Leaderboard/getStatsForLeaderboardByProfileName
+[t=731.500s] HTTP RESP BODY [0,[]
+[t=731.500s] HTTP RESP: building head
+[t=731.500s] HTTP RESP: sent
+[t=731.750s] srv: blk#25 n=475
+[t=731.750s] srv: req#25 n=475
+[t=731.750s] HTTP REQ /game/Leaderboard/getStatsForLeaderboardByProfileName
+[t=731.750s] HTTP RESP BODY [0,[]
+[t=731.750s] HTTP RESP: building head
+[t=731.750s] HTTP RESP: sent
+[t=732.000s] srv: blk#25 n=476
+[t=732.000s] srv: req#25 n=476
+[t=732.000s] HTTP REQ /game/Leaderboard/getStatsForLeaderboardByProfileName
+[t=732.000s] HTTP RESP BODY [0,[]
+[t=732.000s] HTTP RESP: building head
+[t=732.000s] HTTP RESP: sent
+[t=732.610s] srv: blk#25 n=352
+[t=732.610s] srv: blk#25 n=54
+[t=732.610s] srv: req#25 n=406
+[t=732.610s] HTTP REQ /game/login/logout
+[t=732.610s] HTTP BODY callNum=105&connect_id=1194087560&sessionID=1194087560
+[t=732.610s] HTTP RESP BODY [0,[]
+[t=732.610s] HTTP RESP: building head
+[t=732.610s] HTTP RESP: sent
+[t=732.735s] WS: closed, frames=293
+[t=732.735s] WS: data frames ignored=1
+[t=732.735s] srv: closed pending#2 n=213
+[t=733.188s] HIT LogHelper #173: "WebSocketConnection::Process: Connection closed (State::FreeingSocket); m_resumeState=%d" r8=0x0000000000000000 r9=0x00000265899e0b40 a5=0x000002659880ff60 a6=0x00000078bd9ffa10 ret=0x00007ff648e20f60
+[t=733.610s] srv: closed pending#25 n=0
+[t=735.329s] hb alive sec=735
+[t=740.329s] hb alive sec=740

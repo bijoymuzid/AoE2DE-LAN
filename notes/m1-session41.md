@@ -188,16 +188,43 @@ the writer works and is measured.
 - The blocking warning, t=57.36: `LogWarn "%s - response was not formatted correctly: %s"` with
   `s8="WorldwideOnPartyPeerAddAsync"`, `s9="[0,[]]"`.
 
+## 41g2. MEASURED — run 4, the no-AI control (`logs/lanhook-17168.log`)
+
+Same DLL, same switches (`PLAY-stage8-AIGATE.cmd`), **zero AI in any slot**. Result: identical failure.
+
+- t=55.703 `WorldwideOnPartyPeerAddAsync - response was not formatted correctly: [0,[]]` — during
+  lobby creation, before any AI exists.
+- t=63.781 `SetMatchState - state 1`; t=64.484 `WorldwideOnPartyPeerUpdateAsync - response was not
+  formatted correctly: [0,[]]`; t=65.375 `/game/advertisement/updateState`; t=65.484
+  `OnStartComplete - detected successful game start`, `Match Started - …, slot = 0`.
+- t=115.344 `MessageCounts: inval=0/0, seek=0/0, join=0/2, ichk=0/0, sk_r=0/0, deny=` — two join
+  attempts, none accepted. No map, no loading screen (operator confirmed).
+- **No `AISlotLabel` and no `keepgate` lines at all**: with no AI selected the populator never ran, so
+  `g_LobbyScreen` was never armed and the field stayed -1. Start was still accepted, because with 0 AI
+  the door-2 count is 0 (even) and the door-3 balance test is `0 <= 0`. So this run does NOT test the
+  keepgate; it only proves the load failure is AI-independent.
+
+**Conclusion: `/game/party/peerAdd` (+ `peerUpdate`) is the sole blocker between "Start accepted" and a
+running match, and it has nothing to do with AI.** Both endpoints fall into `loginsrv.c`'s catch-all
+`[0,[]]` (`loginsrv.c:1649-1652`); neither is named anywhere in the file.
+
 ## 41h. Next session, in order
 
 1. **N10 — `/game/party/peerAdd` (and `peerUpdate`) in `loginsrv.c`.** This is the single blocker
-   between "Start accepted" and a running match. Method that already worked once: find the parser the
-   cache uses (s30 did this for `/game/advertisement/host` → parser `0x140579020`, which wants
-   `result` + `updatedAvertisement`), then emit exactly those fields. Entry point: the warning string
-   `"%s - response was not formatted correctly: %s"` is logged through `0x1402BCC00` (hook id 13, already
-   installed) and the *cache name* is `s8`, so the caller of that log line is the peerAdd completion
-   handler — xref it and read the parse. Note `ret=0x00007ff648…` in those lines is a heap address, not
-   a code RVA, so recover the caller from the frame the way HK_WSET does (`ctx[25]`), not from `ret`.
+   between "Start accepted" and a running match, and run 4 (§41g2) proved it is AI-independent.
+   **It is testable WITHOUT the game**: `srvtest.exe` starts loginsrv on `127.0.0.1:443` and idles
+   60 s while `C:/Python314/python.exe -X utf8 dev/lanhook/srvclient.py` (stdlib only) does the TLS
+   handshake with SNI `pb-live-release6-api.worldsedgelink.com` and POSTs requests at it — that is how
+   the login object-form reply was developed in s12/s21. Add a peerAdd case to `srvclient.py` and iterate
+   offline; only spend a game run once the offline reply is shaped.
+   Method that already worked once: find the parser the cache uses (s30 did this for
+   `/game/advertisement/host` → parser `0x140579020`, which wants `result` + `updatedAvertisement`;
+   s12/s21 did it for login → parser `0x140615b70`, named keys not a positional array), then emit
+   exactly those fields. Entry point: the warning string `"%s - response was not formatted correctly:
+   %s"` is logged through `0x1402BCC00` (hook id 13, already installed) and the *cache name* is `s8`,
+   so the caller of that log line is the peerAdd completion handler — xref it and read the parse. Note
+   `ret=0x00007ff648…` in those lines is a heap address, not a code RVA, so recover the caller from the
+   frame the way HK_WSET does (`ctx[25]`), not from `ret`.
 2. **N11 — after peerAdd, re-test with AI.** Expect the loading screen and a running skirmish. Then
    check the AI actually play (they are host-side simulation, so no extra networking should be needed).
    `session+0xee0` already holds the AI list (§40d), so the sim-side plumbing is probably intact.
