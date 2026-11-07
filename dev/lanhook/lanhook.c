@@ -76,6 +76,7 @@ static const BYTE EXP_SETSTORE[8]   = {0x48,0x89,0x5C,0x24,0x08,0x57,0xB8,0x20};
 static const BYTE EXP_ADDCERT[8]    = {0xB8,0x28,0x00,0x00,0x00,0xE8,0x56,0x0E};
 static const BYTE EXP_WSET[8]       = {0x48,0x8B,0x81,0xD8,0x03,0x00,0x00,0x90}; // 0x140ab6300 widget SetStateFlags
 static const BYTE EXP_AISLOT[8]     = {0x48,0x83,0xEC,0x28,0x48,0x81,0xC1,0x80}; // 0x140d62260 sub rsp,0x28; add rcx,0x680
+static const BYTE EXP_LOCID[8]      = {0x40,0x53,0x48,0x83,0xEC,0x20,0x8B,0xD9}; // 0x140ac5480 push rbx; sub rsp,0x20; mov ebx,ecx
 
 HOOKDEF g_Hooks[] = {
     // ids 0-3: provider cluster, CLEAN ON DISK (stage 4). Tolerated by the
@@ -117,6 +118,14 @@ HOOKDEF g_Hooks[] = {
     // the lobby asks for and how many AIs that slot holds. Read-only unless
     // AOE2LAN_AIKIND=n is set.
     {"AISlotPick",      0x140D62260, EXP_AISLOT, 600000, 0, HK_AISLOT },
+    // id 16: localize-string-by-id 0x140ac5480, CLEAN ON DISK, grp=0 (opt-in via
+    // AOE2LAN_HOOKS). Filtered to the host lobby's slot-dropdown populator
+    // 0x1a344f0..0x1a362aa: the (call site, string id) pair names the exact
+    // dropdown item being built, so one run shows which of the three item blocks
+    // ran. Also reads screen+0x1cf8 (rsi) against the sentinel at [0x14326b258] -
+    // the single field that gates BOTH the "AI" item and the settings-row locks.
+    // Read-only unless AOE2LAN_AIGATE=1, which writes the sentinel into the field.
+    {"AISlotLabel",     0x140AC5480, EXP_LOCID, 600000, 0, HK_LOCID  },
 };
 const int g_NHooks = (int)(sizeof(g_Hooks)/sizeof(g_Hooks[0]));
 

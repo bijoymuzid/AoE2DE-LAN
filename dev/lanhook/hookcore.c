@@ -210,11 +210,55 @@ int hc_install_hook(BYTE *target, int id) {
 }
 
 // ---------------------------------------------------------------- hit logger
-// thunk passes ctx: [0x00..0x5F]=xmm0-5, ctx[12]=r11, ctx[13]=r10(id),
+// thunk passes ctx: ctx[-8..-5] = the caller's rbx/rsi/rdi/rbp snapshot,
+// [0x00..0x5F]=xmm0-5, ctx[12]=r11, ctx[13]=r10(id),
 // ctx[14]=r9, ctx[15]=r8, ctx[16]=rdx, ctx[17]=rcx, ctx[18]=rax,
-// ctx[19]=original return address
+// ctx[19]=original return address, ctx[20..]=the caller's stack
 static volatile LONG g_Hits[HK_MAX];
 static volatile LONG g_HLines[HK_MAX];
+
+// s41: the host lobby screen object, captured by HK_LOCID from the populator's
+// rsi (verified by its own slot-widget chain). screen+0x1cf8 gates BOTH the "AI"
+// dropdown item (0x1a35db8) and the settings-row locks (0x1a2cd08); the lobby
+// keeps restoring it to -1 (measured: rows were still being locked at t=93.4s,
+// 27 s after the populator pass set it to 0), so HK_WSET re-asserts the sentinel.
+// g_LobbyScreen is only ever set when AOE2LAN_AIGATE=1, so it doubles as the
+// on/off switch for the re-assertion.
+static volatile DWORD64 g_LobbyScreen = 0;
+static DWORD64 g_LobbySent = 0;
+
+static int g_AiGate = -1;
+static int aigate(void) {
+    if (g_AiGate < 0) {
+        char v[8];
+        g_AiGate = (GetEnvironmentVariableA("AOE2LAN_AIGATE", v, sizeof v) && v[0] == '1');
+        log_line(g_AiGate ? "AIGATE=1 (writes screen+0x1cf8 and the populator's arg4)"
+                          : "AIGATE off (AOE2LAN_AIGATE unset, log only)");
+    }
+    return g_AiGate;
+}
+
+// Re-assert screen+0x1cf8 == sentinel. Only ever writes the sentinel, only when
+// the field holds exactly -1, and only after the screen's slot-widget chain
+// still resolves - so a freed/reused block is very unlikely to be touched.
+// shortcut: repairs only the measured bad value -1; widen to "any != sentinel"
+// if a run ever shows the lobby gate holding a different non-zero id.
+static void lobby_keepgate(void) {
+    static volatile LONG s_Fixed = 0;
+    DWORD64 s = g_LobbyScreen;
+    if (!s) return;
+    __try {
+        if (*(const volatile DWORD64 *)(s + 0x1cf8) != (DWORD64)-1) return;
+        { DWORD64 w = *(const volatile DWORD64 *)(s + 0x2690);   // slot 1 widget
+          if (w < 0x10000) return;
+          if (*(const volatile DWORD64 *)(w + 0x4a0) < 0x10000) return; }
+        *(volatile DWORD64 *)(s + 0x1cf8) = g_LobbySent;
+        { LONG k = InterlockedIncrement(&s_Fixed);
+          if (k <= 16) { char b[64]; int i = bsput(b, 0, "keepgate: field -1 -> 0, fix #");
+                         i = bnput(b, i, (DWORD)k); b[i] = 0; log_line(b); }
+          else if (k == 17) log_line("keepgate: 17 fixes, further fixes not logged"); }
+    } __except (EXCEPTION_EXECUTE_HANDLER) { g_LobbyScreen = 0; }
+}
 
 static int read_cstr(const void *p, char *out, int maxn) {
     int i = 0;
@@ -345,6 +389,8 @@ void lanhook_log_hit(int id, const unsigned long long *ctx) {
         char nm[96]; int nml = 0;
         // Skip boot-time screen creation (first 20 s) so Options/QueueButton0..63 don't eat the cap
         if (GetTickCount() - g_t0 < 20000) return;
+        // s41: keep the lobby's AI/row-lock gate at the sentinel between refreshes
+        if (g_LobbyScreen) lobby_keepgate();
         if (w < 0x10000) return;
         __try {
             vt = *(const volatile DWORD64*)w;
@@ -528,6 +574,93 @@ void lanhook_log_hit(int id, const unsigned long long *ctx) {
               if (!via) i = bsput(b, i, "?"); else { i = bsput(b, i, "0x"); i = bxput(b, i, via); }
           }
           if (s_Force >= 0) { i = bsput(b, i, " FORCE="); i = bnput(b, i, (DWORD)s_Force); }
+          b[i] = 0; log_line(b); }
+        return;
+    }
+    if (g_Hooks[id].kind == HK_LOCID) {
+        // 0x140ac5480 = localize-string-by-id (CLEAN, 29 B, 633 call sites):
+        // push rbx; sub rsp,0x20; mov ebx,ecx, so ecx = the string id. Filtered
+        // to the host lobby's slot-dropdown populator 0x1a344f0..0x1a362aa, where
+        // rsi = the lobby screen (set once at 0x1a34537, callee-saved, popped only
+        // at 0x1a36295) and rbp = the populator frame (rsp == rbp-0x100).
+        // s41 MEASURED (logs/lanhook-5064.log): the populator ALREADY runs block C
+        // (sites 0x1a35c64 Open / 0x1a35d1f Closed, slots 1..7 in one pass), so the
+        // s40 "ebx == 1 takes block B" theory is dead. What blocks the AI item
+        // (id 0x29625, built at 0x1a35df9, dropdown index 4) are the two checks
+        // inside block C, and both fail:
+        //   [screen+0x1cf8] == [0x14326b258]   0x1a35db8: field=-1, sentinel=0
+        //   byte[rsp+0x30] != 0                0x1a35dc5: arg4=0 -> name-list
+        //                                      branch instead of the "AI" item
+        // [rsp+0x30] == [rbp-0xd0] and the populator reads it EXACTLY twice: the
+        // r9b store at 0x1a34529 and this gate, so forcing it touches nothing else.
+        // The same field compare gates the settings-row locks (0x1a2cd08: equal ->
+        // SetEnabled(0)), so field=0 should also unlock the rows at the source.
+        // The sentinel slot is a zero qword in read-only .rdata with no relocation
+        // (an extern-const null in another TU), and 0x1a2e91e null-checks the same
+        // field before the same registry lookup. 0x140e83240 compares its key by
+        // value and never dereferences it (miss -> the "DEFAULT" record), so 0 and
+        // -1 are both safe keys.
+        // Read-only unless AOE2LAN_AIGATE=1. Both writes land at the block-C Open
+        // call (0x1a35c64), which is before the AI gate in the SAME pass, so every
+        // slot 1..7 gets the item without needing a second lobby build.
+        static DWORD64 s_Seen[256];
+        static volatile LONG s_NSeen = 0;
+        DWORD64 caller = ctx[19] - g_ModBase();
+        DWORD64 screen, frame, field, sent;
+        DWORD arg4 = 0xFF, slot = 0xFFFFFFFF, ok = 0;
+        int gate, wrote = 0;
+        if (caller < 0x1a344f0 || caller > 0x1a362aa) return;   // cheap out: 633 sites
+        gate = aigate();
+        screen = ctx[-7];        // rsi
+        frame  = ctx[-5];        // rbp
+        field = sent = 0;
+        __try {
+            field = *(const volatile DWORD64 *)(screen + 0x1cf8);
+            sent  = *(const volatile DWORD64 *)(g_ModBase() + 0x326b258);
+            arg4  = *(const volatile BYTE *)(frame - 0xd0);
+            slot  = *(const volatile DWORD *)(frame - 0x7c);
+            // self-check on both captured registers: the builder set
+            // r15 = [[screen + slot*8 + 0x2688] + 0x4a0] and bailed if either was 0
+            if (slot < 16) {
+                DWORD64 w = *(const volatile DWORD64 *)(screen + slot * 8 + 0x2688);
+                if (w > 0x10000 && *(const volatile DWORD64 *)(w + 0x4a0) > 0x10000) ok = 1;
+            }
+        } __except (EXCEPTION_EXECUTE_HANDLER) { ok = 0; }
+        if (ok && gate) { g_LobbySent = sent; g_LobbyScreen = screen; }
+        if (gate && ok && (field != sent || arg4 != 1)) {
+            __try {
+                if (field != sent) { *(volatile DWORD64 *)(screen + 0x1cf8) = sent; wrote |= 1; }
+                if (arg4 != 1)     { *(volatile BYTE *)(frame - 0xd0) = 1;    wrote |= 2; }
+            } __except (EXCEPTION_EXECUTE_HANDLER) { wrote = 0; }
+        }
+        // boot-window rule as in HK_WSET/HK_AISLOT: logging only, the write above
+        // deliberately stays live from t=0 (the caller filter already scopes it).
+        if (GetTickCount() - g_t0 < 20000) return;
+        { DWORD64 h = (1469598103934665603ULL ^ caller) * 1099511628211ULL;
+          h = (h ^ (ctx[17] & 0xFFFFFFFF)) * 1099511628211ULL;
+          h = (h ^ field) * 1099511628211ULL;
+          h = (h ^ (arg4 & 0xFF)) * 1099511628211ULL;
+          h = (h ^ slot) * 1099511628211ULL;
+          LONG cur = s_NSeen;
+          for (LONG k = 0; k < cur && k < 256; k++) if (s_Seen[k] == h) return;
+          { LONG idx = InterlockedIncrement(&s_NSeen) - 1;
+            if (idx < 256) s_Seen[idx] = h; } }
+        { LONG ln = InterlockedIncrement(&g_HLines[id]);
+          if (ln > 256) {
+              if (ln == 257) log_line("HIT AISlotLabel log capped at 256 lines");
+              return;
+          }
+          i = bsput(b, 0, "HIT AISlotLabel #"); i = bnput(b, i, (DWORD)n);
+          i = bsput(b, i, " site=0x"); i = bxput(b, i, caller);
+          i = bsput(b, i, " id=0x"); i = bxput(b, i, ctx[17] & 0xFFFFFFFF);
+          i = bsput(b, i, " screen=0x"); i = bxput(b, i, screen);
+          i = bsput(b, i, " field=0x"); i = bxput(b, i, field);
+          i = bsput(b, i, " sent=0x"); i = bxput(b, i, sent);
+          i = bsput(b, i, " arg4="); i = bnput(b, i, arg4);
+          i = bsput(b, i, " slot="); i = bnput(b, i, slot);
+          i = bsput(b, i, ok ? " frame=ok" : " frame=BAD");
+          if (wrote & 1) { i = bsput(b, i, " WROTE-field"); }
+          if (wrote & 2) { i = bsput(b, i, " WROTE-arg4"); }
           b[i] = 0; log_line(b); }
         return;
     }
