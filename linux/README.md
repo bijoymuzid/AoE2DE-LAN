@@ -1,8 +1,11 @@
 # linux/ — Linux-side launch path (W2)
 
 - `launch.sh` — the L4 launcher: stages W1's `dbghelp.dll` next to the game exe in the
-  prefix, starts the native `lanhub`, sets `WINEDLLOVERRIDES="dbghelp=n,b"` +
-  `AOE2LAN_STAGE=8`, launches `AoE2DE_s.exe` under the workspace GE-Proton.
+  prefix, starts the native `lanhub`, sets `WINEDLLOVERRIDES="dbghelp,winmm=n,b"` +
+  `AOE2LAN_STAGE=8` + `PROTON_NO_NTSYNC=1`, and launches `AoE2DE_s.exe` under the workspace
+  Proton-CachyOS with `proton runinprefix` (direct wine — `proton run` goes through Proton's
+  `steam.exe` stub, which delegated to the real Steam client and hung; see
+  `notes/linux-session2.md` 2b).
   Expects the DLL at `AoE2DE-LAN/dbghelp.dll` (override: `AOE2LAN_DLL`).
 - `relay_test.py` — the L3 relay harness. `python3 relay_test.py local` spawns stock
   BattleServer.exe in the prefix and PASS/FAILs a synthetic two-peer relay session.
@@ -13,7 +16,9 @@
 
 - Prefix: `~/Games/aoe/winepfx` (`STEAM_COMPAT_DATA_PATH`; real prefix at `…/pfx`)
 - Game: `C:\Games\AoE2DE` = `~/Games/aoe/winepfx/pfx/drive_c/Games/AoE2DE`
-- Proton: `~/Games/aoe/Proton-GE Latest` (GE-Proton11-12) — no other Proton/Wine used
+- Proton: `~/Games/aoe/Proton-CachyOS Latest-x86_64_v3` (`cachyos-11.0-20261015-slr`) — default;
+  `~/Games/aoe/Proton-GE Latest` (GE-Proton11-12) also works via `AOE2LAN_PROTON`. No other
+  Proton/Wine used.
 
 ## Privileged port (required, one time)
 
@@ -25,6 +30,18 @@ with `srv: bind 127.0.0.1:443 FAILED` (really EACCES). Allow unprivileged binds:
 
 Alternative if that is unacceptable: listen on 4443 and rewrite the port in the
 `getaddrinfo` hook (`dev/lanhook/iathook.c`) — not done, the sysctl is one line.
+
+## Host block (required, one time)
+
+The game must *not* reach the real `api.ageofempires.com`: a genuine HTTP 401 from it ends the
+login flow, while a transport failure is tolerated (that is what the Windows reference box sees).
+This Wine build ignores the prefix's `drivers\etc\hosts`, so it has to be the real resolver:
+
+    echo '127.0.0.2 api.ageofempires.com cdn.ageofempires.com' | sudo tee -a /etc/hosts
+
+`127.0.0.2` is loopback with nothing on :443 (our server binds `127.0.0.1` exactly), so the connect
+is refused instantly and the game gets the same `-47` failure Windows does. Undo with
+`sudo sed -i '/ageofempires\.com/d' /etc/hosts`. Evidence: `notes/linux-session2.md` 2c.
 
 ## Firewall / tailnet checklist (PLAN §3.6, §8)
 
