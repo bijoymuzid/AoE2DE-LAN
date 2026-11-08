@@ -140,8 +140,9 @@ ever turns out to be signature-verified we cannot forge it. Not currently believ
 `powershell -NoProfile -ExecutionPolicy Bypass -File
 "dev\lanhook\work\launch-detached.ps1" -cmdFile PLAY-stage8-VERBOSE.cmd`, wait ~27 s, take the
 **newest** `logs/lanhook-<pid>.log` (the launcher returns the cmd.exe PID, not the game's).
-**Kill any leftover `AoE2DE_s.exe` first — it holds port 443** (pid 12008 was still running at
-the end of session 46). No dialog will appear and nothing needs clicking. Healthy boot =
+**Kill any leftover `AoE2DE_s.exe` and `BattleServer.exe` first — the game holds port 443 and
+the next launch silently fails to bind without it.** No dialog will appear and nothing needs
+clicking. Healthy boot =
 repeated `TLS: handshake complete (server side)` + `OnAccountEvent: Client is using
 WebSockets` + `cert: user-Root registered via API (consent dialog auto-clicked)`.
 
