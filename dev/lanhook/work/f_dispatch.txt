@@ -1,0 +1,142 @@
+func 0x1407a7070..0x1407a7220 (432 bytes)
+1407a7070  mov       rax, rsp
+1407a7073  mov       qword ptr [rax + 8], rbx
+1407a7077  mov       qword ptr [rax + 0x10], rdx
+1407a707b  push      rbp
+1407a707c  push      rsi
+1407a707d  push      rdi
+1407a707e  push      r12
+1407a7080  push      r13
+1407a7082  push      r14
+1407a7084  push      r15
+1407a7086  sub       rsp, 0x40
+1407a708a  mov       r13, rcx
+1407a708d  mov       r15d, 1
+1407a7093  mov       dword ptr [rax + 0x18], r15d
+1407a7097  xorps     xmm0, xmm0
+1407a709a  movdqu    xmmword ptr [rax - 0x48], xmm0
+1407a709f  mov       dword ptr [rax + 0x18], r15d
+1407a70a3  mov       r14, qword ptr [rip + 0x44f7336]   ; 0x144c9e3e0
+1407a70aa  mov       esi, 0xffffffff
+1407a70af  mov       rdi, qword ptr [rax - 0x40]
+1407a70b3  test      r14, r14
+1407a70b6  je        0x1407a7182
+1407a70bc  xor       ebx, ebx
+1407a70be  nop       
+1407a70c0  mov       rax, qword ptr [r14]
+1407a70c3  lea       r8, [r13 + 8]
+1407a70c7  lea       rcx, [rsp + 0x20]
+1407a70cc  call      rax
+1407a70ce  or        r15d, 2
+1407a70d2  mov       dword ptr [rsp + 0x90], r15d
+1407a70da  mov       rbp, qword ptr [rsp + 0x20]
+1407a70df  mov       rax, qword ptr [rsp + 0x28]
+1407a70e4  mov       qword ptr [rsp + 0x20], rbx
+1407a70e9  mov       qword ptr [rsp + 0x28], rbx
+1407a70ee  mov       qword ptr [rsp + 0x30], rbp
+1407a70f3  mov       rbx, rdi
+1407a70f6  mov       rdi, rax
+1407a70f9  mov       qword ptr [rsp + 0x38], rax
+1407a70fe  test      rbx, rbx
+1407a7101  je        0x1407a7163
+1407a7103  mov       eax, esi
+1407a7105  lock xadd dword ptr [rbx + 8], eax
+1407a710a  cmp       eax, 1
+1407a710d  jne       0x1407a712e
+1407a710f  mov       rax, qword ptr [rbx]
+1407a7112  mov       rcx, rbx
+1407a7115  call      qword ptr [rax]
+1407a7117  nop       
+1407a7118  mov       eax, esi
+1407a711a  lock xadd dword ptr [rbx + 0xc], eax
+1407a711f  cmp       eax, 1
+1407a7122  jne       0x1407a712e
+1407a7124  mov       rax, qword ptr [rbx]
+1407a7127  mov       rcx, rbx
+1407a712a  call      qword ptr [rax + 8]
+1407a712d  nop       
+1407a712e  mov       rbx, qword ptr [rsp + 0x28]
+1407a7133  test      rbx, rbx
+1407a7136  je        0x1407a7163
+1407a7138  mov       eax, esi
+1407a713a  lock xadd dword ptr [rbx + 8], eax
+1407a713f  cmp       eax, 1
+1407a7142  jne       0x1407a7163
+1407a7144  mov       rax, qword ptr [rbx]
+1407a7147  mov       rcx, rbx
+1407a714a  call      qword ptr [rax]
+1407a714c  nop       
+1407a714d  mov       eax, esi
+1407a714f  lock xadd dword ptr [rbx + 0xc], eax
+1407a7154  cmp       eax, 1
+1407a7157  jne       0x1407a7163
+1407a7159  mov       rax, qword ptr [rbx]
+1407a715c  mov       rcx, rbx
+1407a715f  call      qword ptr [rax + 8]
+1407a7162  nop       
+1407a7163  test      rbp, rbp
+1407a7166  jne       0x1407a7187
+1407a7168  mov       r14, qword ptr [r14 + 8]
+1407a716c  test      r14, r14
+1407a716f  mov       rdx, qword ptr [rsp + 0x88]
+1407a7177  mov       rbx, rbp
+1407a717a  jne       0x1407a70c0
+1407a7180  jmp       0x1407a7187
+1407a7182  mov       rbp, qword ptr [rsp + 0x30]
+1407a7187  test      rbp, rbp
+1407a718a  je        0x1407a71d5
+1407a718c  test      rdi, rdi
+1407a718f  je        0x1407a7195
+1407a7191  lock inc  dword ptr [rdi + 8]
+1407a7195  mov       qword ptr [r13 + 0x30], rbp
+1407a7199  mov       rbx, qword ptr [r13 + 0x38]
+1407a719d  mov       qword ptr [r13 + 0x38], rdi
+1407a71a1  test      rbx, rbx
+1407a71a4  je        0x1407a71d1
+1407a71a6  mov       eax, esi
+1407a71a8  lock xadd dword ptr [rbx + 8], eax
+1407a71ad  cmp       eax, 1
+1407a71b0  jne       0x1407a71d1
+1407a71b2  mov       rax, qword ptr [rbx]
+1407a71b5  mov       rcx, rbx
+1407a71b8  call      qword ptr [rax]
+1407a71ba  nop       
+1407a71bb  mov       eax, esi
+1407a71bd  lock xadd dword ptr [rbx + 0xc], eax
+1407a71c2  cmp       eax, 1
+1407a71c5  jne       0x1407a71d1
+1407a71c7  mov       rax, qword ptr [rbx]
+1407a71ca  mov       rcx, rbx
+1407a71cd  call      qword ptr [rax + 8]
+1407a71d0  nop       
+1407a71d1  mov       bl, 1
+1407a71d3  jmp       0x1407a71d7
+1407a71d5  xor       bl, bl
+1407a71d7  test      rdi, rdi
+1407a71da  je        0x1407a7205
+1407a71dc  mov       eax, esi
+1407a71de  lock xadd dword ptr [rdi + 8], eax
+1407a71e3  cmp       eax, 1
+1407a71e6  jne       0x1407a7205
+1407a71e8  mov       rax, qword ptr [rdi]
+1407a71eb  mov       rcx, rdi
+1407a71ee  call      qword ptr [rax]
+1407a71f0  nop       
+1407a71f1  lock xadd dword ptr [rdi + 0xc], esi
+1407a71f6  cmp       esi, 1
+1407a71f9  jne       0x1407a7205
+1407a71fb  mov       rdx, qword ptr [rdi]
+1407a71fe  mov       rcx, rdi
+1407a7201  call      qword ptr [rdx + 8]
+1407a7204  nop       
+1407a7205  movzx     eax, bl
+1407a7208  mov       rbx, qword ptr [rsp + 0x80]
+1407a7210  add       rsp, 0x40
+1407a7214  pop       r15
+1407a7216  pop       r14
+1407a7218  pop       r13
+1407a721a  pop       r12
+1407a721c  pop       rdi
+1407a721d  pop       rsi
+1407a721e  pop       rbp
+1407a721f  ret       

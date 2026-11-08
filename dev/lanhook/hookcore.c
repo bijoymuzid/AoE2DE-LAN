@@ -352,7 +352,11 @@ void lanhook_log_hit(int id, const unsigned long long *ctx) {
         L = read_cstr(sp, s, 112);
         if (L <= 0) return;
         { LONG ln = InterlockedIncrement(&g_HLines[id]);
-          if (ln > 512) return;
+          // s44: the MatchStartMessage parse failure is the one line that decides the
+          // whole launch, and the "response was failure" cache spam exhausts the 512
+          // cap long before Start (measured: capped at t=76, push at t=85) - so a
+          // "failed to parse" line is never dropped. Its s8 (=r8) is the reason.
+          if (ln > 512 && !contains_ci(s, "failed to parse")) return;
           i = bsput(b, 0, "HIT ");
           i = bsput(b, i, g_Hooks[id].name);
           i = bsput(b, i, " #"); i = bnput(b, i, (DWORD)n);

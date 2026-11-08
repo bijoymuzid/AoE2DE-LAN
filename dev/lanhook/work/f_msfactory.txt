@@ -1,0 +1,116 @@
+func 0x1407cdf10..0x1407ce0ce (446 bytes)
+1407cdf10  mov       qword ptr [rsp + 8], rbx
+1407cdf15  mov       qword ptr [rsp + 0x10], rbp
+1407cdf1a  push      rsi
+1407cdf1b  push      rdi
+1407cdf1c  push      r14
+1407cdf1e  sub       rsp, 0x50
+1407cdf22  mov       rax, r8
+1407cdf25  mov       rbp, rdx
+1407cdf28  mov       rdi, rcx
+1407cdf2b  xor       r14d, r14d
+1407cdf2e  mov       r8, qword ptr [r8 + 0x10]
+1407cdf32  cmp       qword ptr [rax + 0x18], 0xf
+1407cdf37  jbe       0x1407cdf3c
+1407cdf39  mov       rax, qword ptr [rax]
+1407cdf3c  cmp       r8, 0x11
+1407cdf40  jne       0x1407ce077
+1407cdf46  lea       rdx, [rip + 0x2ed0ebb]   ; 0x14369ee08 "MatchStartMessage"
+1407cdf4d  mov       rcx, rax
+1407cdf50  call      0x142d7058d
+1407cdf55  test      eax, eax
+1407cdf57  jne       0x1407ce077
+1407cdf5d  mov       ecx, 0x2c8
+1407cdf62  call      0x142d6dc48
+1407cdf67  mov       rsi, rax
+1407cdf6a  mov       qword ptr [rsp + 0x80], rax
+1407cdf72  xor       edx, edx
+1407cdf74  mov       r8d, 0x2c8
+1407cdf7a  mov       rcx, rax
+1407cdf7d  call      0x142d70587
+1407cdf82  nop       
+1407cdf83  lea       rax, [rip + 0x2ea8906]   ; 0x143676890
+1407cdf8a  mov       qword ptr [rsi], rax
+1407cdf8d  mov       qword ptr [rsi + 8], r14
+1407cdf91  mov       qword ptr [rsi + 0x10], r14
+1407cdf95  mov       qword ptr [rsi + 0x18], r14
+1407cdf99  mov       qword ptr [rsi + 0x20], r14
+1407cdf9d  mov       qword ptr [rsi + 0x28], r14
+1407cdfa1  mov       qword ptr [rsi + 0x30], r14
+1407cdfa5  mov       qword ptr [rsi + 0x40], r14
+1407cdfa9  mov       qword ptr [rsi + 0x48], r14
+1407cdfad  mov       qword ptr [rsi + 0x50], r14
+1407cdfb1  lea       rcx, [rsi + 0x58]
+1407cdfb5  call      0x1402bfab0
+1407cdfba  mov       qword ptr [rsi + 0x2b0], r14
+1407cdfc1  mov       qword ptr [rsi + 0x2b8], r14
+1407cdfc8  mov       qword ptr [rsi + 0x2c0], r14
+1407cdfcf  mov       qword ptr [rsp + 0x80], rsi
+1407cdfd7  mov       ecx, 0x18
+1407cdfdc  call      0x142d6dc48
+1407cdfe1  mov       rbx, rax
+1407cdfe4  mov       qword ptr [rsp + 0x80], rax
+1407cdfec  xorps     xmm0, xmm0
+1407cdfef  movups    xmmword ptr [rax], xmm0
+1407cdff2  mov       dword ptr [rax + 8], 1
+1407cdff9  mov       dword ptr [rax + 0xc], 1
+1407ce000  lea       rax, [rip + 0x2ea7f19]   ; 0x143675f20
+1407ce007  mov       qword ptr [rbx], rax
+1407ce00a  mov       qword ptr [rbx + 0x10], rsi
+1407ce00e  mov       qword ptr [rsp + 0x38], rsi
+1407ce013  mov       qword ptr [rsp + 0x40], rbx
+1407ce018  mov       dword ptr [rsp + 0x20], r14d
+1407ce01d  lea       r9, [rip + 0x3a70c8c]   ; 0x14423ecb0
+1407ce024  lea       r8, [rip + 0x3a6bcf5]   ; 0x144239d20
+1407ce02b  xor       edx, edx
+1407ce02d  mov       rcx, rbp
+1407ce030  call      0x142d705a5
+1407ce035  test      rax, rax
+1407ce038  je        0x1407ce094
+1407ce03a  mov       rdx, rsi
+1407ce03d  mov       rcx, rax
+1407ce040  call      0x1407b6710
+1407ce045  test      al, al
+1407ce047  jne       0x1407ce0c5
+1407ce049  mov       esi, 0xffffffff
+1407ce04e  mov       eax, esi
+1407ce050  lock xadd dword ptr [rbx + 8], eax
+1407ce055  cmp       eax, 1
+1407ce058  jne       0x1407ce077
+1407ce05a  mov       rax, qword ptr [rbx]
+1407ce05d  mov       rcx, rbx
+1407ce060  call      qword ptr [rax]
+1407ce062  nop       
+1407ce063  lock xadd dword ptr [rbx + 0xc], esi
+1407ce068  cmp       esi, 1
+1407ce06b  jne       0x1407ce077
+1407ce06d  mov       rax, qword ptr [rbx]
+1407ce070  mov       rcx, rbx
+1407ce073  call      qword ptr [rax + 8]
+1407ce076  nop       
+1407ce077  mov       qword ptr [rdi], r14
+1407ce07a  mov       qword ptr [rdi + 8], r14
+1407ce07e  mov       rax, rdi
+1407ce081  mov       rbx, qword ptr [rsp + 0x70]
+1407ce086  mov       rbp, qword ptr [rsp + 0x78]
+1407ce08b  add       rsp, 0x50
+1407ce08f  pop       r14
+1407ce091  pop       rdi
+1407ce092  pop       rsi
+1407ce093  ret       
+1407ce094  mov       dword ptr [rsp + 0x20], r14d
+1407ce099  lea       r9, [rip + 0x3a6bc48]   ; 0x144239ce8
+1407ce0a0  lea       r8, [rip + 0x3a6bc79]   ; 0x144239d20
+1407ce0a7  xor       edx, edx
+1407ce0a9  mov       rcx, rbp
+1407ce0ac  call      0x142d705a5
+1407ce0b1  test      rax, rax
+1407ce0b4  je        0x1407ce049
+1407ce0b6  mov       rdx, rsi
+1407ce0b9  mov       rcx, rax
+1407ce0bc  call      0x1407b73f0
+1407ce0c1  test      al, al
+1407ce0c3  je        0x1407ce049
+1407ce0c5  mov       qword ptr [rdi], rsi
+1407ce0c8  mov       qword ptr [rdi + 8], rbx
+1407ce0cc  jmp       0x1407ce07e
