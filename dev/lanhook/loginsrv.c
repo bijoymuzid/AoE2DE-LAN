@@ -91,6 +91,10 @@ static char g_Alias[64];       /* account alias of the last login (WS event pump
 // none is a login/account event (s21 static result). The ladder stays for M2,
 // where the pushed types *are* registered ones. AOE2LAN_PUSH=1 re-enables it.
 static int g_PushEnable = -1;
+// s43: 0 = idle, 1 = armed by an advertisement `state>=1`, 2 = pushed. One-shot:
+// route() only arms from 0, and ws_serve only fires on the 1 -> 2 transition, so
+// a game that re-sends updateState every second cannot make us spam the socket.
+static volatile LONG g_MatchStart = 0;
 /* probe needles: each is a raw LE int64 the reply carries, so a hit in game
    memory localises how far the client's deserializer got (see ProbeThread) */
 static unsigned char g_ProbeId[8];     /* profileID   (accountInfo.id / profile.id) */
@@ -150,6 +154,8 @@ static void bnum(BUF *b, DWORD64 v) {
 
 // strlen without CRT
 static size_t strlen_f(const char *s) { size_t n = 0; while (s[n]) n++; return n; }
+
+static void build_match_start(BUF *b);   // defined after emit_advertisement
 
 static int starts(const char *s, const char *pre) {
     while (*pre) { if (*s++ != *pre++) return 0; }
@@ -1293,6 +1299,13 @@ static void ws_serve(TLSSES *t, const char *req)
             } else { logn("WS PUSH send failed"); }
             pushed++; pushAt = GetTickCount64() + PUSH_INTERVAL_MS;
         }
+        if (InterlockedCompareExchange(&g_MatchStart, 2, 1) == 1) {
+            ev.len = 0; ev.oom = 0;
+            build_match_start(&ev);
+            if (ev.len && ws_send(t, 0x2, (const unsigned char*)ev.p, (int)ev.len))
+                log_int("WS PUSH MatchStartMessage len=", (int)ev.len);
+            else logn("WS PUSH MatchStartMessage: no advertisement to send");
+        }
         int n = tls_decrypt(t, plain, TLS_MAX_PLAIN);
         if (n == -1) {
             // SO_RCVTIMEO also lands here: keep the socket with a ping before
@@ -1490,6 +1503,25 @@ static void adv_num(BUF *b, const char *body, const char *k, const char *name, c
     bs(b, (p && v[0]) ? v : dflt);
 }
 
+// s43: the last `state=` any advertisement call sent us. updateState carries
+// ONLY state (no hostid), so it echoed the stored lobby and answered
+// matchState:0 to "set the state to 1" - every time, forever. Kept as a string
+// under its own lock, same idiom as g_AdvBody below.
+static char g_AdvState[8];
+static volatile LONG g_AdvStateLock;
+static void adv_set_state(const char *v) {
+    while (InterlockedCompareExchange(&g_AdvStateLock, 1, 0)) Sleep(1);
+    { int i = 0; while (v[i] && i < (int)sizeof g_AdvState - 1) { g_AdvState[i] = v[i]; i++; } g_AdvState[i] = 0; }
+    InterlockedExchange(&g_AdvStateLock, 0);
+}
+static int adv_get_state(char *out, int cap) {
+    int n;
+    while (InterlockedCompareExchange(&g_AdvStateLock, 1, 0)) Sleep(1);
+    { int i = 0; while (g_AdvState[i] && i < cap - 1) { out[i] = g_AdvState[i]; i++; } out[i] = 0; n = i; }
+    InterlockedExchange(&g_AdvStateLock, 0);
+    return n;
+}
+
 static void emit_advertisement(BUF *b, const char *body) {
     char hostid[32], sid[32];
     if (!form_get(body, "hostid", hostid, sizeof hostid)) hostid[0] = 0;
@@ -1507,7 +1539,12 @@ static void emit_advertisement(BUF *b, const char *body) {
     adv_num(b, body, "passworded", "isPassworded", "0");
     adv_num(b, body, "maxplayers", "maxPlayerCount", "8");
     adv_num(b, body, "matchtype", "matchTypeID", "-1");
-    adv_num(b, body, "state", "matchState", "-1");
+    // matchState: the state the game last told us, else this body's own, else -1
+    { char st[8];
+      if (!adv_get_state(st, sizeof st) &&
+          !(form_get(body, "state", st, sizeof st) && st[0])) st[0] = 0;
+      bs(b, ",\"matchState\":");
+      bs(b, st[0] ? st : "-1"); }
     adv_num(b, body, "serviceType", "service", "1");
     adv_num(b, body, "isObservable", "isobservable", "0");
     adv_num(b, body, "observerDelay", "observerDelay", "0");
@@ -1538,6 +1575,38 @@ static int adv_copy(char *out, int cap) {
     { int i = 0; while (g_AdvBody[i] && i < cap - 1) { out[i] = g_AdvBody[i]; i++; } out[i] = 0; n = i; }
     InterlockedExchange(&g_AdvLock, 0);
     return n;
+}
+
+// s43: THE missing push. The game-layer advertisement dispatcher 0x140eeb930
+// switches on [event+0x10]; case 7 = AET_MatchStartNotify (0x140eec335) and it is
+// the only thing that builds the roster the match loads from. It is fed by
+// registered WS payload parser #9 (table 0x144116af0+0x10*9 = 0x1407b66f0 ->
+// 0x1407cdf10), which locks m_type to the 17-char name "MatchStartMessage" and
+// reads six OPTIONAL members (writer 0x1407b7220 gives the exact shapes):
+//   ownedAppIDs, profileRaces, matchStartDate (u64), equippedItems,
+//   matchAdvertisement (writer 0x14056dda0 - the SAME advertisement dto
+//   emit_advertisement already builds), inProgressChallenges.
+// WorldwideNotifier::ProcessNotification 0x14079a1bc then adds profile info to
+// the slots out of the advertisement, failing with "Failed to add profile
+// information to slots." / "A match discrepancy has been detected". We never sent
+// this in 43 sessions, so AET_MatchStartNotify never fired: the countdown ran,
+// StartLaunchGame logged "ok", and the lobby sat there with nothing to load.
+// Empty arrays for the four members we have no data for - the reader treats every
+// member as optional and skips what is absent.
+static void build_match_start(BUF *b) {
+    char ab[8192], hid[32];
+    if (adv_copy(ab, sizeof ab) <= 0) return;
+    if (!form_get(ab, "hostid", hid, sizeof hid) || !hid[0]) return;
+    bs(b, "{\"result\":0,\"m_type\":\"MatchStartMessage\",\"m_profileID\":");
+    bs(b, hid);
+    bs(b, ",\"matchStartDate\":");
+    bnum(b, unix_now());
+    bs(b, ",\"ownedAppIDs\":[],\"profileRaces\":[],\"equippedItems\":[],\"inProgressChallenges\":[]");
+    bs(b, ",\"matchAdvertisement\":");
+    emit_advertisement(b, ab);
+    // one WS frame = one notification value, and the trailing comma is mandatory
+    // (s20: "null," parses, "null" does not)
+    bs(b, "},");
 }
 
 // ---------------------------------------------------------------- route
@@ -1617,8 +1686,15 @@ static void route(TLSSES *t, const char *method, const char *path,
         // such a body handed the game a lobby with hostProfileID 0, empty slot blob
         // and matchState -1 once a second (s32); those calls now echo the lobby we
         // already have instead of inventing an empty one.
-        char hb[32], ab[8192];
+        char hb[32], ab[8192], st[8];
         const char *src = form_get(body, "hostid", hb, sizeof hb) ? body : 0;
+        // s43: capture the state from THIS request before echoing the stored
+        // lobby, or updateState's state=1 is thrown away (see adv_set_state).
+        // state>=1 is the host pressing Start: arm the MatchStartMessage push.
+        if (form_get(body, "state", st, sizeof st) && st[0]) {
+            adv_set_state(st);
+            if (st[0] >= '1' && st[0] <= '9') InterlockedCompareExchange(&g_MatchStart, 1, 0);
+        }
         if (!src && adv_copy(ab, sizeof ab) > 0) src = ab;
         if (!src) src = body;
         bs(&resp, "{\"result\":0,\"updatedAvertisement\":");

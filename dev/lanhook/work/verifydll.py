@@ -44,7 +44,7 @@ for sec in pe.sections:
         if not nm or not nm.isprintable() or " " in nm:
             continue
         if wait not in (60000, 600000) or grp not in (0, 1, 2, 3) \
-           or kind not in (0, 1, 2, 3, 4, 5, 6):
+           or kind not in (0, 1, 2, 3, 4, 5, 6, 7):
             continue
         found.append((off, nm, va, d[eo:eo + 8].hex(" "), wait, grp, kind))
 

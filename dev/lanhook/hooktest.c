@@ -282,11 +282,32 @@ static const BYTE T5[] = {
 
 typedef int (*FN6)(int,int,int,int,int,int);
 
-HOOKDEF g_Hooks[2] = {
+// T7 — s43: the EXACT prologue shape of hook 17's target 0x1407db520, with the
+// two `mov [rsp+imm],r8/r9` stores FIRST. T5 has the same two stores but last,
+// so its 5-byte first boundary never makes the LDE decode them. This one does:
+// if insn_len mis-measures `4c 89 44 24 18`, the trampoline tears the store or
+// resumes mid-instruction and the six-arg sum comes out wrong.
+static const BYTE T7[] = {
+    0x4C,0x89,0x44,0x24,0x18,     // mov [rsp+0x18], r8   (boundary at 5)
+    0x4C,0x89,0x4C,0x24,0x20,     // mov [rsp+0x20], r9
+    0x48,0x89,0x54,0x24,0x10,     // mov [rsp+0x10], rdx
+    0x48,0x89,0x4C,0x24,0x08,     // mov [rsp+0x08], rcx
+    0x8B,0x44,0x24,0x28,          // mov eax, [rsp+0x28]  (e)
+    0x03,0x44,0x24,0x30,          // add eax, [rsp+0x30]  (f)
+    0x03,0x44,0x24,0x08,          // add eax, [rsp+0x08]  (a)
+    0x03,0x44,0x24,0x10,          // add eax, [rsp+0x10]  (b)
+    0x03,0x44,0x24,0x18,          // add eax, [rsp+0x18]  (c)
+    0x03,0x44,0x24,0x20,          // add eax, [rsp+0x20]  (d)
+    0xC3,                         // ret
+};
+static const BYTE E7[8] = {0x4C,0x89,0x44,0x24,0x18,0x4C,0x89,0x4C};
+
+HOOKDEF g_Hooks[3] = {
     {"Test6", 0, T6, 0, 1, HK_RAW},
     {"Test5", 0, T5, 0, 1, HK_RAW},
+    {"Test7", 0, E7, 0, 1, HK_RAW},
 };
-const int g_NHooks = 2;
+const int g_NHooks = 3;
 
 int main(void) {
     HANDLE hLog = CreateFileW(L"hooktest.log", GENERIC_WRITE, FILE_SHARE_READ,
@@ -297,28 +318,39 @@ int main(void) {
     if (!page) { printf("FAIL: VirtualAlloc\n"); return 1; }
     BYTE *p6 = page;            // 16-aligned
     BYTE *p5 = page + 0x100;    // 16-aligned
+    BYTE *p7 = page + 0x200;    // 16-aligned
     for (int i=0;i<(int)sizeof(T6);i++) p6[i]=T6[i];
     for (int i=0;i<(int)sizeof(T5);i++) p5[i]=T5[i];
+    for (int i=0;i<(int)sizeof(T7);i++) p7[i]=T7[i];
     FlushInstructionCache(GetCurrentProcess(), page, 0x1000);
     hc_alloc_near(p6);
     if (!hc_near_page()) { printf("FAIL: near page alloc\n"); return 1; }
-    FN6 f6 = (FN6)p6, f5 = (FN6)p5;
+    FN6 f6 = (FN6)p6, f5 = (FN6)p5, f7 = (FN6)p7;
     int r = f6(1,2,3,4,5,6);
     if (r != 21)  { printf("FAIL: pre-hook f6=%d\n", r); return 1; }
     r = f5(1,2,3,4,5,6);
     if (r != 21)  { printf("FAIL: pre-hook f5=%d\n", r); return 1; }
+    r = f7(1,2,3,4,5,6);
+    if (r != 21)  { printf("FAIL: pre-hook f7=%d\n", r); return 1; }
     printf("pre-hook ok (21, 21)\n");
     if (!hc_match_now(p6, g_Hooks[0].exp)) { printf("FAIL: T6 prologue\n"); return 1; }
     if (!hc_match_now(p5, g_Hooks[1].exp)) { printf("FAIL: T5 prologue\n"); return 1; }
+    if (!hc_match_now(p7, g_Hooks[2].exp)) { printf("FAIL: T7 prologue\n"); return 1; }
     if (!hc_install_hook(p6, 0)) { printf("FAIL: install T6\n"); return 1; }
     if (!hc_install_hook(p5, 1)) { printf("FAIL: install T5\n"); return 1; }
-    printf("installed both\n");
+    if (!hc_install_hook(p7, 2)) { printf("FAIL: install T7\n"); return 1; }
+    printf("installed all three\n");
     { // debug: dump the patched target head and the near-page slot
       BYTE *slot6 = (BYTE*)g_TailTable[0];
       printf("p6 head : "); for (int i=0;i<8;i++)  printf("%02X ", p6[i]);    printf("\n");
       printf("slot6   : "); for (int i=0;i<40;i++) printf("%02X ", slot6[i]); printf("\n");
       printf("p6      : %p  slot: %p  delta=0x%llX\n", p6, slot6, (unsigned long long)(p6 - slot6));
       printf("thunk   : %p tail0 : %p\n", (void*)&lanhook_thunk, (void*)g_TailTable[0]);
+      { BYTE *slot7 = (BYTE*)g_TailTable[2];
+        printf("p7 head : "); for (int i=0;i<40;i++) printf("%02X ", p7[i]);   printf("\n");
+        printf("slot7   : "); for (int i=0;i<40;i++) printf("%02X ", slot7[i]); printf("\n");
+        printf("p7      : %p  slot: %p  delta=0x%llX\n", p7, slot7,
+               (unsigned long long)((BYTE*)p7 - slot7)); }
     }
     __try {
         r = f6(1,2,3,4,5,6);
@@ -331,6 +363,13 @@ int main(void) {
     r = f5(1,1,1,1,1,1);
     if (r != 6)    { printf("FAIL: post-hook f5b=%d\n", r); return 1; }
     printf("post-hook ok (21, 210, 2100, 6) — thunk/trampoline verified\n");
+    __try {
+        r = f7(10,20,30,40,50,60);
+    } __except (printf("EXC in f7: code=0x%lX\n", GetExceptionCode())) { return 1; }
+    if (r != 210) { printf("FAIL: post-hook f7=%d\n", r); return 1; }
+    r = f7(1,1,1,1,1,1);
+    if (r != 6)   { printf("FAIL: post-hook f7b=%d\n", r); return 1; }
+    printf("T7 ok (210, 6) — hook-17 prologue shape (mov [rsp+imm],r8/r9 first) verified\n");
     if (!test_iat()) return 1;
     if (!test_sni()) return 1;
     if (!test_wsa()) return 1;

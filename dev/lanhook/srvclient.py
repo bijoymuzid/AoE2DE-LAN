@@ -187,34 +187,39 @@ def ws_frame(op, payload, mask=True, fin=True):
         b += payload
     return bytes(b)
 
-key = base64.b64encode(os.urandom(16)).decode()
-wsock = ctx.wrap_socket(socket.create_connection(("127.0.0.1", PORT), timeout=10),
+def ws_connect():
+    """Open one websocket to the shim; return (sock, WS, accept-key)."""
+    key = base64.b64encode(os.urandom(16)).decode()
+    s = ctx.wrap_socket(socket.create_connection(("127.0.0.1", PORT), timeout=10),
                         server_hostname=HOST)
-wsock.sendall((f"GET /wss/?ack=0&pollNum=0 HTTP/1.1\r\n"
+    s.sendall((f"GET /wss/?ack=0&pollNum=0 HTTP/1.1\r\n"
                f"Host: {HOST}\r\n"
                f"Upgrade: websocket\r\n"
                f"Connection: Upgrade\r\n"
                f"Sec-WebSocket-Key: {key}\r\n"
                f"Sec-WebSocket-Version: 13\r\n\r\n").encode())
-head = b""
-while b"\r\n\r\n" not in head:
-    d = wsock.recv(4096)
-    if not d:
-        break
-    head += d
-head, _, rest = head.partition(b"\r\n\r\n")
-status = head.decode("latin1").splitlines()[0] if head else ""
-chk(status.startswith("HTTP/1.1 101"), f"wss upgrade status: {status!r}")
-want = base64.b64encode(hashlib.sha1((key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11").encode()).digest()).decode()
-got = ""
-for l in head.decode("latin1").splitlines()[1:]:
-    if l.lower().startswith("sec-websocket-accept:"):
-        got = l.split(":", 1)[1].strip()
-chk(got == want, f"Sec-WebSocket-Accept={got!r} want {want!r}")
-print(f"  wss upgrade: 101 + accept ok ({got})")
+    head = b""
+    while b"\r\n\r\n" not in head:
+        d = s.recv(4096)
+        if not d:
+            break
+        head += d
+    head, _, rest = head.partition(b"\r\n\r\n")
+    status = head.decode("latin1").splitlines()[0] if head else ""
+    chk(status.startswith("HTTP/1.1 101"), f"wss upgrade status: {status!r}")
+    want = base64.b64encode(hashlib.sha1((key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11").encode()).digest()).decode()
+    got = ""
+    for l in head.decode("latin1").splitlines()[1:]:
+        if l.lower().startswith("sec-websocket-accept:"):
+            got = l.split(":", 1)[1].strip()
+    chk(got == want, f"Sec-WebSocket-Accept={got!r} want {want!r}")
+    w = WS(s)
+    w.buf = rest
+    return s, w, got
 
-ws = WS(wsock)
-ws.buf = rest
+
+wsock, ws, got = ws_connect()
+print(f"  wss upgrade: 101 + accept ok ({got})")
 wsock.settimeout(1.0)     # ping-driven reads: the server's pump wakes on socket events
 
 # rlink sends its login as a BINARY frame. The candidate ladder is off by
@@ -431,6 +436,65 @@ if isinstance(ut, dict):
     chk(a.get("encodedSlots") == blob, "updateTags advert encodedSlots must stay the hosted blob")
 print(f"  updateTags reply: hostProfileID={((ut or {}).get('updatedAvertisement') or {}).get('hostProfileID')!r}")
 
+# ---- s43: updateState must actually change matchState. It carries ONLY
+# `state=1` and no hostid, so before s43 the server echoed the stored lobby and
+# answered matchState:0 to "set the state to 1" - every time, forever. The game
+# asks for state 1 (MS_Start) at Start and our reply told it the match was still
+# in state 0.
+# Open the second websocket FIRST: state>=1 arms a one-shot push that the next
+# live ws_serve loop consumes, and the first websocket was closed above.
+wsock2, ws2, _ = ws_connect()
+wsock2.settimeout(10.0)
+us = post("/game/advertisement/updateState",
+          "advertisementid=1&callNum=79&connect_id=1&sessionID=1&state=1")
+chk(isinstance(us, dict), f"updateState reply must be an object, got {str(us)[:40]}")
+if isinstance(us, dict):
+    a = us.get("updatedAvertisement") or {}
+    chk(us.get("result") == 0, f"updateState result {us.get('result')!r}")
+    chk(a.get("matchState") == 1, f"updateState matchState {a.get('matchState')!r}, want 1")
+    chk(a.get("hostProfileID") == 3842241165083521967,
+        f"updateState advert hostProfileID {a.get('hostProfileID')!r} (empty advert)")
+    chk(a.get("encodedSlots") == blob, "updateState advert encodedSlots must stay the hosted blob")
+print(f"  updateState reply: matchState={((us or {}).get('updatedAvertisement') or {}).get('matchState')!r}")
+
+# ---- s43: state>=1 arms the MatchStartMessage push, and ws_serve must send one
+# binary frame with it. That notification is the only thing that produces
+# AET_MatchStartNotify (advertisement event case 7, 0x140eec335), which is what
+# builds the roster the match loads from. Envelope members are fixed by the
+# client's reader 0x1407a7620: result / m_type / m_profileID; the payload members
+# are the six the registered parser #9 reads.
+ms = None
+for _ in range(30):
+    op, pl, _ = ws2.frame()
+    if op == 0x9:
+        wsock2.sendall(ws_frame(0xA, pl))
+        continue
+    if op == 0x2:
+        ms = pl
+        break
+chk(ms is not None, "no MatchStartMessage push arrived after updateState state=1")
+if ms:
+    txt = ms.decode("latin1")
+    chk(txt.endswith("},"), f"push must be one value with a trailing comma, ends {txt[-6:]!r}")
+    ev = json.loads(txt.rstrip(","))
+    chk(ev.get("result") == 0, f"push result {ev.get('result')!r}")
+    chk(ev.get("m_type") == "MatchStartMessage", f"push m_type {ev.get('m_type')!r}")
+    chk(ev.get("m_profileID") == 3842241165083521967,
+        f"push m_profileID {ev.get('m_profileID')!r}")
+    chk(isinstance(ev.get("matchStartDate"), int) and ev["matchStartDate"] > 1600000000,
+        f"push matchStartDate {ev.get('matchStartDate')!r}")
+    for k in ("ownedAppIDs", "profileRaces", "equippedItems", "inProgressChallenges"):
+        chk(ev.get(k) == [], f"push {k} {ev.get(k)!r}, want []")
+    pa = ev.get("matchAdvertisement") or {}
+    chk(pa.get("matchState") == 1, f"pushed advert matchState {pa.get('matchState')!r}, want 1")
+    chk(pa.get("hostProfileID") == 3842241165083521967,
+        f"pushed advert hostProfileID {pa.get('hostProfileID')!r}")
+    chk(pa.get("encodedSlots") == blob, "pushed advert must carry the hosted slot blob")
+    chk(isinstance(pa.get("matchMembers"), list) and pa["matchMembers"],
+        "pushed advert must carry matchMembers - ProcessNotification fills the slots from it")
+    print(f"  MatchStartMessage push: {len(ms)}B, matchState={pa.get('matchState')!r}, "
+          f"members={len(pa.get('matchMembers') or [])}")
+
 # ---- browse (s31): result + advertisements[] + playerRatings[], filled from the
 # lobby this server was last told about.
 lv = post("/game/advertisement/getLanAdvertisements", "lanServerGuids=&callNum=1")
@@ -442,6 +506,8 @@ if isinstance(lv, dict):
     chk(isinstance(ad, list) and len(ad) == 1, f"expected our one advertisement, got {len(ad) if isinstance(ad, list) else '?'}")
     if isinstance(ad, list) and ad:
         chk(ad[0].get("encodedSlots") == blob, "listed advertisement must carry the same slot blob")
+        chk(ad[0].get("matchState") == 1,
+            f"listed matchState {ad[0].get('matchState')!r}, want the 1 updateState set")
     chk(isinstance(lv.get("playerRatings"), list), "playerRatings must be an array")
 print(f"  lan list reply: {len(lv.get('advertisements') or []) if lv else 0} advertisement(s)")
 

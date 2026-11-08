@@ -292,6 +292,51 @@ static int contains_ci(const char *h, const char *n) {
     return 0;
 }
 
+// s43 N13b, solved without the command line: the game-layer log fn 0x140f19210
+// gates on `cmp byte [0x144356c66], 2; jae proceed / test dl,dl; je return`, so a
+// message logged at level 0 is dropped BEFORE it ever reaches the vsnprintf
+// helper hook 17 sits on. Every TComm_Provider_RL message is level 0 -
+// StartLaunchGame logs `xor edx,edx` at 0x140f1609e, UpdateConnectionState at
+// 0x140f17106 - which is why not one game-layer line appeared in 43 sessions.
+// The byte lives in .data (writable) and is the game's own log-level setting, so
+// raising it to 2 is a data write of exactly the kind hooks 14/16 already do,
+// not a code patch. Opt-in via AOE2LAN_VERBOSE=1; armed from hook 17's filtered
+// path, which a level>=1 message reaches at t~20 (measured), long before Start.
+static int g_Verbose = -1;
+static void verbose_on(void) {
+    volatile BYTE *p;
+    BYTE old;
+    DWORD64 sink;
+    if (g_Verbose < 0) {
+        char v[8];
+        g_Verbose = (GetEnvironmentVariableA("AOE2LAN_VERBOSE", v, sizeof v) && v[0] == '1') ? 1 : 0;
+        log_line(g_Verbose ? "VERBOSE=1 (will raise [0x144356c66] to 2: game-layer level-0 logs on)"
+                           : "VERBOSE off (AOE2LAN_VERBOSE unset, game-layer level-0 logs stay dropped)");
+    }
+    if (g_Verbose != 1) return;
+    p = (volatile BYTE *)(g_ModBase() + 0x4356c66);
+    __try {
+        old = *p;
+        // Level 0 with [c66]>=2 also routes to the second writer 0x14101bb50,
+        // which does `mov rax,[sink]; mov rcx,[rax+0x6f0]` at 0x14101c6fa with no
+        // null check. So only raise the level once the game has built that sink.
+        sink = *(const volatile DWORD64 *)(g_ModBase() + 0x4356c88);
+        if (old >= 2) return;
+        if (!sink) {
+            static volatile LONG s_Said;
+            if (InterlockedIncrement(&s_Said) <= 3)
+                log_line("VERBOSE: sink [0x144356c88] still null, not raising the level yet");
+            return;
+        }
+        *p = 2;
+        { char b[112]; int i = bsput(b, 0, "VERBOSE: log level byte [0x144356c66] ");
+          i = bnput(b, i, old);
+          i = bsput(b, i, " -> 2 (sink=0x"); i = bxput(b, i, sink);
+          i = bsput(b, i, "), game-layer level-0 messages now reach GLog");
+          b[i] = 0; log_line(b); }
+    } __except (EXCEPTION_EXECUTE_HANDLER) { g_Verbose = 0; }
+}
+
 void lanhook_log_hit(int id, const unsigned long long *ctx) {
     char b[640];
     LONG n = InterlockedIncrement(&g_Hits[id]);
@@ -661,6 +706,52 @@ void lanhook_log_hit(int id, const unsigned long long *ctx) {
           i = bsput(b, i, ok ? " frame=ok" : " frame=BAD");
           if (wrote & 1) { i = bsput(b, i, " WROTE-field"); }
           if (wrote & 2) { i = bsput(b, i, " WROTE-arg4"); }
+          b[i] = 0; log_line(b); }
+        return;
+    }
+    if (g_Hooks[id].kind == HK_GLOG) {
+        // s43 N13: our ONE window into the game layer. The game-layer log fn
+        // 0x140f19210 (and its twin 0x140f192f0) is ENCRYPTED on disk, and so are
+        // its two writers, so nothing below it has ever shown us a game-layer
+        // message in 42 sessions. Both twins build their "[%s] " prefix by calling
+        // the CLEAN vsnprintf helper 0x1407db520 (93 B, 60 call sites image-wide,
+        // exactly two of them inside the log fns: 0x140f19275 and 0x140f19347).
+        // At the helper's entry r9 = the category (the log fn's own rcx) and the
+        // log fn's rsi - set from its r8 at 0x140f1924b / 0x140f1931d, before the
+        // call - is the caller's format string. The helper pushes rsi only at +12,
+        // so the thunk's entry snapshot ctx[-7] still holds the CALLER's rsi.
+        // Range filter, not two exact addresses: cx.py proves 0xf19200..0xf19400
+        // holds only those two sites, and a range is immune to call-vs-return
+        // address confusion. READ ONLY - writes nothing to game memory.
+        // We get the format string, not the substituted values; that still shows
+        // exactly how far the game layer gets past "Match Started".
+        static DWORD64 s_Seen[2048];
+        static volatile LONG s_NSeen = 0;
+        DWORD64 caller = ctx[19] - g_ModBase();
+        char cat[40], fmt[176];
+        if (caller < 0xf19200 || caller > 0xf19400) return;   // cheap out: 58 sites
+        verbose_on();                                          // opt-in, one-shot arm
+        if (GetTickCount() - g_t0 < 20000) return;            // boot-window rule
+        if (ctx[14] <= 0x10000 || ctx[-7] <= 0x10000) return;
+        if (read_cstr((const void*)ctx[14], cat, sizeof cat) <= 0) return;
+        if (read_cstr((const void*)ctx[-7], fmt, sizeof fmt) <= 0) return;
+        { DWORD64 h = 1469598103934665603ULL;
+          for (int k = 0; cat[k]; k++) h = (h ^ (BYTE)cat[k]) * 1099511628211ULL;
+          for (int k = 0; fmt[k]; k++) h = (h ^ (BYTE)fmt[k]) * 1099511628211ULL;
+          LONG cur = s_NSeen;
+          for (LONG k = 0; k < cur && k < 2048; k++) if (s_Seen[k] == h) return;
+          { LONG idx = InterlockedIncrement(&s_NSeen) - 1;
+            if (idx < 2048) s_Seen[idx] = h; } }
+        { LONG ln = InterlockedIncrement(&g_HLines[id]);
+          if (ln > 2048) {
+              if (ln == 2049) log_line("HIT GLog capped at 2048 unique lines");
+              return;
+          }
+          i = bsput(b, 0, "GLOG #"); i = bnput(b, i, (DWORD)n);
+          i = bsput(b, i, " site=0x"); i = bxput(b, i, caller);
+          i = bsput(b, i, " ["); i = bsput(b, i, cat);
+          i = bsput(b, i, "] \""); i = bsput(b, i, fmt);
+          i = bsput(b, i, "\"");
           b[i] = 0; log_line(b); }
         return;
     }

@@ -11,6 +11,7 @@
 #define HK_WSET  4   // widget SetEnabled (0x140a74ca0): rcx=widget, dl=en, deduped
 #define HK_AISLOT 5  // 0x140d62260 AI-slot picker: rcx=setup obj, picks table[kind]
 #define HK_LOCID 6   // 0x140ac5480 localize-by-id, filtered to the host lobby populator
+#define HK_GLOG  7   // 0x1407db520 vsnprintf helper, filtered to the game-layer log fn
 
 typedef struct {
     const char *name;
