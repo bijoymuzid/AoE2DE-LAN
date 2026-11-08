@@ -95,6 +95,22 @@ static int g_PushEnable = -1;
 // route() only arms from 0, and ws_serve only fires on the 1 -> 2 transition, so
 // a game that re-sends updateState every second cannot make us spam the socket.
 static volatile LONG g_MatchStart = 0;
+
+// s46: live payload channel. A local TCP client (dev/lanhook/work/livepush.py)
+// hands the shim an arbitrary WebSocket payload plus an opcode; the ws_serve
+// loop that owns the game's connection is the ONLY thread that ever sends it,
+// so no lock is needed and no frame can interleave. The control thread waits
+// for the send, then for the game's verdict window, and reports the hook 13
+// (g_ParseFail) and hook 18 (g_MSReached) deltas straight back to the caller.
+//
+// Why: the s45 ladder gets three guesses per ~10 minute game run and all three
+// were rejected (logs/lanhook-5848.log). The parse path is encrypted (s45a) so
+// the expected shape cannot be read out statically. This turns one run into
+// unlimited guesses, each answered in ~2 s.
+// Gated on AOE2LAN_LIVE=1 and bound to 127.0.0.1 only.
+static char *g_LiveBuf;
+static int   g_LiveLen, g_LiveOp;
+static volatile LONG g_LiveReq, g_LiveAck, g_LiveArmed;
 /* probe needles: each is a raw LE int64 the reply carries, so a hit in game
    memory localises how far the client's deserializer got (see ProbeThread) */
 static unsigned char g_ProbeId[8];     /* profileID   (accountInfo.id / profile.id) */
@@ -155,7 +171,8 @@ static void bnum(BUF *b, DWORD64 v) {
 // strlen without CRT
 static size_t strlen_f(const char *s) { size_t n = 0; while (s[n]) n++; return n; }
 
-static void build_match_start(BUF *b);   // defined after emit_advertisement
+static void build_match_start(BUF *b, int variant);   // defined after emit_advertisement
+static void registry_dump(void);                      // s45 H1 probe, defined next to it
 
 static int starts(const char *s, const char *pre) {
     while (*pre) { if (*s++ != *pre++) return 0; }
@@ -1157,6 +1174,27 @@ static void log_int(const char *pre, int v)
     logn(b);
 }
 
+// append "0x<hex>" at b[i], return the new i (CRT-free, like every logger here).
+static int hx(char *b, int i, DWORD64 v)
+{
+    char t[16]; int tl = 0;
+    b[i++] = '0'; b[i++] = 'x';
+    if (!v) t[tl++] = '0';
+    while (v) { int d = (int)(v & 0xF); t[tl++] = (char)(d < 10 ? '0' + d : 'a' + d - 10); v >>= 4; }
+    while (tl) b[i++] = t[--tl];
+    return i;
+}
+
+// "<pre>0x<hex>" - the pointer twin of log_int.
+static void log_hex(const char *pre, DWORD64 v)
+{
+    char b[96]; int i = 0;
+    while (*pre && i < 60) b[i++] = *pre++;
+    i = hx(b, i, v);
+    b[i] = 0;
+    logn(b);
+}
+
 // ---------------------------------------------------------------- websocket
 // 0.4 s after a successful login the client opens a WebSocket:
 //   WebSocketConnection::Process: Creating a websocket connection;
@@ -1263,14 +1301,18 @@ static void ws_serve(TLSSES *t, const char *req)
     // (hook id 13) logs any rejected frame, and resultCode 99 makes a parsed
     // AccountLoginEvent unmistakable at the deserializer.
     DWORD64 pushAt = 0; int pushed = 0; BUF ev = {0};
+    // s45 payload-ladder state: -1 idle, 0..2 = the variant to push next,
+    // 3 = the last variant is pushed and being graded, 4 = done. msAt is the tick
+    // the current verdict window closes; msFail0/msReach0 are the hook counters
+    // as they stood when that variant went out.
+    int msVar = -1; DWORD64 msAt = 0; LONG msFail0 = 0, msReach0 = 0;
     if (g_PushEnable < 0) { char v[8]; g_PushEnable = 0;
         if (GetEnvironmentVariableA("AOE2LAN_PUSH", v, sizeof v)) g_PushEnable = (v[0] == '1'); }
     if (!plain || !fb) goto out;
     if (!ws_accept(req, acc)) {
         logn("WS: no usable Sec-WebSocket-Key in the upgrade request");
         goto out;
-    }
-    { const char *m =
+    }    { const char *m =
         "HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: ";
       while (*m) head[hl++] = *m++;
       for (int i = 0; acc[i]; i++) head[hl++] = acc[i];
@@ -1281,7 +1323,19 @@ static void ws_serve(TLSSES *t, const char *req)
       while (*m) b[i++] = *m++;
       for (int k = 0; acc[k] && i < 90; k++) b[i++] = acc[k];
       b[i] = 0; logn(b); }
+    InterlockedExchange(&g_LiveArmed, 1);   // this loop is now the live-push sender
     for (;;) {
+        // s46: service one live-push request per pass. Sending happens here and
+        // nowhere else, so g_LiveBuf is stable while it is read.
+        if (g_LiveReq != g_LiveAck) {
+            if (g_LiveBuf && g_LiveLen > 0) {
+                if (ws_send(t, g_LiveOp, (const unsigned char*)g_LiveBuf, g_LiveLen))
+                    log_int("LIVE pushed len=", g_LiveLen);
+                else
+                    logn("LIVE push send failed");
+            } else logn("LIVE push requested with no payload");
+            InterlockedIncrement(&g_LiveAck);
+        }
         if (pushAt && GetTickCount64() >= pushAt && pushed < N_CANDS) {
             const PUSHCAND *c = &g_Cands[pushed];
             ev.len = 0; ev.oom = 0;
@@ -1299,12 +1353,42 @@ static void ws_serve(TLSSES *t, const char *req)
             } else { logn("WS PUSH send failed"); }
             pushed++; pushAt = GetTickCount64() + PUSH_INTERVAL_MS;
         }
-        if (InterlockedCompareExchange(&g_MatchStart, 2, 1) == 1) {
-            ev.len = 0; ev.oom = 0;
-            build_match_start(&ev);
-            if (ev.len && ws_send(t, 0x2, (const unsigned char*)ev.p, (int)ev.len))
-                log_int("WS PUSH MatchStartMessage len=", (int)ev.len);
-            else logn("WS PUSH MatchStartMessage: no advertisement to send");
+        // s45: arm once, dump the dispatch registry, then push a payload variant,
+        // wait for its verdict and escalate. One run answers H1 (MSREG lines),
+        // H1-vs-H2 (thunkHits) and which member the parser rejects (which variant
+        // stops the ladder) instead of spending a run on each question.
+        if (msVar < 0 && InterlockedCompareExchange(&g_MatchStart, 2, 1) == 1) {
+            registry_dump();
+            msVar = 0; msAt = 0;
+        }
+        if (msVar >= 0 && msVar < 4 && GetTickCount64() >= msAt) {
+            if (msVar > 0) {                    // grade the variant pushed last pass
+                LONG f = g_ParseFail - msFail0;
+                LONG r = g_MSReached - msReach0;
+                log_int("MSLADDER variant=", msVar - 1);
+                log_int("MSLADDER   parsefail=", (int)f);
+                log_int("MSLADDER   thunkHits=", (int)r);
+                // no failure logged = this variant parsed (the line lands ~60 ms
+                // after the frame, measured), so stop before pushing another.
+                if (!f) { logn("MSLADDER PARSED - no failure logged, ladder stops"); msVar = 4; }
+            }
+            if (msVar < 3) {
+                ev.len = 0; ev.oom = 0;
+                build_match_start(&ev, msVar);
+                if (ev.len && ws_send(t, 0x2, (const unsigned char*)ev.p, (int)ev.len)) {
+                    log_int("MSLADDER pushing variant=", msVar);
+                    log_int("WS PUSH MatchStartMessage len=", (int)ev.len);
+                } else {
+                    logn("WS PUSH MatchStartMessage: no advertisement to send");
+                    msVar = 4;
+                }
+                msFail0 = g_ParseFail; msReach0 = g_MSReached;
+                msAt = GetTickCount64() + 3000;
+                msVar++;
+            } else if (msVar == 3) {
+                logn("MSLADDER every variant rejected - MSREG lines answer H1, thunkHits answer H2");
+                msVar = 4;
+            }
         }
         int n = tls_decrypt(t, plain, TLS_MAX_PLAIN);
         if (n == -1) {
@@ -1376,6 +1460,7 @@ static void ws_serve(TLSSES *t, const char *req)
         }
     }
 out:
+    InterlockedExchange(&g_LiveArmed, 0);   // no sender now; live pushes must fail loudly
     log_int("WS: closed, frames=", frames);
     if (ignored) log_int("WS: data frames ignored=", ignored);
     if (ev.p) HeapFree(GetProcessHeap(), 0, ev.p);
@@ -1593,20 +1678,70 @@ static int adv_copy(char *out, int cap) {
 // StartLaunchGame logged "ok", and the lobby sat there with nothing to load.
 // Empty arrays for the four members we have no data for - the reader treats every
 // member as optional and skips what is absent.
-static void build_match_start(BUF *b) {
+//
+// s45: variants, tried in ONE run. The shim and the hooks share a process, so the
+// shim can read hook 13's parse-failure count (g_ParseFail) and hook 18's
+// factory-reached count (g_MSReached) and escalate instead of spending a run per
+// payload. 0 = every member and NO trailing comma (the comma came from the s20
+// HTTP long-poll rule "null, parses, null does not" - a different transport; the
+// game's own WS frames, e.g. {"operation":1,"ackCount":1}, carry none, so it may
+// never have applied here). 1 = envelope only, which must parse if the
+// envelope+dispatch+factory chain works, because all six members are optional.
+// 2 = envelope + matchAdvertisement (the advertisement is proven-valid: the same
+// object parses as the /game/advertisement/update reply).
+static void build_match_start(BUF *b, int variant) {
     char ab[8192], hid[32];
     if (adv_copy(ab, sizeof ab) <= 0) return;
     if (!form_get(ab, "hostid", hid, sizeof hid) || !hid[0]) return;
     bs(b, "{\"result\":0,\"m_type\":\"MatchStartMessage\",\"m_profileID\":");
     bs(b, hid);
-    bs(b, ",\"matchStartDate\":");
-    bnum(b, unix_now());
-    bs(b, ",\"ownedAppIDs\":[],\"profileRaces\":[],\"equippedItems\":[],\"inProgressChallenges\":[]");
-    bs(b, ",\"matchAdvertisement\":");
-    emit_advertisement(b, ab);
-    // one WS frame = one notification value, and the trailing comma is mandatory
-    // (s20: "null," parses, "null" does not)
-    bs(b, "},");
+    if (variant == 0) {
+        bs(b, ",\"matchStartDate\":");
+        bnum(b, unix_now());
+        bs(b, ",\"ownedAppIDs\":[],\"profileRaces\":[],\"equippedItems\":[],\"inProgressChallenges\":[]");
+    }
+    if (variant != 1) {
+        bs(b, ",\"matchAdvertisement\":");
+        emit_advertisement(b, ab);
+    }
+    bs(b, "}");
+}
+
+// ---------------------------------------------------------------- s45 H1 probe
+// Dispatch 0x1407a7070 walks a RUNTIME linked list at [0x144c9e3e0] whose nodes
+// are {fn at +0, next at +8} and calls fn(out, reader, &m_type) until one returns
+// an object. No node handling the m_type => dispatch false => the envelope reader
+// false => "failed to parse notification messages". That head is at rva
+// 0x4c9e3e0, PAST .data's raw size (0x4256600), so it is zero-filled at boot and
+// only readable live. Dumping it here - at push time, t~139, long after rlink
+// init - answers "is MatchStartMessage registered at all?" without hooking any of
+// the encrypted functions. The value to look for is 0x1407b66f0, the factory
+// thunk (hook 18); 0x1407cdf10 (the factory itself) would mean a direct entry.
+static void registry_dump(void)
+{
+    volatile int k = 0;
+    DWORD64 node;
+    __try {
+        node = *(const volatile DWORD64 *)(g_ModBase() + 0x4c9e3e0);
+        log_hex("MSREG head=", node);
+        while (node && k < 64) {
+            DWORD64 fn = *(const volatile DWORD64 *)node;
+            DWORD64 nx = *(const volatile DWORD64 *)(node + 8);
+            char b[112]; int i = 0;
+            { const char *m = "MSREG["; while (*m) b[i++] = *m++; }
+            i = hx(b, i, (DWORD64)k);
+            { const char *m = "] node="; while (*m) b[i++] = *m++; }
+            i = hx(b, i, node);
+            { const char *m = " fn="; while (*m) b[i++] = *m++; }
+            i = hx(b, i, fn);
+            b[i] = 0; logn(b);
+            if (nx == node) { logn("MSREG self-loop, stopping"); break; }
+            node = nx; k++;
+        }
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        logn("MSREG walk faulted (bad node pointer)");
+    }
+    log_int("MSREG nodes=", k);
 }
 
 // ---------------------------------------------------------------- route
@@ -1807,6 +1942,191 @@ static int root_present(void) {
     return n;
 }
 
+// s45: silent root registration. CertAddCertificateContextToStore on a Root store
+// makes Windows pop a consent dialog, and because mint_cert() makes a NEW key every
+// launch the operator had to click Yes on every single run (s44i), and clicking No
+// killed login at t=18. The Root store persists each certificate as
+//   HKCU\Software\Microsoft\SystemCertificates\Root\Certificates\<SHA1 thumbprint>\Blob
+// and that Blob is exactly what CertSaveStore returns for a memory store holding
+// that one cert, encoded X509|PKCS7. Writing the key directly registers the root
+// with no UI and no consent, which is what the store itself does. The caller
+// re-checks with root_present(), so this can only ever remove clicks, never lose
+// trust: if the write does not land, the prompting API add still runs.
+static int root_add_silent(void) {
+    typedef void * (WINAPI *PopenStore)(LPCSTR, DWORD, void *, DWORD, const void *);
+    typedef int    (WINAPI *PaddCtx)(void *, void *, DWORD, void **);
+    typedef int    (WINAPI *PsaveStore)(void *, DWORD, DWORD, void *, DWORD);
+    typedef int    (WINAPI *PcloseStore)(void *);
+    typedef int    (WINAPI *PgetProp)(void *, DWORD, void *, DWORD *);
+    PopenStore  pOpenMem = (PopenStore) GetProcAddress(g_hCrypt, "CertOpenStore");
+    PaddCtx     pAdd     = (PaddCtx)    GetProcAddress(g_hCrypt, "CertAddCertificateContextToStore");
+    PsaveStore  pSave    = (PsaveStore) GetProcAddress(g_hCrypt, "CertSaveStore");
+    PcloseStore pCloseSt = (PcloseStore)GetProcAddress(g_hCrypt, "CertCloseStore");
+    PgetProp    pProp    = (PgetProp)   GetProcAddress(g_hCrypt, "CertGetCertificateContextProperty");
+    unsigned char thumb[24]; DWORD tl = sizeof thumb;
+    CRYPT_DATA_BLOB blob = {0, 0};
+    wchar_t path[160];
+    void *hMem = 0;
+    HKEY hKey = 0;
+    int ok = 0, i = 0, k;
+    if (!g_ServerCert || !g_hCrypt || !g_hAdv) return 0;
+    if (!pOpenMem || !pAdd || !pSave || !pCloseSt || !pProp) {
+        logn("cert: silent-root crypt32 fns missing"); return 0; }
+    if (!pProp((void*)g_ServerCert, CERT_SHA1_HASH_PROP_ID, thumb, &tl) || tl != 20) {
+        logn("cert: silent-root thumbprint failed"); return 0; }
+    { const wchar_t *pre = L"Software\\Microsoft\\SystemCertificates\\Root\\Certificates\\";
+      while (*pre && i < 110) path[i++] = *pre++;
+      for (k = 0; k < 20 && i < 156; k++) {
+          static const wchar_t hxd[] = L"0123456789ABCDEF";
+          path[i++] = hxd[(thumb[k] >> 4) & 15];
+          path[i++] = hxd[thumb[k] & 15]; }
+      path[i] = 0; }
+    hMem = pOpenMem(CERT_STORE_PROV_MEMORY,
+                    X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, 0, 0, 0);
+    if (!hMem) { logn("cert: silent-root memory store failed"); return 0; }
+    if (pAdd(hMem, (void*)g_ServerCert, CERT_STORE_ADD_REPLACE_EXISTING, 0)) {
+        // first call only sizes the blob (cbData comes back either way)
+        pSave(hMem, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING,
+              CERT_STORE_SAVE_TO_MEMORY, &blob, 0);
+        if (blob.cbData)
+            blob.pbData = (unsigned char*)HeapAlloc(GetProcessHeap(), 0, blob.cbData);
+        if (blob.pbData &&
+            pSave(hMem, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING,
+                  CERT_STORE_SAVE_TO_MEMORY, &blob, 0)) {
+            typedef long (WINAPI *PregCreate)(HKEY, LPCWSTR, DWORD, LPWSTR, DWORD,
+                                              REGSAM, const SECURITY_ATTRIBUTES *,
+                                              PHKEY, LPDWORD);
+            typedef long (WINAPI *PregSet)(HKEY, LPCWSTR, DWORD, DWORD,
+                                           const BYTE *, DWORD);
+            typedef long (WINAPI *PregClose)(HKEY);
+            PregCreate pCreate = (PregCreate)GetProcAddress(g_hAdv, "RegCreateKeyExW");
+            PregSet    pSet    = (PregSet)   GetProcAddress(g_hAdv, "RegSetValueExW");
+            PregClose  pCloseK = (PregClose) GetProcAddress(g_hAdv, "RegCloseKey");
+            if (pCreate && pSet && pCloseK &&
+                pCreate(HKEY_CURRENT_USER, path, 0, 0, REG_OPTION_NON_VOLATILE,
+                        KEY_WRITE, 0, &hKey, 0) == ERROR_SUCCESS && hKey) {
+                ok = (pSet(hKey, L"Blob", 0, REG_BINARY,
+                           blob.pbData, blob.cbData) == ERROR_SUCCESS);
+                pCloseK(hKey);
+            } else logn("cert: silent-root RegCreateKeyEx failed");
+        } else logn("cert: silent-root CertSaveStore failed");
+        if (blob.pbData) HeapFree(GetProcessHeap(), 0, blob.pbData);
+    } else logn("cert: silent-root add-to-memory failed");
+    pCloseSt(hMem);
+    log_int("cert: silent-root Blob written bytes=", ok ? (int)blob.cbData : 0);
+    return ok;
+}
+
+// s46: auto-click the root-store consent dialog.
+//
+// MEASURED offline with dlgprobe.c (no game involved): the dialog crypt32 shows
+// for a user-Root add is class "#32770", title "Security Warning", and belongs
+// to OUR OWN PROCESS on the thread that called
+// CertAddCertificateContextToStore. Its buttons are the standard control IDs:
+// 6 = "&Yes", 7 = "&No". One PostMessage(BM_CLICK) to control 6 dismissed it in
+// under 100 ms, the add returned 1, and the cert was in the store.
+//
+// This is load-bearing, not cosmetic: RootRegThread runs at BOOT (t=0.125 s in
+// logs/lanhook-12816.log) and the add call BLOCKS until the dialog is answered.
+// An unattended run has nobody to answer it, so the launch died at t=1.2 s.
+//
+// Scope is deliberately narrow. Only visible dialogs that have BOTH control 6
+// and control 7, and only inside our own process. Nothing else is reachable.
+static HMODULE g_hUser;
+static BOOL (WINAPI *pEnumThreadWindows)(DWORD, WNDENUMPROC, LPARAM);
+static BOOL (WINAPI *pEnumWindows)(WNDENUMPROC, LPARAM);
+static DWORD (WINAPI *pGetWinTid)(HWND, DWORD *);
+static HWND (WINAPI *pGetDlgItem)(HWND, int);
+static BOOL (WINAPI *pIsWindowVisible)(HWND);
+static BOOL (WINAPI *pPostMessageW)(HWND, UINT, WPARAM, LPARAM);
+static DWORD g_rootTid;
+static volatile LONG g_rootAddLive;
+static volatile LONG g_dlgClicked;
+
+static int user32_ready(void) {
+    if (g_hUser) return 1;
+    g_hUser = LoadLibraryExW(L"USER32.dll", NULL, 0);
+    if (!g_hUser) { logn("cert: clicker USER32 load failed"); return 0; }
+#define UGPA(n) ((void*)GetProcAddress(g_hUser, n))
+    pEnumThreadWindows = (BOOL (WINAPI*)(DWORD, WNDENUMPROC, LPARAM))UGPA("EnumThreadWindows");
+    pEnumWindows       = (BOOL (WINAPI*)(WNDENUMPROC, LPARAM))UGPA("EnumWindows");
+    pGetWinTid         = (DWORD (WINAPI*)(HWND, DWORD*))UGPA("GetWindowThreadProcessId");
+    pGetDlgItem        = (HWND (WINAPI*)(HWND, int))UGPA("GetDlgItem");
+    pIsWindowVisible   = (BOOL (WINAPI*)(HWND))UGPA("IsWindowVisible");
+    pPostMessageW      = (BOOL (WINAPI*)(HWND, UINT, WPARAM, LPARAM))UGPA("PostMessageW");
+#undef UGPA
+    if (!pEnumThreadWindows || !pEnumWindows || !pGetWinTid ||
+        !pGetDlgItem || !pIsWindowVisible || !pPostMessageW) {
+        logn("cert: clicker user32 fns missing"); return 0; }
+    return 1;
+}
+
+// Returns 1 if this window is the consent dialog and the click was posted.
+static int dlg_try_click(HWND h) {
+    HWND yes;
+    if (!pIsWindowVisible(h)) return 0;
+    yes = pGetDlgItem(h, 6 /*IDYES*/);
+    if (!yes || !pGetDlgItem(h, 7 /*IDNO*/)) return 0;
+    if (pPostMessageW(yes, 0x00F5 /*BM_CLICK*/, 0, 0)) {
+        InterlockedIncrement(&g_dlgClicked);
+        logn("cert: consent dialog found, posted BM_CLICK to IDYES");
+        return 1;
+    }
+    logn("cert: consent dialog found but BM_CLICK post failed");
+    return 0;
+}
+
+static BOOL CALLBACK dlgThreadProc(HWND h, LPARAM lp) {
+    (void)lp;
+    return dlg_try_click(h) ? FALSE : TRUE;
+}
+
+// Fallback pass: every top-level window, filtered to our own pid. Covers the
+// case where crypt32 puts the dialog on a helper thread instead of ours.
+static BOOL CALLBACK dlgPidProc(HWND h, LPARAM lp) {
+    DWORD pid = 0;
+    (void)lp;
+    pGetWinTid(h, &pid);
+    if (pid != GetCurrentProcessId()) return TRUE;
+    return dlg_try_click(h) ? FALSE : TRUE;
+}
+
+static DWORD WINAPI DlgClickThread(void *p) {
+    int polls = 0;
+    (void)p;
+    // Poll until the add call returns. 600 * 100 ms = 60 s ceiling, and nothing
+    // is dismissed on timeout, so a human can still answer it if the click fails.
+    while (g_rootAddLive && polls < 600) {
+        Sleep(100);
+        polls++;
+        if (g_dlgClicked) break;
+        if (g_rootTid) pEnumThreadWindows(g_rootTid, dlgThreadProc, 0);
+        if (!g_dlgClicked && polls % 5 == 0) pEnumWindows(dlgPidProc, 0);
+    }
+    log_int("cert: consent watcher out polls=", polls);
+    return 0;
+}
+
+// The prompting add, with the watcher running beside it. Returns whatever
+// CertAddCertificateContextToStore returned.
+static int root_add_prompting(void *hRoot, int (WINAPI *pAddCtx)(void *, void *, int, void **)) {
+    HANDLE hw = 0;
+    int added;
+    if (user32_ready()) {
+        g_rootTid = GetCurrentThreadId();
+        g_dlgClicked = 0;
+        g_rootAddLive = 1;
+        hw = CreateThread(NULL, 0, DlgClickThread, NULL, 0, NULL);
+        if (hw) CloseHandle(hw);
+        else logn("cert: clicker thread failed, dialog will need a human");
+    }
+    added = pAddCtx(hRoot, (void*)g_ServerCert, 1 /*CERT_STORE_ADD_NEW*/, (void**)0) ? 1 : 0;
+    g_rootAddLive = 0;
+    log_int("cert: prompting add returned=", added);
+    log_int("cert: dialogs auto-clicked=", (int)g_dlgClicked);
+    return added;
+}
+
 // ageLANServer-equivalent trust registration, on its own thread:
 // the CURRENT USER Root store add can stall (authroot CTL sync), so it
 // must not sit on the boot or handshake path. The game's fast retry
@@ -1825,8 +2145,18 @@ static DWORD WINAPI RootRegThread(void *p) {
                 // store without our root for ~0.7 s while the game was already
                 // doing its own crypt32 work, and one run then handshook with
                 // SEC_E_UNTRUSTED_ROOT.
-                if (pAddCtx(hRoot, (void*)g_ServerCert, 1, (void**)0))
-                    logn("cert: user-Root registered (schannel trust path live)");
+                // s45: the silent registry write goes first and root_present()
+                // decides whether the prompting API add is still needed.
+                // s46: an early-out on root_present() first. mint_cert() makes a
+                // NEW cert every launch, so this only fires on a repeat run with
+                // a persisted cert - but it can only ever skip work, never lose
+                // trust, because it is gated on the exact DER already being there.
+                if (root_present() == 1)
+                    logn("cert: user-Root already trusted, no add and no dialog");
+                else if (root_add_silent() && root_present() == 1)
+                    logn("cert: user-Root registered silently (no consent dialog)");
+                else if (root_add_prompting(hRoot, pAddCtx))
+                    logn("cert: user-Root registered via API (consent dialog auto-clicked)");
                 else
                     logn("cert: user-Root add returned 0 (already present or denied)");
                 { int old = purge_aoe2lan_roots(hRoot);
@@ -2001,6 +2331,122 @@ static DWORD WINAPI ServerThread(LPVOID p) {
     return 0;
 }
 
+// ---- s46: live payload channel, server side -------------------------------
+static char *live_itoa(char *p, int v) {
+    char t[12]; int n = 0;
+    if (v < 0) { *p++ = '-'; v = -v; }
+    if (!v) t[n++] = '0';
+    while (v && n < 11) { t[n++] = (char)('0' + v % 10); v /= 10; }
+    while (n) *p++ = t[--n];
+    *p = 0;
+    return p;
+}
+
+static void live_reply(SOCKET c, const char *s) { p_send(c, s, (int)strlen_f(s), 0); }
+
+static void live_puts(char **p, const char *s) { while (*s) { **p = *s; (*p)++; s++; } **p = 0; }
+
+// One request per connection:
+//   "PING\n"                -> "PONG armed=N\n"
+//   "GETVARIANT <n>\n"       -> "<len>\n" then len bytes: the shim's own built
+//                               MatchStartMessage payload, so the caller can
+//                               re-wrap the real advertisement instead of
+//                               inventing one
+//   "<opcode> <len>\n" + len -> "sent=1 parsefail=N thunkhits=M\n"
+// Verdict window is 2 s: the parse-fail line lands ~60 ms after the frame
+// (s45b), so this is generous, not tight.
+static void live_conn(SOCKET c) {
+    char hdr[32]; int i = 0;
+    for (;;) {
+        char ch;
+        if (p_recv(c, &ch, 1, 0) != 1) return;
+        if (ch == '\n') break;
+        if (i < 30) hdr[i++] = ch;
+    }
+    hdr[i] = 0;
+    if (hdr[0] == 'P') {                       // PING
+        char b[48]; char *p = b;
+        live_puts(&p, "PONG armed="); p = live_itoa(p, (int)g_LiveArmed);
+        live_puts(&p, "\n"); live_reply(c, b); return;
+    }
+    if (hdr[0] == 'G') {                       // GETVARIANT <n>
+        BUF b = {0};                           // all four fields: p/cap must be NULL/0
+        char lb[16]; char *p = lb;
+        build_match_start(&b, atoi_f(hdr + 10));
+        if (!b.len || !b.p) { live_reply(c, "0\n"); return; }
+        p = live_itoa(p, (int)b.len); live_puts(&p, "\n");
+        live_reply(c, lb);
+        p_send(c, (const char*)b.p, (int)b.len, 0);
+        HeapFree(GetProcessHeap(), 0, b.p);
+        return;
+    }
+    {   const char *sp = hdr;
+        int op, len, waited = 0;
+        char *nb;
+        LONG req, f0, r0;
+        char b[96]; char *p = b;
+        while (*sp && *sp != ' ') sp++;
+        if (!*sp) { live_reply(c, "ERR header needs '<opcode> <len>'\n"); return; }
+        op = atoi_f(hdr);
+        len = atoi_f(sp + 1);
+        if (len <= 0 || len > 4096) { live_reply(c, "ERR length out of range 1..4096\n"); return; }
+        nb = (char*)HeapAlloc(GetProcessHeap(), 0, (SIZE_T)len + 1);
+        if (!nb) { live_reply(c, "ERR oom\n"); return; }
+        {   int got = 0;
+            while (got < len) {
+                int r = p_recv(c, nb + got, len - got, 0);
+                if (r <= 0) break;
+                got += r;
+            }
+            if (got != len) {
+                HeapFree(GetProcessHeap(), 0, nb);
+                live_reply(c, "ERR payload truncated\n"); return;
+            } }
+        nb[len] = 0;
+        // Publish the payload before bumping the request counter; the increment
+        // is a full barrier, so the ws_serve loop sees a consistent triple.
+        if (g_LiveBuf) HeapFree(GetProcessHeap(), 0, g_LiveBuf);
+        g_LiveBuf = nb; g_LiveLen = len; g_LiveOp = op;
+        if (!g_LiveArmed) { live_reply(c, "ERR no live websocket (game not on a WS yet)\n"); return; }
+        f0 = g_ParseFail; r0 = g_MSReached;
+        req = InterlockedIncrement(&g_LiveReq);
+        while (g_LiveAck != req && waited < 5000) { Sleep(20); waited += 20; }
+        if (g_LiveAck != req) { live_reply(c, "ERR ws loop never picked it up\n"); return; }
+        Sleep(2000);
+        live_puts(&p, "sent=1 parsefail="); p = live_itoa(p, (int)(g_ParseFail - f0));
+        live_puts(&p, " thunkhits=");       p = live_itoa(p, (int)(g_MSReached - r0));
+        live_puts(&p, "\n");
+        live_reply(c, b);
+    }
+}
+
+static DWORD WINAPI LiveThread(void *p) {
+    SOCKET ls;
+    struct sockaddr_in la;
+    int to = 30000;
+    (void)p;
+    // WSAStartup is per-process but not yet guaranteed when this thread wins the
+    // race with ServerThread; without it socket() fails with WSANOTINITIALISED.
+    if (p_WSAStartup) { WSADATA wd; p_WSAStartup(0x0202, &wd); }
+    ls = p_socket(AF_INET, SOCK_STREAM, 0);
+    if (ls == INVALID_SOCKET) { logn("live: socket failed"); return 0; }
+    la.sin_family = AF_INET;
+    la.sin_addr.s_addr = 0x0100007f;   // 127.0.0.1 as LE u32 (no htonl import)
+    la.sin_port = 0x5FB8;              // 47199 in network byte order
+    if (p_bind(ls, (struct sockaddr*)&la, sizeof(la))) {
+        logn("live: bind 127.0.0.1:47199 failed (port busy?)");
+        p_closesocket(ls); return 0; }
+    if (p_listen(ls, 4)) { logn("live: listen failed"); p_closesocket(ls); return 0; }
+    logn("live: payload channel listening on 127.0.0.1:47199");
+    for (;;) {
+        SOCKET c = p_accept(ls, NULL, NULL);
+        if (c == INVALID_SOCKET) continue;
+        if (p_setsockopt) p_setsockopt(c, SOL_SOCKET, SO_RCVTIMEO, (const char*)&to, sizeof(to));
+        live_conn(c);
+        p_closesocket(c);
+    }
+}
+
 int loginsrv_start(void) {
     g_hWs2  = LoadLibraryExW(L"WS2_32.dll", NULL, 0);
     logn("dbg: ws2 loaded");
@@ -2072,5 +2518,11 @@ int loginsrv_start(void) {
     { HANDLE h = CreateThread(NULL, 0, ServerThread, NULL, 0, NULL);
       if (!h) return 0;
       CloseHandle(h); }
+    { char v[8];
+      if (GetEnvironmentVariableA("AOE2LAN_LIVE", v, sizeof v) && v[0] == '1') {
+          HANDLE h = CreateThread(NULL, 0, LiveThread, NULL, 0, NULL);
+          if (h) CloseHandle(h);
+          else logn("live: thread create failed");
+      } }
     return 1;
 }

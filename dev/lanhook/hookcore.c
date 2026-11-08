@@ -216,6 +216,8 @@ int hc_install_hook(BYTE *target, int id) {
 // ctx[19]=original return address, ctx[20..]=the caller's stack
 static volatile LONG g_Hits[HK_MAX];
 static volatile LONG g_HLines[HK_MAX];
+volatile LONG g_ParseFail = 0;   // see hookcore.h (s45 payload-variant ladder)
+volatile LONG g_MSReached = 0;
 
 // s41: the host lobby screen object, captured by HK_LOCID from the populator's
 // rsi (verified by its own slot-widget chain). screen+0x1cf8 gates BOTH the "AI"
@@ -351,12 +353,16 @@ void lanhook_log_hit(int id, const unsigned long long *ctx) {
         if ((DWORD64)sp < 0x10000) return;
         L = read_cstr(sp, s, 112);
         if (L <= 0) return;
-        { LONG ln = InterlockedIncrement(&g_HLines[id]);
+        { int pf = contains_ci(s, "failed to parse");
+          LONG ln = InterlockedIncrement(&g_HLines[id]);
           // s44: the MatchStartMessage parse failure is the one line that decides the
           // whole launch, and the "response was failure" cache spam exhausts the 512
           // cap long before Start (measured: capped at t=76, push at t=85) - so a
           // "failed to parse" line is never dropped. Its s8 (=r8) is the reason.
-          if (ln > 512 && !contains_ci(s, "failed to parse")) return;
+          // s45: count it too - this is the verdict the push ladder grades on
+          // (measured: the line lands ~60 ms after our WS frame, once per push).
+          if (pf) InterlockedIncrement(&g_ParseFail);
+          if (ln > 512 && !pf) return;
           i = bsput(b, 0, "HIT ");
           i = bsput(b, i, g_Hooks[id].name);
           i = bsput(b, i, " #"); i = bnput(b, i, (DWORD)n);
@@ -759,6 +765,13 @@ void lanhook_log_hit(int id, const unsigned long long *ctx) {
           b[i] = 0; log_line(b); }
         return;
     }
+    // s45: hook 18 is the MatchStartMessage factory thunk 0x1407b66f0 - CLEAN on
+    // disk (whole 24 B body == gametext.bin) although the factory it calls,
+    // 0x1407cdf10, is encrypted. Nothing calls it directly; dispatch 0x1407a7070
+    // reaches it through the runtime {fn,next} registry at [0x144c9e3e0]. So this
+    // counter separates H1 (never fired = MatchStartMessage is not registered)
+    // from H2 (fired = registered, the payload is what the factory rejects).
+    if (g_Hooks[id].va == 0x1407B66F0) InterlockedIncrement(&g_MSReached);
     { LONG ln = InterlockedIncrement(&g_HLines[id]);
       if (ln > 64) {
           if (ln == 65) { i = bsput(b, 0, "HIT ");

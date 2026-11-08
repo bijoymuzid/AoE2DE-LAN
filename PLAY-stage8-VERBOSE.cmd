@@ -33,11 +33,30 @@ rem with no null check. So the write only happens once [0x144356c88] is non-null
 rem and it says so in the log either way. Read the VERBOSE: lines first.
 rem
 rem Operator: Multiplayer -> Host Game, 3 AI, press Start, wait 2 minutes.
+rem s46: the certificate consent dialog is now AUTO-CLICKED by the DLL (measured:
+rem logs/lanhook-5848.log t=0.172 "consent dialog found, posted BM_CLICK to IDYES").
+rem Do NOT wait for a dialog and do NOT click anything - there is nothing to click.
 rem The answer is the [Network] TComm_Provider_RL lines around Start.
+rem s45: after Start the shim dumps the dispatch registry (MSREG lines) and pushes
+rem up to three MatchStartMessage payload variants ~3 s apart (MSLADDER lines),
+rem stopping early if one parses. So wait ~60 s after Start, not 40.
+rem s45: hook 18 added = MSThunk 0x1407b66f0, the MatchStartMessage factory thunk.
+rem CLEAN on disk (its whole 24 B body == gametext.bin) even though the factory it
+rem calls, 0x1407cdf10, and parser #9, 0x1407b6710, are ENCRYPTED and unhookable.
+rem Nothing calls it directly - dispatch 0x1407a7070 reaches it through the runtime
+rem {fn,next} registry at [0x144c9e3e0] - so if it fires, MatchStartMessage IS
+rem registered and the payload is what fails (H2). If it never fires while "failed
+rem to parse" appears, it is NOT registered (H1). grp=0: drop ",18" to disable it
+rem without a rebuild if it turns out to trip the tamper response (~5.6 s exit).
+rem s46: AOE2LAN_LIVE=1 opens a local control channel on 127.0.0.1:47199. Once the
+rem game is sitting in the lobby, dev/lanhook/work/livepush.py can push ANY payload
+rem down the live websocket and read the verdict (parsefail / thunkhits) in ~2 s.
+rem That replaces "one guess per 10 minute run" with as many guesses as we want.
 set AOE2LAN_STAGE=8
-set AOE2LAN_HOOKS=4,5,13,14,15,16,17
+set AOE2LAN_HOOKS=4,5,13,14,15,16,17,18
 set AOE2LAN_AIGATE=1
 set AOE2LAN_VERBOSE=1
+set AOE2LAN_LIVE=1
 set RL_TELEMSHOULDNTSEND=1
 set RL_TELEMREPORTPCT=0
 start "" "AoE2DE_s.exe"

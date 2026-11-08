@@ -13,6 +13,13 @@
 #define HK_LOCID 6   // 0x140ac5480 localize-by-id, filtered to the host lobby populator
 #define HK_GLOG  7   // 0x1407db520 vsnprintf helper, filtered to the game-layer log fn
 
+// s45: cross-TU signals for the MatchStartMessage parse experiment. The shim and
+// the hooks share a process, so loginsrv.c reads these from the WS pump and can
+// grade a pushed payload variant - and escalate to the next one - inside a
+// single game run instead of spending a run per variant.
+extern volatile LONG g_ParseFail;   // hook 13 logged "failed to parse notification messages"
+extern volatile LONG g_MSReached;   // hook 18 ran = the MatchStartMessage factory was reached
+
 typedef struct {
     const char *name;
     DWORD64     va;       // VA at imagebase 0x140000000

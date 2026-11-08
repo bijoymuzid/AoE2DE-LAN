@@ -1,0 +1,4 @@
+@echo off
+rem Host probe: measure + auto-click the crypt32 root-store consent dialog.
+rem Same toolchain/flags as mkprobe.cmd plus user32 (EnumWindows, GetDlgItem).
+"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\Hostx64\x64\cl.exe" -nologo -MD -W3 "-IC:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include" "-IC:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\um" "-IC:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\ucrt" "-IC:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0\shared" dlgprobe.c -Fedlgprobe.exe -link "-LIBPATH:C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\lib\x64" "-LIBPATH:C:\Program Files (x86)\Windows Kits\10\Lib\10.0.26100.0\um\x64" "-LIBPATH:C:\Program Files (x86)\Windows Kits\10\Lib\10.0.26100.0\ucrt\x64" crypt32.lib advapi32.lib user32.lib

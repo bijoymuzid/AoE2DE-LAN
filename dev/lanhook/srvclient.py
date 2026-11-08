@@ -475,8 +475,12 @@ for _ in range(30):
 chk(ms is not None, "no MatchStartMessage push arrived after updateState state=1")
 if ms:
     txt = ms.decode("latin1")
-    chk(txt.endswith("},"), f"push must be one value with a trailing comma, ends {txt[-6:]!r}")
-    ev = json.loads(txt.rstrip(","))
+    # s45: no trailing comma. The comma came from the s20 HTTP long-poll rule
+    # ("null," parses, "null" does not) - a different transport. The game's own WS
+    # frames ({"operation":1,"ackCount":1}) carry none, and the WS notification
+    # parser rejected our frame with one.
+    chk(txt.endswith("}"), f"push must be one bare value, ends {txt[-6:]!r}")
+    ev = json.loads(txt)
     chk(ev.get("result") == 0, f"push result {ev.get('result')!r}")
     chk(ev.get("m_type") == "MatchStartMessage", f"push m_type {ev.get('m_type')!r}")
     chk(ev.get("m_profileID") == 3842241165083521967,
@@ -494,6 +498,52 @@ if ms:
         "pushed advert must carry matchMembers - ProcessNotification fills the slots from it")
     print(f"  MatchStartMessage push: {len(ms)}B, matchState={pa.get('matchState')!r}, "
           f"members={len(pa.get('matchMembers') or [])}")
+
+# ---- s45: the payload ladder. Offline srvtest bumps hook 13's parse-failure
+# count once a second (there is no real hook 13 here), so the shim grades every
+# variant as rejected and escalates ~3 s apart: variant 1 = envelope only (all six
+# payload members are optional), variant 2 = envelope + matchAdvertisement. This
+# is the ladder's only automated check.
+for tag, keys in (("variant1 envelope-only", {"result", "m_type", "m_profileID"}),
+                  ("variant2 envelope+advert",
+                   {"result", "m_type", "m_profileID", "matchAdvertisement"})):
+    p = None
+    try:
+        for _ in range(10):
+            op, pl, _ = ws2.frame()
+            if op == 0x9:
+                wsock2.sendall(ws_frame(0xA, pl))
+                continue
+            if op == 0x2:
+                p = pl
+                break
+    except socket.timeout:
+        pass
+    chk(p is not None, f"no {tag} push arrived")
+    if p:
+        ev2 = json.loads(p.decode("latin1"))
+        chk(set(ev2) == keys, f"{tag} keys {sorted(ev2)}, want {sorted(keys)}")
+        print(f"  ladder {tag}: {len(p)}B, keys={sorted(ev2)}")
+
+# the ladder must TERMINATE after variant 2 - a shim that re-pushed MatchStartMessage
+# every 3 s forever would spam a live match. Deadline, not an idle timeout: the
+# server pings every ~3 s, so the socket is never idle long enough to time out.
+import time
+wsock2.settimeout(2.0)
+fourth = None
+end = time.time() + 6.0
+while time.time() < end and fourth is None:
+    try:
+        op, pl, _ = ws2.frame()
+    except socket.timeout:
+        continue
+    if op == 0x9:
+        wsock2.sendall(ws_frame(0xA, pl))
+        continue
+    if op == 0x2:
+        fourth = pl
+chk(fourth is None, f"ladder pushed a 4th frame after all variants: {str(fourth)[:60]!r}")
+print("  ladder terminated after variant2 (no 4th push in 6 s)")
 
 # ---- browse (s31): result + advertisements[] + playerRatings[], filled from the
 # lobby this server was last told about.

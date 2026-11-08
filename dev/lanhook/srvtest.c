@@ -24,7 +24,15 @@ int main(int argc, char **argv) {
         return 1;
     }
     printf("login server live on https://127.0.0.1:443/ — idling %ds\n", secs);
-    for (int i = 0; i < secs; i++) Sleep(1000);
+    for (int i = 0; i < secs; i++) {
+        Sleep(1000);
+        // s45: offline there is no hook 13, so nothing would ever increment
+        // g_ParseFail and the shim's payload ladder would grade variant 0 as
+        // "parsed" and stop after one push. Simulate the failure the game's WS
+        // notification parser reports, so srvclient can watch the ladder escalate
+        // through all three variants and then terminate.
+        InterlockedIncrement(&g_ParseFail);
+    }
     printf("srvtest done\n");
     log_line("srvtest: done");
     CloseHandle(hLog);

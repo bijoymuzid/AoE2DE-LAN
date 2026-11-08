@@ -78,6 +78,7 @@ static const BYTE EXP_WSET[8]       = {0x48,0x8B,0x81,0xD8,0x03,0x00,0x00,0x90};
 static const BYTE EXP_AISLOT[8]     = {0x48,0x83,0xEC,0x28,0x48,0x81,0xC1,0x80}; // 0x140d62260 sub rsp,0x28; add rcx,0x680
 static const BYTE EXP_LOCID[8]      = {0x40,0x53,0x48,0x83,0xEC,0x20,0x8B,0xD9}; // 0x140ac5480 push rbx; sub rsp,0x20; mov ebx,ecx
 static const BYTE EXP_GLG[8]        = {0x4C,0x89,0x44,0x24,0x18,0x4C,0x89,0x4C}; // 0x1407db520 mov [rsp+0x18],r8; mov [rsp+0x20],r9
+static const BYTE EXP_MSTH[8]       = {0x40,0x53,0x48,0x83,0xEC,0x30,0x48,0x8B}; // 0x1407b66f0 push rbx; sub rsp,0x30; mov rbx,rcx
 
 HOOKDEF g_Hooks[] = {
     // ids 0-3: provider cluster, CLEAN ON DISK (stage 4). Tolerated by the
@@ -133,6 +134,17 @@ HOOKDEF g_Hooks[] = {
     // Logs (category, format string) deduped - the only view we have ever had
     // above rlink. READ ONLY. See hookcore.c HK_GLOG for the register proof.
     {"GLog",            0x1407DB520, EXP_GLG,   600000, 0, HK_GLOG   },
+    // id 18 (s45): the MatchStartMessage factory THUNK 0x1407b66f0, grp=0 (opt-in
+    // via AOE2LAN_HOOKS). The whole parse path below the envelope reader is
+    // ENCRYPTED on disk and so unhookable (s44f: dispatch 0x1407a7070, factory
+    // 0x1407cdf10, parser #9 0x1407b6710, all six member readers, all the
+    // 0x14039xxxx bond helpers) - but this one 24 B thunk is CLEAN: its on-disk
+    // bytes are identical to gametext.bin, which is the house rule for hookable.
+    // It has no direct callers; dispatch reaches it through the runtime registry.
+    // Fired => MatchStartMessage IS registered and the payload is the fault (H2).
+    // Never fired while "failed to parse" appears => it is NOT registered (H1).
+    // READ ONLY (HK_RAW logs rcx/rdx/r8/r9 + the indirect call site).
+    {"MSThunk",         0x1407B66F0, EXP_MSTH,  600000, 0, HK_RAW    },
 };
 const int g_NHooks = (int)(sizeof(g_Hooks)/sizeof(g_Hooks[0]));
 
