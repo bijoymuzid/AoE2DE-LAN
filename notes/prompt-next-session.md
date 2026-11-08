@@ -1,159 +1,175 @@
 # Prompt for the next Windows session (paste this into a new chat)
 
-Continue AoE2LAN (AoE2:DE LAN mod). Read `notes/m1-session41.md` in full before touching anything; it
-supersedes `notes/m1-session40.md`. Then read `PLAN.md` §0–§2, §6.1, §6.2 and §17.
+Continue AoE2LAN (AoE2:DE LAN mod). Read `notes/m1-session46.md` in full before touching
+anything; it supersedes `notes/m1-session45.md`. Then read `PLAN.md` §0–§2, §6.1, §6.2,
+§6.4 and §17.
 
-Say everything in plain English: short sentences, no jargon, no code dumps, no leaps. If something is
-unknown, say it is unknown.
+Say everything in plain English: short sentences, no jargon, no code dumps, no leaps. If
+something is unknown, say it is unknown.
+
+WORKING RULE — obey it every turn: **MEASURE FIRST.** Do not burn time or tokens on long
+static reverse-engineering when one instrumented run answers the question. Go straight to a
+runtime measurement, and make each game run capture the maximum information so runs stay
+few. Before proposing ANY new hook, check the target is CLEAN on disk (on-disk `.text`
+bytes == `gametext.bin`, compared over the **pdata function bounds**, not a fixed window) —
+an encrypted function cannot be hooked. Also: if the hard way genuinely raises the chance of
+the thing working, take the hard way — do not hold back to stay minimal (operator, session 46).
 
 Working dir: `D:\Age of Empires II Definitive Edition`. Repo: `D:\aoe2lan-repo` →
 https://github.com/bijoymuzid/AoE2DE-LAN. `git pull` first. At the end run
-`cmd /c D:\aoe2lan-repo\sync.cmd "session 42 - <one line, no parentheses, no colon after NN>"`
-(in this shell `cmd /c` must be written as `/c/WINDOWS/system32/cmd.exe //c`, and the `sync.cmd` path
-must be in single quotes or bash eats the backslashes).
+`/c/WINDOWS/system32/cmd.exe //c 'D:\aoe2lan-repo\sync.cmd' "session 47 - <one line, no
+parentheses, no colon after NN>"` (in this shell `cmd /c` must be written as
+`/c/WINDOWS/system32/cmd.exe //c`, and the `sync.cmd` path must be in single quotes or bash
+eats the backslashes).
 
 ## THE JOB, in priority order. Nothing else outranks these.
 
-1. **Make a hosted match actually load and run.** Pressing Start is already accepted; the game then
-   sits in the lobby forever. The single known blocker is our fake server's reply to
-   `/game/party/peerAdd` (and `/game/party/peerUpdate`) in `dev/lanhook/loginsrv.c`.
-2. **Then confirm AI are in that match and actually play.** AI already appear in the lobby and are
-   already carried in the session's slot data, so this may work with no further changes.
-3. Only after that: a second human joining over the tailnet (PLAN §W1-c / M2).
+1. **Make a hosted match actually load and run.** Pressing Start is accepted and the game
+   logs `StartLaunchGame ok` + `Match Started`, but the screen never leaves the lobby. The
+   single known blocker is that our fake server's **MatchStartMessage websocket push does not
+   parse** (§46e).
+2. **Then confirm AI are in that match and actually play.** Separately broken, and it is the
+   GAME that drops them: its own `slotinfo` has 8 slots with slots 1–7 empty (§46f).
+3. Only after that: a second human joining over the tailnet (PLAN §W1-c / M2). Note the host
+   reply still says `"relayIP":"127.0.0.1"`, which priority 3 will have to change.
 
-## SOLVED IN SESSION 41 — do not redo any of it
+Priorities 1 and 2 are independent — a match with only the human in it should still load, so
+do not couple them.
 
-- **AI in the MULTIPLAYER HOST LOBBY dropdown: DONE and verified on screen and in the log.** All seven
-  empty slots offer Open / Closed / AI. Mechanism, fully measured: the populator `0x141a344f0..0x1a362aa`
-  already ran block C (§40e's `ebx == 1` / block-B theory is **dead**). What blocked the AI item were
-  two checks *inside* block C at `0x1a35db8` and `0x1a35dc5`, and both failed:
-  `[screen+0x1cf8]` was `-1` and had to equal the sentinel `[0x14326b258]`, which is **0** (read-only
-  `.rdata`, zero on disk, no `.reloc` entry — an `extern const` null); and the populator's own `r9b`
-  copy at `[rbp-0xd0]` was `0`, which selects a name-list branch instead of the single "AI" item.
-- **The fix that works** (`AOE2LAN_AIGATE=1`): hook id 16 `AISlotLabel` on CLEAN `0x140ac5480`
-  (localize-by-id, 633 sites), caller-filtered to the populator, writes the sentinel into
-  `screen+0x1cf8` and `1` into `[rbp-0xd0]`; plus `lobby_keepgate()` called from hook 14
-  (`WidgetSetEn`) which re-asserts the sentinel from the cached screen pointer, because the lobby
-  restores `-1` on every refresh (measured: 16 repairs in 125 ms). Do not remove either half.
-- **`hooks.asm` now snapshots callee-saved registers** at `ctx[-8]=rbx, ctx[-7]=rsi, ctx[-6]=rdi,
-  ctx[-5]=rbp`, with `sub rsp,0C0h` and ctx at `rsp+0x60`, so `ctx+0x98` is still the live
-  return-address slot and `ctx[20..]` is still the caller's stack. **Every existing ctx index is
-  unchanged and HK_WSET needed no edit.** `HK_MAX` is 20, `g_TailTable QWORD 20 DUP(?)`.
-- **The Start button works.** No error message. `Match Started - …, slot = 0`,
-  `OnStartComplete - detected successful game start`, `/game/advertisement/updateState state=1`,
-  `hosting - Session is connected`, `BattleServer.exe` spawned, LAN relay added.
-- **The two lobby errors are gone for good, not worked around.** The Start handler
-  `0x141a3c700..0x141a3ce53` has three doors on the same field: `field == 0` skips every check and
-  starts; `field != 0` counts **only slots with status 2** (status 0 = human, 1 = empty, 2 = AI) and
-  rejects an odd count with `IDS_LOBBY_SCREEN_ERROR_UNEVEN_PLAYERS`, then rejects unbalanced teams with
-  `IDS_LOBBY_SCREEN_ERROR_UNBALANCED_TEAMS` unless registry record `+0xb0 == 1`. "Even number of
-  players" really meant "even number of AI", which is why 3 AI and 7 AI both failed.
-- **MEASURED control run, no AI at all (`logs/lanhook-17168.log`): identical failure.** So the match
-  not loading has nothing to do with AI. `WorldwideOnPartyPeerAddAsync` fires at lobby creation, before
-  any AI exists.
+## SOLVED IN SESSION 46 — do not redo any of it
 
-## THE BLOCKER, precisely
+- **The Windows certificate consent dialog is FIXED and fully automatic.** The DLL finds the
+  `#32770` "Security Warning" window (owned by our own process, control **6** = "&Yes",
+  **7** = "&No") and posts `BM_CLICK` to control 6. Measured: clicked in under 100 ms, both
+  offline (`dlgprobe.exe`, `srvtest`, `work/livetest.py`) and in game (`t=0.188 cert:
+  consent dialog found, posted BM_CLICK to IDYES`). **There is no dialog to click any more —
+  do not wait for one, do not tell the operator to click anything.** §45e options (a)/(b)/(c)
+  and `root_add_silent()`'s blob format are all dead ends and are now irrelevant.
+- **The t≈1.2 s exit was NOT a tamper response.** `RootRegThread` runs at BOOT (`t=0.125`)
+  and the prompting add BLOCKS on the dialog; nobody clicked, so the run died. §45d's
+  "~5.6 s exit ⇒ drop `,18`" row never applied. Hook 18 is fine and stays.
+- **H1 is dead — MatchStartMessage IS registered.** `MSREG nodes=46` and
+  `MSREG[0x24] fn=0x7ff6f26c66f0` = VA `0x1407b66f0` (game base `0x7ff6f1f10000`).
+  `HIT MSThunk ret` = VA `0x1407a70ce` = the `call rax` in dispatch `0x1407a7070`.
+  Do NOT xref the QWORD writers of RVA `0x4c9e3e0`. Also: **46 registry nodes == 46 RLink
+  `*Message` RTTI types** (full list in `work/livepush.py: RLINK_TYPES`).
+- **`HIT MSThunk` is NOT a type-match signal** (corrects §45b). Measured: it fires for ANY
+  top-level JSON object, including `m_type:"SessionStatusMessage"` and `{"messages":[…]}`,
+  but not for a top-level array or an integer `m_type`. **Only `parsefail` is a verdict.**
 
-`loginsrv.c` has explicit handlers only for login, `readSession`, `getAvailableLeaderboards`,
-`advertisement/host`, `advertisement/update`, `advertisement/getLan*|find*|getAdvertisements`, and
-`/game/news/`. **Everything else falls into the catch-all `[0,[]]` at `loginsrv.c:1649-1652`**, and
-`/game/party/peerAdd` and `/game/party/peerUpdate` are not named anywhere in the file. The game logs
-`"%s - response was not formatted correctly: %s"` with `s8="WorldwideOnPartyPeerAddAsync"`,
-`s9="[0,[]]"`. 19 other caches log the same warning in one boot (`LeaderboardStatsCache`, `NewsCache`,
-`ChatChannelCache`, `ItemCategoryCache`, `GetOfflineMessagesAsync`, `RelationshipCache`, …) — those are
-PLAN §W1-d and are NOT blocking; peerAdd is.
+## THE TOOL — use this, never re-run the game to test a payload
 
-## NEXT STEP, already planned as §41h N10 — follow it
+`AOE2LAN_LIVE=1` (already in `PLAY-stage8-VERBOSE.cmd`) opens a plain-TCP control channel on
+**127.0.0.1:47199** inside the game process. Driver: `dev/lanhook/work/livepush.py`.
 
-**Shape the `/game/party/peerAdd` reply (then `peerUpdate`).**
+| command | what it does |
+|---|---|
+| `livepush.py ping` | `PONG armed=1` means a game websocket is live |
+| `livepush.py get [n]` | the shim's own built MatchStartMessage payload n (needs a hosted lobby) |
+| `livepush.py push '<json>' [opcode]` | push one payload, returns `sent=1 parsefail=N thunkhits=M` |
+| `livepush.py sweep` / `bisect` / `types` | the three hypothesis batches from §46e |
 
-- **Develop it offline, without the game.** `srvtest.exe` starts loginsrv on `127.0.0.1:443` and idles
-  60 s; `C:/Python314/python.exe -X utf8 dev/lanhook/srvclient.py` (stdlib only) does the TLS handshake
-  with SNI `pb-live-release6-api.worldsedgelink.com` and POSTs at it. That is how the login object-form
-  reply was built in s12/s21. Add a peerAdd case to `srvclient.py`, iterate, and only spend a game run
-  once the offline reply is shaped.
-- **Find the expected shape the way s30 did for `/game/advertisement/host`** (parser `0x140579020`
-  wants `result` + `updatedAvertisement`) and s12/s21 did for login (parser `0x140615b70`, named keys,
-  not a positional array). Entry point: the `not formatted correctly` warning is logged through
-  `0x1402BCC00` (hook id 13, already installed) and the cache name arrives in `s8`, so the *caller* of
-  that log line is the peerAdd completion handler — xref it and read its parse. `ret=0x00007ff648…` in
-  those lines is a heap address, not a code RVA: recover the caller from the frame the way HK_WSET does
-  (`ctx[25]`), not from `ret`.
-- Then re-test in game with `PLAY-stage8-AIGATE.cmd`, 3 AI, Start. Expect a loading screen.
-- §41h also lists N11 (verify the AI play), N12 (whether the s38 bit-0x4 row suppression can now be
-  retired — **unverified**, the suppression is still armed and may be masking the result) and N7 (M2).
+**One game run to the lobby answers unlimited payload questions at ~2.6 s each.** `parsefail=0`
+means it parsed — that is the win condition. Payloads are sent by the `ws_serve` loop that owns
+the connection, never by the control thread, so no lock and no frame interleaving.
 
-## ALREADY SETTLED — do not re-open
+## WHERE SESSION 46 LEFT IT — the one open question
 
-- The host-lobby settings rows: fixed and verified in-game by the bit-0x4 suppression in HK_WSET (hook
-  id 14) with four locker ranges. Correct and staged. Do not touch it unless a specific log line shows
-  a new re-lock site.
-- The lobby is healthy; its settings round-trip. `mapname="my map"` and `matchtype=-1` in our replies
-  are dead fields for lobby health. (Note `screen+0x1cf8` holding `-1` is a *different* thing and is now
-  handled client-side; §41e records that **who writes -1 is unresolved** and that outvoting it works.)
-- AI in an online match is a real supported feature (`UNRANKED_VIA_AI`, string 13204).
-- The AI table itself is fine: `kind=2, nAI=2` in both screens, so `AOE2LAN_AIKIND=n` cannot help.
-- `0x141ab4bd0` is the SKIRMISH filler, not the host lobby's.
+**~110 payload shapes were tested live in a real hosted lobby and EVERY ONE was rejected**
+(§46e has the full list: all 46 type names, `operation=0..24`, array/wrapper/key-name shapes,
+positional arrays, member add-one/remove-one/reorder, advert-as-array). **Conclusion: the
+outer container is wrong, not the members. No MatchStartMessage member permutation can ever
+fix this — that whole space is closed.**
 
-## METHOD RULES
+Shape-guessing is exhausted. The next step must produce **ground truth**, not another guess.
+Two routes, do them in this order:
 
-- Never patch or hook code that is encrypted on disk. Read it from `dev/lanhook/gametext.bin` only.
-  `gametext.bin` is code-only: no strings, no `IDS_` keys, so find string xrefs by scanning it for
-  rip-relative `lea` (`work/xgrp.py`). Localized text lives in
-  `resources/en/strings/key-value/key-value-strings-utf8.txt`; `IDS_` keys live in the exe's `.rdata`.
-- A fix must be a caller-filtered hook on a CLEAN function (HK_WSET's bit-0x4 suppression and hook 16
-  are the templates) or something server-side in `loginsrv.c`.
-- Verify any rebuilt DLL by parsing it (`work/verifydll.py` — **its kind filter must include every
-  `HK_*` kind or it silently drops the entry**) and with `dumpbin -DISASM`, never with a byte grep.
-  MSVC folds constants into displacements and puts static arrays in `.rdata`. `dumpbin` is not on PATH:
-  `C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\Hostx64\x64\dumpbin.exe`.
-- `build.cmd` ends with `copy /y dbghelp.dll ..\..\dbghelp.dll` and makes **no backup**, and **Windows
-  locks the file while the game runs** (the copy then fails silently and the two copies diverge). Close
-  the game first, copy `dbghelp.dll` to a `.prev-*` name BEFORE building, and `md5sum` both copies after.
-- Measure before patching. Prefer a read-only logging hook and one run per screen over guessing.
-- Opt-in hook ids only via `AOE2LAN_HOOKS` in a `PLAY-stage8-*.cmd`. Default stage-8 hooks stay 4, 5, 13.
-  No whole-memory sweeps, never `AOE2LAN_UIW=1` or `rules_scan()`. Do not edit `lanhub/**`, `linux/**`,
-  `notes/linux-*.md`.
-- Edit the game-dir tree (`D:\Age of Empires II Definitive Edition\dev\lanhook`), then sync with `sync.cmd`.
-- Start disassembly from an `fn.py` bound, not a guessed address: `dz.py` silently emits garbage
-  mid-instruction and prints nothing at all below the dump base. RVA vs VA: `VA = 0x140000000 + RVA`.
-  Never name a helper script `grp.py` (shadows the stdlib module `pathlib` imports).
-- `g_Hooks` lives in `.data`, not `.rdata`. The launcher returns the `cmd.exe` PID, not the game's —
-  find the real PID from the newest `logs/lanhook-<pid>.log`.
-- To reassemble a request/response body from a log: join the `HTTP BODY +` continuation lines FIRST
-  (the plain `HTTP BODY` regex also matches them and will shred the body), then URL-decode,
-  base64-decode, `zlib.decompress`. `slotinfo` decodes to `"<n>,[{profileInfo.id, stationID, teamID,
-  factionID, raceID, rankLevel, rankMatchTypeID, timePerFrameMS, isReady, status, metaData}…]`, and
-  `metaData` is base64-of-base64 of a binary blob whose strings are `ScenarioPlayerIndex` and `Team`.
-- **A launch that dies under ~5 s with a clean boot log is a transient.** It happened once in s41 right
-  after `cert: purged stale roots=1`; the identical DLL ran for minutes on relaunch. Relaunch before
-  debugging it.
+1. **Force long polling and watch** (no rebuild needed). `RL_USE_WEBSOCKET_PERCENT`
+   (exe `0x3698008`) picks WS vs long poll; it can be set as an env var in the PLAY cmd, or
+   pushed through the login reply's `clientSettings` array (which already carries
+   `RL_KEEPALIVE`/`RL_MISSPOLL`/`RL_DISCONNECT`). The long-poll path logs
+   `LongPoller::Process: response good, processing=%lld: %s` and
+   `…mismatched session IDs; lastPollSessionID=%s m_sessionToken=%s` — plain JSON over HTTP,
+   in the dialect our other replies already parse in. Read **which URL the poller hits** (it is
+   NOT among the 150 `/game/...` strings in the exe, so it is built at runtime) and what the
+   response must look like.
+2. **Ground truth from a reference implementation.** `github.com/luskaner/ageLANServer`,
+   `server/internal/routes/wss/wss.go` — its `parseMessage` confirms inbound
+   `operation`/`sessionToken`. The **outbound** envelope struct lives in the `common` package,
+   which was not located before session 46 ran out.
+   **DECISION PENDING — ask the operator once at the start of the session:** they forbade
+   *using* ageLANServer as the mod (session 11, "make your own mod"), and we are building our
+   own, but reading it purely for the wire format is their call. `loginsrv.c`'s header already
+   credits it ("field order proven by the ageLANServer public source"). Do not rely on it
+   without an explicit yes.
 
-## GATES before any in-game run
+Useful static facts already gathered (§46e): only two `{"operation"` format strings exist and
+both are client→server (`{"clientLibVersion":%d,"operation":%d,"sessionToken":"%s"}` @
+`0x3697ab8`, `{"operation":%d,"ackCount":%d}` @ `0x3697c48`); the game sends
+`{"clientLibVersion":194,"operation":0,"sessionToken":"1194178595"}` then
+`{"operation":1,"ackCount":1}`; only five `m_` strings exist in the whole exe
+(`m_rlinkLibVersion`, `m_resultCodes`, `m_scope`, `m_type`, `m_profileID`) and `m_type` sits in
+the **PrivacyScope** region, so `m_type` as the notification discriminator is an unverified s43
+assumption; MatchStartMessage's own fields per the bond string table @ `0x369d9d7..0x369da08`
+are **{inProgressChallenges, matchAdvertisement, profileRaces}**.
 
-`AoE2DE_s.exe` MD5 must be `affb19f03ca96965abf9e56775cab688` and untouched; `hooktest.exe` must pass
-68/68 plus `post-hook ok (21, 210, 2100, 6)`; `srvtest.exe` must pass; staged `dbghelp.dll` MD5
-**`a4ab2ba4c4e9d69db27195b4cad2fc6b`** (**247,296 B**) unless you rebuilt it, in which case record the
-new MD5 and keep a `.prev-*` backup first. Existing backups: `.prev-s41-before` (the s40 build
-`f499bbd13a4e838f4f6b8c37267d27f4`), `.prev-s41-readonly` (`09fd1423a94a514fed366ea5c2c29adc`,
-read-only hook 16), `.prev-s41-aigate1` (`a4340466b10f3dcd9d2a7323ef584e8a`, one-shot write, no
-keepgate).
+**One risk to keep in view:** the exe has `SignatureManager.cpp` and `Error decrypting
+signature, %lu`. Session 46 checked what it covers — inventory items, profile stats,
+leaderboard match history (anti-cheat on numbers), **not** the match flow. If a notification
+ever turns out to be signature-verified we cannot forge it. Not currently believed to block us.
 
-## To launch for a test
+## GATES before any run (all passed at the end of session 46 — re-run them all)
 
-```
-powershell -NoProfile -ExecutionPolicy Bypass -File "dev\lanhook\work\launch-detached.ps1" -cmdFile PLAY-stage8-AIGATE.cmd
-```
+- `AoE2DE_s.exe` MD5 `affb19f03ca96965abf9e56775cab688`
+- `dbghelp.dll` MD5 **`21fb2d236ad342ac9647cd7bbdc97fef`**, identical in the game dir AND
+  `dev/lanhook/`. If you rebuild: take a `.prev-*` backup of BOTH copies first, then re-run
+  every gate.
+- `hooktest.exe`: `post-hook ok (21, 210, 2100, 6)`, `T7 ok (210, 6)`, `swapped 68 of 68`
+- `AOE2LAN_LIVE=1 srvtest.exe 90` + `C:/Python314/python.exe -X utf8 srvclient.py` → **PASS**
+  incl. `updateState reply: matchState=1`, `MatchStartMessage push: 788B`, both ladder variant
+  lines, `ladder terminated after variant2`; then `work/livetest.py` → **PASS**
+- `work/verifydll.py` → **19** HOOKDEF entries, `MSThunk va=0x1407b66f0 … kind=0`,
+  `GLog va=0x1407db520 … kind=7`
+- verify any rebuilt DLL with `verifydll.py` + `dumpbin -DISASM` (path in §43/§44c), **never a
+  byte grep**; `dumpbin -IMPORTS` must still show **KERNEL32.dll only**
+- build warnings must be the pre-existing C4090 five only, now at loginsrv.c
+  **690/692/694/1905/1936**
 
-then wait ~16 s and tell me what to click; I will click and report back. `PLAY-stage8-AIGATE.cmd` is
-the working fix (`AOE2LAN_HOOKS=4,5,13,14,15,16`, `AOE2LAN_AIGATE=1`). `PLAY-stage8-AISLOT.cmd` is the
-same set with the writes OFF (pure logging) — use it to A/B any suspicion that a write caused a problem.
-Log caps: `WidgetSetEn` skips the first 20 s and caps at 512 lines; `AISlotPick` skips 20 s, caps 256;
-`AISlotLabel` skips 20 s, caps 256. Give me one run per screen if a log is filling.
+## To launch
 
-## Useful existing tooling in `dev/lanhook`
+`powershell -NoProfile -ExecutionPolicy Bypass -File
+"dev\lanhook\work\launch-detached.ps1" -cmdFile PLAY-stage8-VERBOSE.cmd`, wait ~27 s, take the
+**newest** `logs/lanhook-<pid>.log` (the launcher returns the cmd.exe PID, not the game's).
+**Kill any leftover `AoE2DE_s.exe` first — it holds port 443** (pid 12008 was still running at
+the end of session 46). No dialog will appear and nothing needs clicking. Healthy boot =
+repeated `TLS: handshake complete (server side)` + `OnAccountEvent: Client is using
+WebSockets` + `cert: user-Root registered via API (consent dialog auto-clicked)`.
 
-`dz.py` (disassemble a VA range from `gametext.bin` with strings resolved), `fn.py` (pdata bounds +
-whole-function dump), `cx.py` (E8 call sites), `rr.py` (rip-relative lea xrefs), `aoe2re.py` (PE + dump
-helpers), `srvclient.py` (offline TLS client for `srvtest.exe`), and in `work/`: `aistr.py`,
-`cleanfns.py`, `verifydll.py`, `xgrp.py`, `launch-detached.ps1`.
+Then: Multiplayer → Host Game → 3 AI. **Stop there — do NOT press Start.** Confirm
+`livepush.py ping` says `armed=1` and `livepush.py get 0` returns the real payload, and iterate
+live. Only press Start once a payload parses (`parsefail=0`).
+
+## Do NOT
+
+- Do NOT re-test any payload shape already listed in §46e — they are measured rejects.
+- Do NOT try more MatchStartMessage **member** permutations (§46e closed that space).
+- Do NOT treat `HIT MSThunk` as a type match (§46d).
+- Do NOT re-open the certificate dialog problem, `root_add_silent()`'s blob format, or §45e.
+- Do NOT chase the t=1.2 s exit as a tamper response (§46a).
+- Do NOT hook anything on the §45a ENCRYPTED list (dispatch `0x1407a7070`, envelope reader
+  `0x1407a7620`, factory `0x1407cdf10`, parser #9 `0x1407b6710`, all six member readers, the
+  `0x14039xxxx` helpers, polling fn `0x1406d1160`).
+- Do NOT re-run a cleanliness check with a fixed byte window — use the pdata bounds (§45a).
+- Do NOT re-derive the registry node layout (`r14=[0x144c9e3e0]`, `fn=[r14]`, `next=[r14+8]`).
+- Do NOT change the s45 ladder's stop-on-no-failure rule, add a 4th variant, or re-order the
+  three, without a measurement that says to.
+- Do NOT delete the `srvtest.c` 1 Hz `g_ParseFail` bump (the offline ladder stops after
+  variant 0 without it), and do NOT let `root_add_silent()` skip its `root_present()` re-check.
+- Do NOT initialise a `BUF` partially — it is `{char *p; size_t len, cap; int oom;}` and a
+  wild `p` crashes the shim thread and takes the whole process with it. Always `BUF b = {0};`.
+- Do NOT rebuild without a `.prev-*` backup of both `dbghelp.dll` copies first.
+- Do NOT re-derive §44e, and do NOT re-open anything in §45g / §44h / §43h.
+
+Method rules, traps, the encrypted-address list, fast tricks and tooling (`dz.py`, `fn.py`,
+`cx.py`, `work/rrx.py`, `work/clean_s45.py`, `srvclient.py`, `livepush.py`, `livetest.py`,
+`dlgprobe.c`) are in §46, §45, §44 and `notes/m1-session43.md` — all still in force.
