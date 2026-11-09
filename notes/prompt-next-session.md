@@ -1,108 +1,229 @@
-# Prompt for the next Windows session (paste this into a new chat)
+# Prompt for the next chat (paste this whole file into a new chat)
 
-Continue AoE2LAN (AoE2:DE LAN mod). Read `notes/m1-session48.md` in full before touching
-anything; it supersedes `notes/m1-session47.md`. Then read `PLAN.md` §0–§3, §6.1, §6.2, §6.4
-and §17.
+Continue AoE2LAN (AoE2:DE LAN mod). This is the **session 50 brief**. It supersedes the
+session 49 brief. Read `notes/m1-session48.md` in full before touching anything, then
+`PLAN.md` §0–§3, §6.1, §6.2, §6.4 and §17.
 
 Say everything in plain English: short sentences, no jargon, no code dumps, no leaps. If
 something is unknown, say it is unknown.
 
 WORKING RULE — obey it every turn: **MEASURE FIRST.** Do not burn time or tokens on long
-static reverse-engineering when one instrumented run answers the question. Go straight to a
-runtime measurement, and make each game run capture the maximum information so runs stay
-few. Before proposing ANY new hook, check the target is CLEAN on disk (on-disk `.text` bytes
-== `gametext.bin`, compared over the **pdata function bounds**, not a fixed window) — an
-encrypted function cannot be HOOKED. But read this carefully, it cost four sessions:
-"encrypted" means cannot-hook, NOT cannot-read. `dev/lanhook/gametext.bin` is a dump of the
-**DECRYPTED** `.text`, so every function on the §45a ENCRYPTED list is fully disassemblable
-offline. Read the dump; only the hooking is forbidden. Also: if the hard way genuinely raises
-the chance of the thing working, take the hard way — do not hold back to stay minimal
-(operator, session 46).
+static reverse-engineering when one instrumented run answers the question. Make each game
+run capture the maximum information so runs stay few. Before proposing ANY new hook, check
+the target is CLEAN on disk (on-disk `.text` bytes == `gametext.bin`, compared over the
+**pdata function bounds**, not a fixed window). "Encrypted" means cannot-HOOK, NOT
+cannot-read: `dev/lanhook/gametext.bin` is a dump of the **DECRYPTED** `.text`, so every
+function on the §45a ENCRYPTED list is fully disassemblable offline. If the hard way
+genuinely raises the chance of the thing working, take the hard way.
 
 Working dir: `D:\Age of Empires II Definitive Edition`. Repo: `D:\aoe2lan-repo` →
 https://github.com/bijoymuzid/AoE2DE-LAN. `git pull` first. At the end run
-`/c/WINDOWS/system32/cmd.exe //c 'D:\aoe2lan-repo\sync.cmd' "session 49 - <one line, no
-parentheses, no colon after NN>"` (in this shell `cmd /c` must be written as
-`/c/WINDOWS/system32/cmd.exe //c`, and the `sync.cmd` path must be in single quotes or bash
-eats the backslashes). Two "The system cannot find the path specified" lines from `sync.cmd`
-are pre-existing noise; it still commits and pushes. `sync.cmd` now also copies
-`dev/lanhook/work/*.json` (added s48).
+`/c/WINDOWS/system32/cmd.exe //c 'D:\aoe2lan-repo\sync.cmd' "session 50 - <one line, no parentheses, no colon after NN>"`
+(in this shell `cmd /c` must be written as `/c/WINDOWS/system32/cmd.exe //c`, and the
+`sync.cmd` path must be in single quotes or bash eats the backslashes). Two "The system
+cannot find the path specified" lines from `sync.cmd` are pre-existing noise; it still
+commits and pushes.
 
-## THE JOB, in priority order. Nothing else outranks these.
+---
 
-**Priority 1 (a hosted match loads and runs) and Priority 2 (AI in that match) are DONE —
-measured, shipped, gated. Do not reopen them.** The front of the queue is now **Priority 3:
-a second human joining over the tailnet** (PLAN §W1-c / M2). §48j has all the groundwork
-already measured; start there, not from zero.
+## FIRST ACTION IN THE NEW CHAT: ask me which job I want, A or B
 
-0. **BLOCKER, operator action, not code: Tailscale is logged out.** `BackendState: NoState`,
-   `tailscale ip` → no address, the adapter has only a link-local IPv6. Ask the operator to
-   log Tailscale in and confirm `tailscale ip` returns a `100.x` address **before** any
-   two-machine measurement. Do not write code against an IP you cannot see.
-1. **`relayIP`** — one hardcoded literal at `loginsrv.c:1551` inside `build_host_reply()`,
-   currently `"127.0.0.1"`. Make it this machine's tailnet IP. Smallest source: an
-   `AOE2LAN_*` env var read once at startup, with `127.0.0.1` as the fallback so single-machine
-   hosting keeps working. Measure: host a lobby, read the `HTTP RESP BODY` for
+Do not start either job on your own. Your first reply must be a short question:
+
+> Which one do you want to do now — **A** (fix Tailscale) or **B** (the one game run:
+> 7 AI plus the 2-member roster test)?
+
+Then wait for my answer and do only that one. Both are described in full below. If I say
+"both", do A first, because B's relay measurement is more useful once a tailnet IP exists.
+
+---
+
+## STATE RIGHT NOW (session 49, all committed and pushed)
+
+Priority 1 (a hosted match loads and runs) and Priority 2 (AI in that match) are **DONE —
+measured, shipped, gated. Do not reopen them.** The front of the queue is **Priority 3: a
+second human joining over the tailnet** (PLAN §W1-c / M2).
+
+Session 49 shipped two of the four Priority 3 steps. Commit `533993f`.
+
+- **Step 1, `relayIP` — DONE.** `loginsrv.c` now has `g_RelayIP` plus `relay_ip_init()`,
+  called from `loginsrv_start()`. It reads `AOE2LAN_RELAY_IP` once, logs
+  `relayIP: AOE2LAN_RELAY_IP <value>`, and falls back to `127.0.0.1` when unset, oversize,
+  or containing any character outside `[0-9A-Za-z.:-]` (it is spliced into a JSON string, so
+  that check is a trust boundary). `build_host_reply()` emits `g_RelayIP` instead of the
+  old literal. `PLAY-stage8-VERBOSE.cmd` sets it to `127.0.0.1`.
+  Measured offline three ways: unset → `127.0.0.1`; set to `100.99.88.77` → that value in
+  the host reply **and** the join reply; set to `1.2.3.4","evil":1` → rejected, logged,
+  fallback. **Not yet measured against a real tailnet IP** — that needs job A first.
+- **Step 2, `/game/advertisement/join` — DONE.** There was no handler; the call fell into
+  the catch-all `[0,[]]`, an array, which the join-result DTO reader (`0x140572540`) cannot
+  parse. The new branch reuses `build_host_reply()` (no second builder, per §48j) by
+  handing it a synthetic form body: `hostid=` this machine's own profileID
+  (`mk_ids(g_Alias)`), `sessionID=` the lobby being joined, `description=` empty. It logs
+  `JOIN: hostid=…&sessionID=…`. Session id is taken from `advertisementid` unless that is
+  `-1`, then `sessionID`, then `connect_id`, then `1`.
+  `shortcut:` comment in the code names the limit — the member id comes from the last
+  login's alias because the join request's own key names are **unmeasured**. No join has
+  ever been attempted. The whole body is logged, so the first live join shows the truth.
+- **Step 3, `matchMembers` must carry the joiner — NOT DONE.** `emit_advertisement()` still
+  hardcodes ONE member. That is correct for co-op-vs-AI (§48e) and wrong the moment a human
+  joins. The brief for s49 said: test the 2-member shape with `work/s48b.py` against a live
+  lobby **before** committing to it. That is job B.
+- **Step 4, discovery — NOT STARTED, and it has a new blocker.** The four browse endpoints
+  answer only from this shim's own `g_AdvBody`, so a second machine never sees the host's
+  lobby. `lanhub` exists (Rust, W2's file, passes 11/11 on Linux) but **this Windows machine
+  has no Rust toolchain and no `lanhub.exe`**. So step 4 needs one of: install Rust here,
+  get a Windows build from W2, or the lazy shortcut the s49 brief pre-authorises — feed the
+  joiner's shim the host's advertisement blob from a file or env var for a first
+  two-machine proof only, named as a shortcut and not shipped as the design.
+- **Step 5, the relay needs no work.** Stock `BattleServer.exe` is already proven
+  cross-tailnet by W2 (repo commit `a890ab3`, `GAMEDATA` funnelled, derp ~85 ms).
+  Do NOT build `lanrelay`.
+
+### Gates, all re-run and passed at the end of session 49
+
+- `AoE2DE_s.exe` MD5 `affb19f03ca96965abf9e56775cab688` (untouched)
+- `dbghelp.dll` MD5 **`bb31158c4dd13ba2706f1334aaf4e5e3`**, identical in the game dir AND
+  `dev/lanhook/`. Backups taken BEFORE the build: `.prev-s49-before` =
+  `fa9330748b0fe297675f44e2828e738d` (the s48 build) in both places.
+- `hooktest.exe`: `post-hook ok (21, 210, 2100, 6)`, `T7 ok (210, 6)`, `swapped 68 of 68`
+- `AOE2LAN_LIVE=1 srvtest.exe 90` + `C:/Python314/python.exe -X utf8 srvclient.py` → **PASS**
+  (run srvclient FIRST, then `work/livetest.py` → **PASS**; livetest needs the advertisement
+  srvclient stored, and both need the SAME srvtest instance)
+- `srvclient.py` now also asserts the join reply and the `AOE2LAN_RELAY_IP` value; it
+  re-logs in as `TestPlayer` before the join test because the expect-100 test posts a login
+  body with no `alias=`, which clears the shim's stored alias
+- `work/verifydll.py` → **19** HOOKDEF entries, `MSThunk va=0x1407b66f0 … kind=0`,
+  `GLog va=0x1407db520 … kind=7`; `dumpbin -IMPORTS` → **KERNEL32.dll only**
+- Build warnings are the pre-existing C4090 five, now at loginsrv.c **690/692/694/2001/2032**
+- Never launch the game while `srvtest.exe` lives or `127.0.0.1:443` has a **LISTENING**
+  socket (`TIME_WAIT` is harmless). Two srvtest instances at once produce
+  `ConnectionResetError` in srvclient — that is the trap, not a code bug.
+
+### A game may still be running from session 49
+
+Session 49 launched the game and left it at the main menu: PID log `logs/lanhook-15940.log`,
+healthy boot, `livepush.py ping` → `PONG armed=1`. At the end of session 49 it was **still
+up** (t≈815 s, 2.17 GB, `BattleServer.exe` running, no `advertisement/host` yet, so no lobby
+hosted). If it is still up, job B can use it — skip B1. Check with
+`tasklist | grep -i AoE2DE_s` and relaunch if it is gone (job A's reboot kills it).
+
+---
+
+## JOB A — fix Tailscale (operator action; you cannot do it, this shell is not admin)
+
+Tailscale has been down since session 48. Measured facts, do not re-derive:
+
+- Service `tailscale` RUNNING, version `1.102.2`. Two `tailscaled.exe` processes — that is
+  **normal**, PID 5392's parent is the service PID 4128.
+- `tailscale status --json`: `BackendState: NoState`, `Self.Online: false`,
+  `TailscaleIPs: null`, `AuthURL: ""`, `HostName: DESKTOP-64DAV0P`.
+- Health: "Unable to connect to the Tailscale coordination server" + "Tailscale is starting.
+  Please wait." — and it stays like that for hours.
+- The network itself is fine: `tailscale netcheck` completes (UDP true, IPv4
+  `118.179.44.73`, UPnP, no captive portal) and `curl https://controlplane.tailscale.com/`
+  returns 302. But netcheck printed "No DERP map from tailscaled", i.e. the **daemon** never
+  fetched one. So the daemon is stuck, not the network.
+- `tailscale up` and `tailscale login` both hang and print nothing.
+- `C:\ProgramData\Tailscale\` is not readable without admin, so the daemon logs are unseen.
+
+What to do: give me these commands to run in an **admin** terminal, then wait for my answer.
+
+```
+net stop tailscale
+net start tailscale
+tailscale up
+```
+
+If that does not work, reboot and log in from the tray icon. Success looks like
+`tailscale ip` printing a `100.x` address. When I give you the address:
+
+1. Put it in `PLAY-stage8-VERBOSE.cmd` as `set AOE2LAN_RELAY_IP=100.x.y.z`.
+2. Re-run the offline gate with it (`AOE2LAN_RELAY_IP=100.x.y.z srvtest.exe 40` plus the
+   same env on `srvclient.py`) to confirm it reaches the host and join replies.
+3. Then a live run: host a lobby and read the `HTTP RESP BODY` for
    `/game/advertisement/host`, confirm the `100.x` address, and confirm the local game still
-   connects to its own relay through it.
-2. **`/game/advertisement/join`** — there is no handler; it falls into the catch-all empty
-   success. Big head start: the comment at `loginsrv.c:1531` records that the *host* call
-   parses its answer with the **join-result DTO** (parser `0x140572540`), so
-   `build_host_reply()` already emits the right shape. Reuse it; do not write a second builder.
-   The member element parser is `0x14056eb40`, keys already dumped (§48c).
-3. **`matchMembers` must carry the joiner.** `emit_advertisement()` hardcodes ONE member (the
-   host) — that is correct for co-op-vs-AI (§48e) and wrong the moment a human joins. Test the
-   2-member shape with `work/s48b.py` against a live lobby **before** committing to it.
-4. **Discovery — the biggest piece.** The four browse endpoints answer only from this shim's
-   own `g_AdvBody`, so a second machine never sees the host's lobby. `lanhub` exists, is Rust,
-   and passes its walk (`lanhub/test_walk.py`, 11/11: HELLO/HOST/cross-instance FIND via
-   gossip/JOIN remote) on control `127.0.0.1:47100`, gossip `:47101`. Wire the shim's browse
-   endpoints to lanhub `FIND`. **Lazy alternative for a first two-machine proof only:** feed
-   the joiner's shim the host's advertisement blob out of a file or env var and skip lanhub —
-   name it as a shortcut in the reply and do not ship it as the design.
-5. **The relay itself needs no work.** Stock `BattleServer.exe` is already proven
-   cross-tailnet by W2 (repo commit `a890ab3`, `GAMEDATA` funnelled, derp ~85 ms). Do not
-   build `lanrelay`.
+   connects to its own relay through it (the match must still load — `SendSyncPacketRawMemCopy`).
+   Do NOT bundle this with any `matchMembers` change.
 
-Steps 1–3 are shim-side and testable on ONE machine. Do them and gate them before touching 4.
-Change one thing at a time and measure it; do not bundle `relayIP` with `matchMembers`.
+Do not write code against an IP you cannot see.
 
-### Also worth one cheap run (warm-up, answers an open question)
+---
 
-**Does 7 AI work?** The operator asked. Nothing we emit depends on the AI count — AI are
-host-local simulation, they never enter `slotinfo` (slots 1–7 stay empty even with 3 AI) and
-never enter `matchMembers`; `maxPlayerCount` is 8 and the blob has 8 slots, so 1 human + 7 AI
-is inside the game's own limit. **But it is untested**, and there is an unexplained number: the
-operator placed 3 AI and every `HIT AISlotPick` reports `nAI=0x2 val=0x2 kind=2`, in both s48
-runs, before and after Start. One run with 7 AI settles both: host, 7 AI, Start, then read
-`nAI` and ask the operator how many AI are visibly in the match. If `nAI` tracks the count,
-the s48 reading was a stale or different counter and there is nothing to fix.
+## JOB B — one game run: does 7 AI work, and does a 2-member roster parse
 
-## SOLVED IN SESSION 48 — do not redo any of it
+This answers two open questions in one run. It does NOT need Tailscale.
 
-- **A hosted match loads and runs.** The one missing thing was the advertisement key **`id`**.
-  Without it the frame parses, `MSThunk` fires, `AET_MatchStartNotify` logs — and the lobby
-  never leaves. No error line at all. With it the same frame reaches `Sending final
-  pregamehoststate packet.` → `SendSyncPacketRawMemCopy` → `AISlotPick nAI=0x2` → scenario
-  load, 63 ms after the push. Measured A/B on one live lobby, 257 s apart, one key different,
-  quiet window verified empty. `emit_advertisement()` now opens with `"id":<sessionID>`;
-  `srvclient.py` asserts it.
-- **§47's "advertisement key order matters" is WRONG.** Reader `0x14056cce0` and the
-  `matchMembers` element reader `0x14056eb40` are **name cascades that restart at the first
-  field for every key**: each block tries the current key against its own name, and on mismatch
-  falls to the next block **without consuming anything**; the tail calls `NextKey` and jumps
-  back to the top. Any permutation parses; unknown keys are skipped. **Presence matters, order
-  does not.** The s47 reorder is harmless and stays. Do not spend a session on order again.
-- **`matchMembers` element shape was never broken.** Keys in probe order: `sessionID,
-  profileID, ranking, statGroupID, raceID, teamID, url`; element size `0x48`. Our
-  `profileID`-first order is fine. §47h's suspicion is closed.
-- **AI do not need to be in the advertisement.** §46f/§47h assumed the empty `slotinfo` was
-  Priority 2's blocker. Re-measured: `slotinfo` still has slots 1–7 empty (`pid=-1
-  station=-1 isReady=0`) and the AI play anyway. Do not "fix" `slotinfo` or add AI to
-  `matchMembers` for co-op.
-- **A live lobby is a reusable test bench.** The game keeps its rlink websocket **armed after
-  Start** (`livepush.py ping` → `PONG armed=1` 257 s into a stalled lobby). One run supports
-  unlimited A/B pushes against real lobby state at ~4 s each. This is what found `id`.
+**B1. Launch (only if the game is not already up).** Confirm `srvtest.exe` is not running
+(`tasklist | grep -i srvtest`) and that `127.0.0.1:443` has no LISTENING socket
+(`netstat -ano | grep "127.0.0.1:443" | grep LISTENING`). Kill any leftover `AoE2DE_s.exe`
+and `BattleServer.exe`. Then:
+
+```
+powershell -NoProfile -ExecutionPolicy Bypass -File "dev\lanhook\work\launch-detached.ps1" -cmdFile PLAY-stage8-VERBOSE.cmd
+```
+
+Wait ~45 s, take the newest `logs/lanhook-<pid>.log` (the launcher returns the cmd.exe PID,
+not the game's). Nothing needs clicking — the cert consent dialog is auto-clicked in under
+100 ms. Healthy boot = `relayIP: AOE2LAN_RELAY_IP 127.0.0.1`, repeated
+`TLS: handshake complete (server side)`, `OnAccountEvent: Client is using WebSockets`,
+`cert: user-Root registered via API (consent dialog auto-clicked)`,
+`VERBOSE: log level byte [0x144356c66] 0 -> 2`. Then `work/livepush.py ping` → `PONG armed=1`.
+
+**B2. Ask me to host.** Multiplayer → Host Game → **7 AI** → sit in the lobby and
+**do NOT press Start**. Wait for my "ready".
+
+**B3. While the lobby is idle, A/B the roster shape** (this is step 3, and the channel is
+armed before Start — measured in session 49). Capture the real frame first, because the
+committed `work/v0-real.json` holds run 15416's sessionID:
+
+```
+cd dev/lanhook
+C:/Python314/python.exe -X utf8 work/livepush.py get 0 > work/v0-real.json
+```
+
+Then push, in this order, and record every verdict (`sent=1 parsefail=N thunkhits=M`):
+
+1. baseline, unchanged: `work/s48b.py base '{}'`
+2. two members — build the override from the captured member so the sessionID and the host
+   profileID are the real ones:
+
+```
+C:/Python314/python.exe -c "import json;m=json.load(open('work/v0-real.json'))[3]['matchAdvertisement']['matchMembers'][0];j=dict(m);j['profileID']=m['profileID']+1;j['teamID']=1;print(json.dumps({'matchMembers':[m,j]}))" > work/ov2.json
+C:/Python314/python.exe -X utf8 work/s48b.py members2 "$(cat work/ov2.json)"
+```
+
+3. four members (same code path, cheap): repeat with three clones instead of one.
+4. control, empty body, to prove the channel still works:
+   `work/livepush.py push '[0,"MatchStartMessage",<realPID>,{}]' 2` → must be `parsefail=0`.
+
+`parsefail=0` means the shape parses. It does NOT mean the match started. A push before
+Start may or may not load the map; if the lobby leaves, that is a finding, not a failure —
+say so and move to B4 with a fresh lobby.
+
+**B4. Then ask me to press Start.** Wait ~2 minutes. Expected within ~70 ms of
+`WS PUSH MatchStartMessage`: `AET_MatchStartNotify`, `Sending final pregamehoststate packet.`,
+`TComm_Provider_RL::SendSyncPacketRawMemCopy`, `HIT AISlotPick … nAI=0x…`, then
+`MSLADDER PARSED - no failure logged, ladder stops`. The process grows to ~3 GB when the map
+loads.
+
+**B5. Read the log and ask me one question.** Grep `HIT AISlotPick` and report every `nAI`
+value, then ask me: *how many AI are visibly in the match?* Session 48 saw `nAI=0x2` with
+3 AI placed, in two runs, before and after Start — unexplained. **New evidence from run
+15940:** `HIT AISlotPick … val=0x2 kind=2 nAI=0x2` fires at t=29.4 s, at the MAIN MENU,
+with no lobby hosted and no AI placed at all. So `nAI=2` is some default or a different
+counter, not the lobby's AI count — job B5 is now "does `nAI` change at all with 7 AI",
+and if it stays 0x2 the hook is reading the wrong field and there is nothing to fix. With 7 AI placed, if `nAI`
+tracks the count the s48 reading was a stale or different counter and there is nothing to
+fix. Nothing we emit depends on the AI count: AI are host-local simulation, they never enter
+`slotinfo` (slots 1–7 stay empty even with 3 AI) and never enter `matchMembers`.
+
+**B6. Only then change code.** If the 2-member shape parses, make `emit_advertisement()`
+carry a second member. There is no producer for a joiner yet (that is step 4 / discovery), so
+keep it minimal and do not invent a member table with nothing to fill it — say what you
+skipped. Test the new shape offline in `srvclient.py` before any live run.
+
+---
 
 ## THE TOOLS
 
@@ -112,22 +233,16 @@ the s48 reading was a stale or different counter and there is nothing to fix.
     livepush.py ping                     -> "PONG armed=1" means a game websocket is live
     livepush.py get [n]                  -> the shim's own built payload n (needs a hosted lobby)
     livepush.py push '<json>' [opcode]   -> push one payload, returns "sent=1 parsefail=N thunkhits=M"
-    livepush.py s47                      -> the batch that proved the positional-array envelope
-    livepush.py selftest                 -> offline check of the s47 payload shapes
-    livepush.py sweep / bisect / types   -> CLOSED, §46e evidence trail only, do NOT re-run
-
+    livepush.py selftest                 -> offline check of the payload shapes
     s48.py                               -> real variant-0 frame + 4-member roster + {} control
     s48b.py <label> '<json>'             -> THE A/B TOOL: override any matchAdvertisement key
     s48b.py <label> --body '<json>'        in the captured real frame and push it live
     keys.py <va> [<va>...]               -> JSON key names a bond reader/writer probes, in order
+    livepush.py sweep / bisect / types   -> CLOSED, §46e evidence only, do NOT re-run
 
 **Playbook for the next blocker:** host a lobby, press Start, let it stall or reach the state
 you want, then `livepush.py get 0 > work/v0-real.json` and A/B with `s48b.py`. Only relaunch
-when the lobby state itself is the variable. `work/v0-real.json` is committed, but it holds
-run 15416's sessionID — re-capture it for a new lobby.
-
-`parsefail` is NOT the only verdict any more. A frame can parse and still do nothing. The line
-that proves a match really started is **`TComm_Provider_RL::SendSyncPacketRawMemCopy`**.
+when the lobby state itself is the variable.
 
 ## THE PARSE CHAIN (all readable in gametext.bin; §47b has the full version)
 
@@ -156,7 +271,8 @@ isObserverPassworded, service, matchStartTime, matchRegion, matchRegionLocalized
 Host/join result DTO: parser `0x140572540`, builder `0x14032f5e0`, members in parser order
 `resultCode, gatheringID, relayAuthToken, relayIP, relayPortRaw/WebSockets/OutOfBandSocket
 (WORD), relayRegion, yourMatchMembers[], steamLobbyID…, filteredDescription`. Member element
-parser `0x14056eb40`. The caller requires `resultCode == 0` AND a non-empty member vector
+parser `0x14056eb40`, keys `sessionID, profileID, ranking, statGroupID, raceID, teamID, url`,
+element size `0x48`. The caller requires `resultCode == 0` AND a non-empty member vector
 (DTO+0x78/+0x80), then copies `gatheringID` (DTO+8) into the service as the session id.
 
 Tokenizer helpers: `0x14039b7c0` SkipWhitespace, `0x14039bb50` PeekChar, `0x14039b860`
@@ -164,96 +280,50 @@ SkipComma, `0x14039b8e0` IsNull, `0x14039a910` BeginContainer, `0x14039b340` Nex
 `0x14039b5a0` ScanToken, `0x14039b550` consume-N, `0x14039c900` ReadInt64, `0x14039cc60`
 ReadString. Browse-list reply parser `0x140571ae0` (`result`, `advertisements`, `playerRatings`).
 
-## GATES before any run (all passed at the end of session 48 — re-run them all)
-
-- `AoE2DE_s.exe` MD5 `affb19f03ca96965abf9e56775cab688`
-- `dbghelp.dll` MD5 **`fa9330748b0fe297675f44e2828e738d`**, identical in the game dir AND
-  `dev/lanhook/`. If you rebuild: take a `.prev-*` backup of BOTH copies first, then re-run
-  every gate. (`.prev-s48-before` = `cc68c98ec43e6fcb38a0aa5c6906fb16`, the s47 build;
-  `.prev-s47-before` = `21fb2d236ad342ac9647cd7bbdc97fef`, s46.)
-- `hooktest.exe`: `post-hook ok (21, 210, 2100, 6)`, `T7 ok (210, 6)`, `swapped 68 of 68`
-- `AOE2LAN_LIVE=1 srvtest.exe 90` + `C:/Python314/python.exe -X utf8 srvclient.py` → **PASS**,
-  incl. `update reply: result=0, advertisement keys=22`, `updateState reply: matchState=1`,
-  `MatchStartMessage push: 774B`, `ladder variant1 empty-body: 46B`,
-  `ladder variant2 advert-only: 666B`, `ladder terminated after variant2`; then
-  `work/livetest.py` → **PASS** (`GETVARIANT 1` = 46 B, `GETVARIANT 0` = 774 B)
-- `work/verifydll.py` → **19** HOOKDEF entries, `MSThunk va=0x1407b66f0 … kind=0`,
-  `GLog va=0x1407db520 … kind=7`
-- verify any rebuilt DLL with `verifydll.py` + `dumpbin -DISASM`, never a byte grep;
-  `dumpbin -IMPORTS` must still show **KERNEL32.dll only**. dumpbin lives at
-  `"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\Hostx64\x64\dumpbin.exe"`
-- build with `dev/lanhook/build.cmd` (it stages the DLL into the game dir itself); warnings
-  must be the pre-existing C4090 five only, now at loginsrv.c **690/692/694/1928/1959**
-
-## To launch
-
-FIRST: confirm `srvtest.exe` is not running (`tasklist | grep -i srvtest`) and that
-`127.0.0.1:443` has **no LISTENING** socket (`netstat -ano | grep "127.0.0.1:443" | grep
-LISTENING`) — `TIME_WAIT` entries are harmless. See the trap below. Then kill any leftover
-`AoE2DE_s.exe` and `BattleServer.exe` (the game holds 443 and the next launch silently fails to
-bind without it). Then:
-
-    powershell -NoProfile -ExecutionPolicy Bypass -File
-    "dev\lanhook\work\launch-detached.ps1" -cmdFile PLAY-stage8-VERBOSE.cmd
-
-Wait ~45 s, take the newest `logs/lanhook-<pid>.log` (the launcher returns the cmd.exe PID, not
-the game's). No dialog appears and nothing needs clicking — the certificate consent dialog is
-found and auto-clicked by the DLL in under 100 ms. Healthy boot = repeated `TLS: handshake
-complete (server side)` + `OnAccountEvent: Client is using WebSockets` + `cert: user-Root
-registered via API (consent dialog auto-clicked)` + `VERBOSE: log level byte [0x144356c66] 0 -> 2`.
-
-Then, for a Priority 1/2 regression check: Multiplayer → Host Game → AI → Start. Expected
-within ~70 ms of `WS PUSH MatchStartMessage`: `AET_MatchStartNotify`, `Sending final
-pregamehoststate packet.`, `SendSyncPacketRawMemCopy`, `HIT AISlotPick … nAI=0x…`, then
-`MSLADDER PARSED - no failure logged, ladder stops`. The process grows to ~3 GB when the map
-loads.
-
 ## TRAPS (each of these cost a run or a session)
 
 - **`srvtest.exe` also binds `127.0.0.1:443`** and `loginsrv.c` sets `SO_REUSEADDR` before
-  bind. On Windows that lets the game "bind" 443 while srvtest still owns it, so the game talks
-  to srvtest and the game's own log shows ZERO handshakes. Always wait srvtest out.
-- **`WebSocketConnection::ProcessMessages: message=%s` prints the exact bytes we pushed** (hook
-  4 truncates to 70 chars, enough to see the shape). READ THAT LINE before believing any
-  payload verdict. A Python helper once returned `(key, value)` tuples and `json.dumps`
-  rendered them as arrays — the log showed it instantly. `livepush.py selftest` guards it.
+  bind, so the game can "bind" 443 while srvtest still owns it and the game's log shows ZERO
+  handshakes. Always wait srvtest out. Two srvtest instances at once reset connections.
+- **`WebSocketConnection::ProcessMessages: message=%s` prints the exact bytes we pushed**
+  (hook 4 truncates to 70 chars). READ THAT LINE before believing any payload verdict.
 - **`parsefail=0` does not mean success.** It means the frame parsed. `id` was missing for a
   whole session while every verdict read clean. Look for `SendSyncPacketRawMemCopy`.
-- **Hook 17 dedupes by format string**, so a running match logs each network line once and then
-  goes quiet. Silence after a successful start is normal, not a stall.
+- **Hook 17 dedupes by format string**, so a running match logs each network line once and
+  then goes quiet. Silence after a successful start is normal, not a stall.
 
 ## Do NOT
 
 - Do NOT reopen Priority 1 or 2. A hosted match loads and runs with AI; it is gated.
-- Do NOT send the notification as a JSON object, and do NOT wrap it in `{"messages":[…]}` on the
-  websocket. Both are measured rejects. `messages` is long-poll only. Do NOT pursue forcing long
-  polling (§46h route 1) — the WS format is known.
-- Do NOT spend time on advertisement or `matchMembers` **key order** (§48c). Presence matters,
-  order does not.
+- Do NOT start job A or job B without asking me which one I want.
+- Do NOT send the notification as a JSON object, and do NOT wrap it in `{"messages":[…]}`.
+  Both are measured rejects. `messages` is long-poll only. Do NOT pursue forcing long polling.
+- Do NOT spend time on advertisement or `matchMembers` **key order** (§48c). Presence
+  matters, order does not.
 - Do NOT remove `"id"` from `emit_advertisement`, and do not change its value away from the
   sessionID without a measurement. `srvclient.py` asserts it.
-- Do NOT add AI to `slotinfo` or `matchMembers` to "fix" Priority 2 (§48e measures they already
-  work). Answer the `nAI=0x2` vs 3-AI question first.
+- Do NOT add AI to `slotinfo` or `matchMembers` to "fix" Priority 2 (§48e measures they
+  already work). Answer the `nAI` vs 7-AI question first (job B5).
 - Do NOT build `lanrelay`. Stock `BattleServer.exe` is proven cross-tailnet (§48j).
-- Do NOT re-run `livepush.py sweep`/`bisect`/`types`, and do NOT re-test any §46e shape.
-- Do NOT treat "on the §45a ENCRYPTED list" as "cannot be read" — see the working rule.
-- Do NOT hook anything on the §45a ENCRYPTED list (dispatch `0x1407a7070`, envelope reader
-  `0x1407a7620`, factory `0x1407cdf10`, body parser `0x1407b6710`, all six member readers, the
-  `0x14039xxxx` helpers, polling fn `0x1406d1160`). `MSThunk 0x1407b66f0` and `GLog
-  0x1407db520` are CLEAN and stay hooked (ids 18 and 17).
-- Do NOT change the s45 ladder's stop-on-no-failure rule or add a 4th variant. The three
-  variants are a real fallback: 0 = all six body members with the real advertisement,
-  1 = empty body `{}` (measured `parsefail=0`), 2 = `matchAdvertisement` only.
-- Do NOT re-run a cleanliness check with a fixed byte window — use the pdata bounds (§45a).
-- Do NOT re-derive the registry node layout (`r14=[0x144c9e3e0]`, `fn=[r14]`, `next=[r14+8]`).
-- Do NOT delete the `srvtest.c` 1 Hz `g_ParseFail` bump (the offline ladder needs it to
-  escalate through all three variants), and do NOT let `root_add_silent()` skip its
-  `root_present()` re-check.
-- Do NOT initialise a `BUF` partially — it is `{char *p; size_t len, cap; int oom;}` and a wild
-  `p` crashes the shim thread and takes the whole process with it. Always `BUF b = {0};`
-- Do NOT rebuild without a `.prev-*` backup of both `dbghelp.dll` copies first.
 - Do NOT edit W2's files (`lanhub/**`, `linux/**`, `notes/linux-*.md`) — §17.1. `PLAN.md` and
   `README.md` are shared: append only, never rewrite the other worker's section.
+- Do NOT re-run `livepush.py sweep`/`bisect`/`types`, and do NOT re-test any §46e shape.
+- Do NOT treat "on the §45a ENCRYPTED list" as "cannot be read", and do NOT hook anything on
+  it (dispatch `0x1407a7070`, envelope reader `0x1407a7620`, factory `0x1407cdf10`, body
+  parser `0x1407b6710`, all six member readers, the `0x14039xxxx` helpers, polling fn
+  `0x1406d1160`). `MSThunk 0x1407b66f0` and `GLog 0x1407db520` are CLEAN and stay hooked
+  (ids 18 and 17).
+- Do NOT change the s45 ladder's stop-on-no-failure rule or add a 4th variant.
+- Do NOT re-run a cleanliness check with a fixed byte window — use the pdata bounds (§45a).
+- Do NOT re-derive the registry node layout (`r14=[0x144c9e3e0]`, `fn=[r14]`, `next=[r14+8]`).
+- Do NOT delete the `srvtest.c` 1 Hz `g_ParseFail` bump, and do NOT let `root_add_silent()`
+  skip its `root_present()` re-check.
+- Do NOT initialise a `BUF` partially — it is `{char *p; size_t len, cap; int oom;}` and a
+  wild `p` crashes the shim thread and takes the whole process with it. Always `BUF b = {0};`
+- Do NOT rebuild without a `.prev-*` backup of both `dbghelp.dll` copies first. Verify a
+  rebuilt DLL with `verifydll.py` + `dumpbin -DISASM`, never a byte grep. dumpbin lives at
+  `"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\Hostx64\x64\dumpbin.exe"`.
+  Build with `dev/lanhook/build.cmd` (it stages the DLL into the game dir itself).
 - Do NOT re-open the certificate dialog problem, `root_add_silent()`'s blob format, §45e, the
   t=1.2 s exit (§46a), or anything in §45g / §44h / §43h.
 
