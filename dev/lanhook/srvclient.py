@@ -460,9 +460,12 @@ print(f"  updateState reply: matchState={((us or {}).get('updatedAvertisement') 
 # ---- s43: state>=1 arms the MatchStartMessage push, and ws_serve must send one
 # binary frame with it. That notification is the only thing that produces
 # AET_MatchStartNotify (advertisement event case 7, 0x140eec335), which is what
-# builds the roster the match loads from. Envelope members are fixed by the
-# client's reader 0x1407a7620: result / m_type / m_profileID; the payload members
-# are the six the registered parser #9 reads.
+# builds the roster the match loads from.
+# s47: the frame is a POSITIONAL ARRAY [result, m_type, m_profileID, {body}],
+# measured live (parsefail=0 + AET_MatchStartNotify). The body parser 0x1407b6710
+# starts with BeginContainer, which needs '[' or '{' where the envelope reader
+# stopped - in object form that is '}', so no object shape can ever parse.
+# Body keys are the six writer 0x1407b7220 emits, in its order.
 ms = None
 for _ in range(30):
     op, pl, _ = ws2.frame()
@@ -475,21 +478,35 @@ for _ in range(30):
 chk(ms is not None, "no MatchStartMessage push arrived after updateState state=1")
 if ms:
     txt = ms.decode("latin1")
-    # s45: no trailing comma. The comma came from the s20 HTTP long-poll rule
-    # ("null," parses, "null" does not) - a different transport. The game's own WS
-    # frames ({"operation":1,"ackCount":1}) carry none, and the WS notification
-    # parser rejected our frame with one.
-    chk(txt.endswith("}"), f"push must be one bare value, ends {txt[-6:]!r}")
-    ev = json.loads(txt)
-    chk(ev.get("result") == 0, f"push result {ev.get('result')!r}")
-    chk(ev.get("m_type") == "MatchStartMessage", f"push m_type {ev.get('m_type')!r}")
-    chk(ev.get("m_profileID") == 3842241165083521967,
-        f"push m_profileID {ev.get('m_profileID')!r}")
+    chk(txt.endswith("}]"), f"push must be [result,m_type,m_profileID,{{body}}], ends {txt[-6:]!r}")
+    fr = json.loads(txt)
+    chk(isinstance(fr, list) and len(fr) == 4,
+        f"push must be a 4-element positional array, got {type(fr).__name__} len {len(fr)}")
+    chk(fr[0] == 0, f"push result {fr[0]!r}")
+    chk(fr[1] == "MatchStartMessage", f"push m_type {fr[1]!r}")
+    chk(fr[2] == 3842241165083521967, f"push m_profileID {fr[2]!r}")
+    ev = fr[3]
+    chk(isinstance(ev, dict), f"push body must be an object, got {type(ev).__name__}")
+    chk(list(ev) == ["ownedAppIDs", "profileRaces", "matchStartDate", "equippedItems",
+                     "matchAdvertisement", "inProgressChallenges"],
+        f"push body order {list(ev)}, want writer 0x1407b7220's order")
     chk(isinstance(ev.get("matchStartDate"), int) and ev["matchStartDate"] > 1600000000,
         f"push matchStartDate {ev.get('matchStartDate')!r}")
     for k in ("ownedAppIDs", "profileRaces", "equippedItems", "inProgressChallenges"):
         chk(ev.get(k) == [], f"push {k} {ev.get(k)!r}, want []")
     pa = ev.get("matchAdvertisement") or {}
+    # s47: reader 0x14056cce0 matches these 27 keys sequentially, so the ones we
+    # emit must appear in its order or NextKey can drop them.
+    ADV_ORDER = ["id", "steamLobbyID", "goodOldGamesLobbyID", "psnPlayerSessionID",
+                 "psnMatchId", "xboxSessionID", "hostProfileID", "matchState",
+                 "description", "filteredDescription", "visible", "mapName", "options",
+                 "isPassworded", "maxPlayerCount", "encodedSlots", "matchTypeID",
+                 "matchMembers", "observerNum", "observerMax", "isobservable",
+                 "observerDelay", "isObserverPassworded", "service", "matchStartTime",
+                 "matchRegion", "matchRegionLocalized"]
+    got = list(pa)
+    chk(got == [k for k in ADV_ORDER if k in got],
+        f"pushed advert keys out of reader order: {got}")
     chk(pa.get("matchState") == 1, f"pushed advert matchState {pa.get('matchState')!r}, want 1")
     chk(pa.get("hostProfileID") == 3842241165083521967,
         f"pushed advert hostProfileID {pa.get('hostProfileID')!r}")
@@ -501,12 +518,12 @@ if ms:
 
 # ---- s45: the payload ladder. Offline srvtest bumps hook 13's parse-failure
 # count once a second (there is no real hook 13 here), so the shim grades every
-# variant as rejected and escalates ~3 s apart: variant 1 = envelope only (all six
-# payload members are optional), variant 2 = envelope + matchAdvertisement. This
-# is the ladder's only automated check.
-for tag, keys in (("variant1 envelope-only", {"result", "m_type", "m_profileID"}),
-                  ("variant2 envelope+advert",
-                   {"result", "m_type", "m_profileID", "matchAdvertisement"})):
+# variant as rejected and escalates ~3 s apart. s47: all three variants are now
+# the positional array and differ only in the body - variant 1 = empty body
+# (measured parsefail=0, the fallback if the advertisement body is what breaks),
+# variant 2 = matchAdvertisement only. This is the ladder's only automated check.
+for tag, keys in (("variant1 empty-body", set()),
+                  ("variant2 advert-only", {"matchAdvertisement"})):
     p = None
     try:
         for _ in range(10):
@@ -521,9 +538,11 @@ for tag, keys in (("variant1 envelope-only", {"result", "m_type", "m_profileID"}
         pass
     chk(p is not None, f"no {tag} push arrived")
     if p:
-        ev2 = json.loads(p.decode("latin1"))
-        chk(set(ev2) == keys, f"{tag} keys {sorted(ev2)}, want {sorted(keys)}")
-        print(f"  ladder {tag}: {len(p)}B, keys={sorted(ev2)}")
+        fr2 = json.loads(p.decode("latin1"))
+        chk(isinstance(fr2, list) and len(fr2) == 4 and fr2[1] == "MatchStartMessage",
+            f"{tag} must be the positional MatchStartMessage array, got {str(fr2)[:50]!r}")
+        chk(set(fr2[3]) == keys, f"{tag} body keys {sorted(fr2[3])}, want {sorted(keys)}")
+        print(f"  ladder {tag}: {len(p)}B, body keys={sorted(fr2[3])}")
 
 # the ladder must TERMINATE after variant 2 - a shim that re-pushed MatchStartMessage
 # every 3 s forever would spam a live match. Deadline, not an idle timeout: the

@@ -1613,34 +1613,40 @@ static void emit_advertisement(BUF *b, const char *body) {
     if (!form_get(body, "sessionID", sid, sizeof sid)) sid[0] = 0;
     bs(b, "{\"hostProfileID\":");
     bs(b, hostid[0] ? hostid : "0");
-    adv_raw(b, body, "description", "description");
-    adv_raw(b, body, "description", "filteredDescription");
-    adv_raw(b, body, "mapname", "mapName");
-    adv_raw(b, body, "options", "options");
-    // the create/update request calls the option blob `slotinfo`; the advertisement
-    // reader calls the same blob `encodedSlots` (PLAN 6.2: byte for byte)
-    adv_raw(b, body, "slotinfo", "encodedSlots");
-    adv_num(b, body, "visible", "visible", "1");
-    adv_num(b, body, "passworded", "isPassworded", "0");
-    adv_num(b, body, "maxplayers", "maxPlayerCount", "8");
-    adv_num(b, body, "matchtype", "matchTypeID", "-1");
+    // s47: keys in the order the notification reader 0x14056cce0 checks them,
+    // which is the order its writer 0x14056dda0 emits them. That reader matches
+    // the 27 keys sequentially and NextKey skips what did not match in turn, so a
+    // key out of order can be dropped - and matchMembers/encodedSlots are exactly
+    // what WorldwideNotifier::ProcessNotification fills the slots from.
     // matchState: the state the game last told us, else this body's own, else -1
     { char st[8];
       if (!adv_get_state(st, sizeof st) &&
           !(form_get(body, "state", st, sizeof st) && st[0])) st[0] = 0;
       bs(b, ",\"matchState\":");
       bs(b, st[0] ? st : "-1"); }
-    adv_num(b, body, "serviceType", "service", "1");
-    adv_num(b, body, "isObservable", "isobservable", "0");
-    adv_num(b, body, "observerDelay", "observerDelay", "0");
-    bs(b, ",\"observerNum\":0,\"observerMax\":0,\"isObserverPassworded\":0");
-    bs(b, ",\"matchStartTime\":0,\"matchRegion\":\"LAN\"");
-    bs(b, ",\"matchRegionLocalized\":\"LAN\"");
+    adv_raw(b, body, "description", "description");
+    adv_raw(b, body, "description", "filteredDescription");
+    adv_num(b, body, "visible", "visible", "1");
+    adv_raw(b, body, "mapname", "mapName");
+    adv_raw(b, body, "options", "options");
+    adv_num(b, body, "passworded", "isPassworded", "0");
+    adv_num(b, body, "maxplayers", "maxPlayerCount", "8");
+    // the create/update request calls the option blob `slotinfo`; the advertisement
+    // reader calls the same blob `encodedSlots` (PLAN 6.2: byte for byte)
+    adv_raw(b, body, "slotinfo", "encodedSlots");
+    adv_num(b, body, "matchtype", "matchTypeID", "-1");
     bs(b, ",\"matchMembers\":[{\"profileID\":");
     bs(b, hostid[0] ? hostid : "0");
     bs(b, ",\"sessionID\":");
     bs(b, sid[0] ? sid : "0");
-    bs(b, ",\"ranking\":0,\"statGroupID\":0,\"raceID\":-1,\"teamID\":-1,\"url\":\"\"}]}");
+    bs(b, ",\"ranking\":0,\"statGroupID\":0,\"raceID\":-1,\"teamID\":-1,\"url\":\"\"}]");
+    bs(b, ",\"observerNum\":0,\"observerMax\":0");
+    adv_num(b, body, "isObservable", "isobservable", "0");
+    adv_num(b, body, "observerDelay", "observerDelay", "0");
+    bs(b, ",\"isObserverPassworded\":0");
+    adv_num(b, body, "serviceType", "service", "1");
+    bs(b, ",\"matchStartTime\":0,\"matchRegion\":\"LAN\"");
+    bs(b, ",\"matchRegionLocalized\":\"LAN\"}");
 }
 
 // The last advertisement this server created or was told to update. One lobby is
@@ -1664,47 +1670,57 @@ static int adv_copy(char *out, int cap) {
 
 // s43: THE missing push. The game-layer advertisement dispatcher 0x140eeb930
 // switches on [event+0x10]; case 7 = AET_MatchStartNotify (0x140eec335) and it is
-// the only thing that builds the roster the match loads from. It is fed by
-// registered WS payload parser #9 (table 0x144116af0+0x10*9 = 0x1407b66f0 ->
-// 0x1407cdf10), which locks m_type to the 17-char name "MatchStartMessage" and
-// reads six OPTIONAL members (writer 0x1407b7220 gives the exact shapes):
-//   ownedAppIDs, profileRaces, matchStartDate (u64), equippedItems,
-//   matchAdvertisement (writer 0x14056dda0 - the SAME advertisement dto
-//   emit_advertisement already builds), inProgressChallenges.
-// WorldwideNotifier::ProcessNotification 0x14079a1bc then adds profile info to
-// the slots out of the advertisement, failing with "Failed to add profile
-// information to slots." / "A match discrepancy has been detected". We never sent
-// this in 43 sessions, so AET_MatchStartNotify never fired: the countdown ran,
-// StartLaunchGame logged "ok", and the lobby sat there with nothing to load.
-// Empty arrays for the four members we have no data for - the reader treats every
-// member as optional and skips what is absent.
+// the only thing that builds the roster the match loads from.
 //
-// s45: variants, tried in ONE run. The shim and the hooks share a process, so the
-// shim can read hook 13's parse-failure count (g_ParseFail) and hook 18's
-// factory-reached count (g_MSReached) and escalate instead of spending a run per
-// payload. 0 = every member and NO trailing comma (the comma came from the s20
-// HTTP long-poll rule "null, parses, null does not" - a different transport; the
-// game's own WS frames, e.g. {"operation":1,"ackCount":1}, carry none, so it may
-// never have applied here). 1 = envelope only, which must parse if the
-// envelope+dispatch+factory chain works, because all six members are optional.
-// 2 = envelope + matchAdvertisement (the advertisement is proven-valid: the same
-// object parses as the /game/advertisement/update reply).
+// s47: SOLVED, measured live (logs/lanhook-11640.log, parsefail=0 and
+// "OnAdvertisementEvent/AET_MatchStartNotify" + "OnStartComplete - detected
+// successful game start" both fired). The WS notification frame is a POSITIONAL
+// ARRAY, not an object:
+//
+//     [ <result>, "<m_type>", <m_profileID>, { <body> } ]
+//
+// Why every object shape in s46 died: the envelope reader 0x1407a7620 reads its
+// three scalars, and each value reader ends in SkipComma 0x14039b860, so the
+// parser is left on the NEXT TOKEN. It then calls dispatch 0x1407a7070, which
+// walks the 46-node registry and returns false unless a factory matches m_type.
+// The MatchStartMessage factory 0x1407cdf10 memcmp's m_type against the 17 chars
+// "MatchStartMessage", dynamic_casts the reader, and calls body parser
+// 0x1407b6710 - whose first act is BeginContainer 0x14039a910, needing '[' or
+// '{'. In object form the position after m_profileID is '}', so the factory
+// returns null, dispatch returns false, and the frame is rejected. In array form
+// the fourth element supplies the '{'.
+//
+// Body keys are the six the writer 0x1407b7220 emits, in its own order; the
+// matchAdvertisement keys are the 27 the writer 0x14056dda0 emits. All are
+// optional (no required-field bitmap), and "{}" alone measures parsefail=0.
+//
+// s45 ladder, kept because it is now a real fallback rather than a guess list:
+// 0 = all six members with the real advertisement; 1 = empty body (measured to
+// parse, so it still fires AET_MatchStartNotify if the advertisement body is what
+// breaks); 2 = matchAdvertisement only. The shim and the hooks share a process, so
+// the shim reads hook 13's parse-failure count (g_ParseFail) and hook 18's
+// factory-reached count (g_MSReached) and escalates instead of spending a run per
+// payload.
 static void build_match_start(BUF *b, int variant) {
     char ab[8192], hid[32];
     if (adv_copy(ab, sizeof ab) <= 0) return;
     if (!form_get(ab, "hostid", hid, sizeof hid) || !hid[0]) return;
-    bs(b, "{\"result\":0,\"m_type\":\"MatchStartMessage\",\"m_profileID\":");
+    bs(b, "[0,\"MatchStartMessage\",");
     bs(b, hid);
+    if (variant == 1) {                 // measured parsefail=0 with an empty body
+        bs(b, ",{}]");
+        return;
+    }
     if (variant == 0) {
-        bs(b, ",\"matchStartDate\":");
+        bs(b, ",{\"ownedAppIDs\":[],\"profileRaces\":[],\"matchStartDate\":");
         bnum(b, unix_now());
-        bs(b, ",\"ownedAppIDs\":[],\"profileRaces\":[],\"equippedItems\":[],\"inProgressChallenges\":[]");
+        bs(b, ",\"equippedItems\":[],\"matchAdvertisement\":");
+    } else {
+        bs(b, ",{\"matchAdvertisement\":");
     }
-    if (variant != 1) {
-        bs(b, ",\"matchAdvertisement\":");
-        emit_advertisement(b, ab);
-    }
-    bs(b, "}");
+    emit_advertisement(b, ab);
+    if (variant == 0) bs(b, ",\"inProgressChallenges\":[]");
+    bs(b, "}]");
 }
 
 // ---------------------------------------------------------------- s45 H1 probe

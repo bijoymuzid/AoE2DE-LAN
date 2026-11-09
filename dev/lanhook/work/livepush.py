@@ -11,11 +11,20 @@ Usage:
   livepush.py ping                  is a websocket armed?
   livepush.py get [n]               print the shim's own built payload (n=0..2)
   livepush.py push '<json>' [op]    push one payload, op = ws opcode (default 2)
-  livepush.py sweep                 try the envelope hypothesis list, stop on a parse
-  livepush.py bisect                binary-search the message BODY (needs a hosted lobby)
-  livepush.py types                 push the minimal envelope under all 46 type names
+  livepush.py sweep                 CLOSED - s46 hypothesis batch, all measured rejects
+  livepush.py bisect                CLOSED - s46 hypothesis batch, all measured rejects
+  livepush.py types                 CLOSED - s46 hypothesis batch, all measured rejects
+  livepush.py s47                   the ANSWER: positional-array batch (notes/m1-session47.md)
+  livepush.py selftest              offline check of the s47 payload shapes
 
-parsefail=0 means that payload PARSED - that is the answer we are hunting.
+parsefail=0 means that payload PARSED.
+
+SOLVED (s47, measured): the WS notification frame is a POSITIONAL ARRAY
+    [ <result>, "<m_type>", <m_profileID>, { <body> } ]
+not an object. The body parser starts with BeginContainer, which needs '[' or '{'
+where the envelope reader stopped; in object form that is '}', so every object
+shape ever tried was rejected. `s47` proves it and keeps the controls.
+sweep/bisect/types are kept only as the s46 evidence trail - do not re-run them.
 """
 import json
 import socket
@@ -323,6 +332,103 @@ def types():
     return 1
 
 
+# s47: ground truth read out of the DECRYPTED .text (gametext.bin), not guessed.
+# The WS frame goes straight to the envelope reader 0x1407a7620, which is a
+# hand-rolled streaming JSON reader. Its three keys are result/m_type/m_profileID
+# and after each value it calls SkipComma (0x14039b860), leaving the parser on the
+# NEXT TOKEN. It then calls dispatch 0x1407a7070, which walks the 46-node registry
+# and returns false unless a factory matches m_type. The MatchStartMessage factory
+# 0x1407cdf10 memcmp's m_type against the 17 chars "MatchStartMessage", then
+# dynamic_casts the reader and calls the body parser 0x1407b6710 - whose first act
+# is BeginContainer 0x14039a910, which needs '[' or '{' at the current position.
+# In OBJECT form that position is '}' => the factory returns null => dispatch false
+# => "failed to parse notification messages". That is why every s46 shape died.
+# In ARRAY form the element after m_profileID is a nested object, so BeginContainer
+# sees '{'. Body field order is the writer 0x1407b7220's own order.
+BODY_ORDER = ["ownedAppIDs", "profileRaces", "matchStartDate",
+              "equippedItems", "matchAdvertisement", "inProgressChallenges"]
+
+
+def _body(adv, start=0):
+    """The six body members as an ordered dict (writer 0x1407b7220's own order)."""
+    vals = {"ownedAppIDs": [], "profileRaces": [], "matchStartDate": start,
+            "equippedItems": [], "matchAdvertisement": adv,
+            "inProgressChallenges": []}
+    return dict((k, vals[k]) for k in BODY_ORDER)
+
+
+def s47():
+    """Positional-array batch: [result, m_type, m_profileID, {body}]."""
+    pid = 3842241165083521967
+    adv = {}
+    raw = getvariant(0)
+    if raw:
+        try:
+            full = json.loads(raw)
+            pid = full.get("m_profileID", pid)
+            adv = full.get("matchAdvertisement") or {}
+        except ValueError:
+            print("could not read the shim payload, using fallbacks")
+    print("profileID=%s advert=%d bytes\n" % (pid, len(json.dumps(adv))))
+
+    pos = lambda b: [0, "MatchStartMessage", pid] + b          # noqa: E731
+    body_empty = [_body({})]
+    body_real = [_body(adv)] if adv else []
+    batch = [
+        ("positional + empty body {}", pos(body_empty), 2),
+        ("positional + empty body {} TEXT", pos(body_empty), 1),
+        ("positional, NO body (control)", pos([]), 2),
+        ("object envelope (control)",
+         {"result": 0, "m_type": "MatchStartMessage", "m_profileID": pid}, 2),
+    ]
+    batch += [("positional + real advert", pos(body_real), 2)] if body_real else []
+    batch += [
+        ("positional SessionStatusMessage",
+         [0, "SessionStatusMessage", pid, _body({})], 2),
+        ("{messages:[positional]}",
+         {"messages": [pos(body_empty)]}, 2),
+        ("[[positional]]", [pos(body_empty)], 2),
+        ("positional + body fields inline",
+         pos([[], [], 0, [], {}, []]), 2),
+    ]
+
+    winner = []
+    print("%-38s %-6s %-9s %s" % ("payload", "op", "parsefail", "thunkhits"))
+    for label, obj, op in batch:
+        raw = json.dumps(obj, separators=(",", ":"))
+        reply = push(raw, op)
+        v = _verdict(reply)
+        if v is None:
+            print("%-38s -- channel error: %s" % (label, reply))
+            break
+        _, fail, hits = v
+        print("%-38s %-6d %-9d %-9d%s"
+              % (label, op, fail, hits, "   <== PARSED" if fail == 0 else ""))
+        if fail == 0:
+            winner.append((label, obj))
+    return report(winner)
+
+
+def selftest():
+    """Offline check of the batch shapes - no game, no sockets.
+
+    Guards the s47 bug: a list of (key, value) tuples serializes as an ARRAY of
+    pairs, not as an object, so every body must be a real dict.
+    """
+    b = _body({"id": 7})
+    assert isinstance(b, dict), "body must be a dict, not a list of pairs"
+    assert list(b) == BODY_ORDER, "body key order drifted"
+    assert b["matchAdvertisement"] == {"id": 7}
+    assert b["matchStartDate"] == 0
+    frame = [0, "MatchStartMessage", 3842241165083521967, b]
+    s = json.dumps(frame, separators=(",", ":"))
+    assert s.startswith('[0,"MatchStartMessage",3842241165083521967,{"ownedAppIDs":[]'), s
+    assert s.endswith('"inProgressChallenges":[]}]'), s
+    assert '[["ownedAppIDs"' not in s, "body leaked back to pair-array form"
+    print("selftest ok: %s" % s)
+    return 0
+
+
 def main(argv):
     if len(argv) < 2:
         print(__doc__)
@@ -342,6 +448,10 @@ def main(argv):
         return bisect()
     elif cmd == "types":
         return types()
+    elif cmd == "s47":
+        return s47()
+    elif cmd == "selftest":
+        return selftest()
     else:
         print("unknown command %r" % cmd)
         return 2

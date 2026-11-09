@@ -72,12 +72,13 @@ def main():
 
         v1 = livepush.getvariant(1)
         print("getvariant 1 -> %d bytes" % len(v1))
-        chk(len(v1) > 20 and '"m_type"' in v1, "GETVARIANT 1 returned the envelope payload")
+        chk(len(v1) > 20 and '"MatchStartMessage"' in v1 and v1.startswith("[0,"),
+            "GETVARIANT 1 returned the positional empty-body payload")
         v0 = livepush.getvariant(0)
         print("getvariant 0 -> %d bytes" % len(v0))
-        chk(len(v0) > len(v1), "GETVARIANT 0 returned the full payload (bigger than envelope)")
+        chk(len(v0) > len(v1), "GETVARIANT 0 returned the full payload (bigger than empty-body)")
 
-        r = livepush.push('{"result":0,"m_type":"MatchStartMessage","m_profileID":1}', 2)
+        r = livepush.push('[0,"MatchStartMessage",1,{}]', 2)
         print("push ->", r)
         chk(r.startswith("sent=1 parsefail="), "push returned a verdict")
         chk("thunkhits=" in r, "verdict carries thunkhits")
