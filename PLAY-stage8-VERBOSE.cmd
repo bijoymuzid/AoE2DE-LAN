@@ -52,6 +52,11 @@ rem s46: AOE2LAN_LIVE=1 opens a local control channel on 127.0.0.1:47199. Once t
 rem game is sitting in the lobby, dev/lanhook/work/livepush.py can push ANY payload
 rem down the live websocket and read the verdict (parsefail / thunkhits) in ~2 s.
 rem That replaces "one guess per 10 minute run" with as many guesses as we want.
+rem s49: relayIP in the host/join reply. Must be THIS machine's tailnet IP for a
+rem second machine to reach BattleServer.exe (PLAN 3.3). Unset = 127.0.0.1, which
+rem is what single-machine hosting needs. Once Tailscale is logged in, put the
+rem 100.x address from `tailscale ip` here.
+set AOE2LAN_RELAY_IP=127.0.0.1
 set AOE2LAN_STAGE=8
 set AOE2LAN_HOOKS=4,5,13,14,15,16,17,18
 set AOE2LAN_AIGATE=1

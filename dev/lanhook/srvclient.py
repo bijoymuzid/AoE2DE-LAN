@@ -5,10 +5,14 @@
 # the platformlogin request and check the NEW object-form response JSON
 # (schema reverse-engineered from the game's own login parser at
 # 0x140615b70: named keys, not a positional array).
-import ssl, socket, json, sys, urllib.parse
+import ssl, socket, json, sys, os, urllib.parse
 
 HOST = "pb-live-release6-api.worldsedgelink.com"
 PORT = 443
+
+# s49: the shim reads AOE2LAN_RELAY_IP once at startup and falls back to
+# 127.0.0.1. Run srvtest and this client with the same environment.
+RELAY_IP = os.environ.get("AOE2LAN_RELAY_IP") or "127.0.0.1"
 
 body = ("accountType=steam&platformUserID=76561197960287930&alias=TestPlayer&"
         "title=age2&macAddress=112233445566&clientLibVersion=10106")
@@ -379,7 +383,7 @@ chk(isinstance(hd, dict), f"host reply must be an object, got {hp[:32]!r}")
 if isinstance(hd, dict):
     chk(hd.get("resultCode") == 0, f"host reply resultCode {hd.get('resultCode')!r}")
     chk(hd.get("gatheringID") == 1193965098, f"gatheringID echo {hd.get('gatheringID')!r}")
-    chk(hd.get("relayIP") == "127.0.0.1", f"relayIP {hd.get('relayIP')!r}")
+    chk(hd.get("relayIP") == RELAY_IP, f"relayIP {hd.get('relayIP')!r}, want {RELAY_IP!r}")
     for k in ("relayPortRaw", "relayPortWebSockets", "relayPortOutOfBandSocket"):
         chk(isinstance(hd.get(k), int) and 0 < hd[k] < 65536, f"{k} must be a 16-bit port")
     m = hd.get("yourMatchMembers")
@@ -406,6 +410,49 @@ def post(p, b):
     s.close()
     _, _, pay = r.partition(b"\r\n\r\n")
     return json.loads(pay) if pay else None
+
+# ---- s49: /game/advertisement/join had NO handler and fell into the catch-all
+# "[0,[]]". That is an array; the join call parses its answer with the join-result
+# DTO (0x140572540), so a joiner could never get a relay address or a member
+# vector - the same class of failure s31 fixed for host. The reply must be that
+# DTO with gatheringID = the lobby being joined and yourMatchMembers holding the
+# JOINER (this shim's own profileID, FNV1a64("aoe2lan:"+alias)), not the host.
+def fnv1a64(s):
+    h = 0xcbf29ce484222325
+    for c in s.encode():
+        h = ((h ^ c) * 0x100000001b3) & 0xFFFFFFFFFFFFFFFF
+    return h
+MY_ID = fnv1a64("aoe2lan:TestPlayer") & 0x7FFFFFFFFFFFFFFF
+# the expect-100 test above logs in with a body that carries no alias=, which
+# clears the shim's stored alias; log in again as TestPlayer first so the join
+# member is the profile this shim really served.
+post("/game/login/platformlogin", body)
+jn = post("/game/advertisement/join",
+          "advertisementid=1193965098&callNum=44&connect_id=7"
+          "&hostid=3842241165083521967&sessionID=1193965098")
+chk(isinstance(jn, dict), f"join reply must be an object, got {str(jn)[:40]}")
+if isinstance(jn, dict):
+    chk(jn.get("resultCode") == 0, f"join resultCode {jn.get('resultCode')!r}")
+    chk(jn.get("gatheringID") == 1193965098, f"join gatheringID {jn.get('gatheringID')!r}")
+    chk(jn.get("relayIP") == RELAY_IP, f"join relayIP {jn.get('relayIP')!r}")
+    for k in ("relayPortRaw", "relayPortWebSockets", "relayPortOutOfBandSocket"):
+        chk(isinstance(jn.get(k), int) and 0 < jn[k] < 65536, f"join {k} must be a 16-bit port")
+    jm = jn.get("yourMatchMembers")
+    chk(isinstance(jm, list) and len(jm) == 1,
+        f"join yourMatchMembers must hold exactly the joiner, got {str(jm)[:60]}")
+    if isinstance(jm, list) and jm:
+        chk(jm[0].get("profileID") == MY_ID,
+            f"join member profileID {jm[0].get('profileID')!r}, want this shim's own {MY_ID}")
+        chk(jm[0].get("sessionID") == 1193965098, f"join member sessionID {jm[0].get('sessionID')!r}")
+print(f"  join reply: resultCode={(jn or {}).get('resultCode')}, "
+      f"gatheringID={(jn or {}).get('gatheringID')}, relayIP={(jn or {}).get('relayIP')}, "
+      f"member={(jn or {}).get('yourMatchMembers', [{}])[0].get('profileID')}")
+# advertisementid=-1 (what host sends before it has an id) must fall through to
+# sessionID, not be echoed as the session id.
+j2 = post("/game/advertisement/join", "advertisementid=-1&callNum=45&sessionID=555")
+chk(isinstance(j2, dict) and j2.get("gatheringID") == 555,
+    f"join with advertisementid=-1 must take sessionID, got {(j2 or {}).get('gatheringID')!r}")
+print(f"  join fallback: advertisementid=-1 -> gatheringID={(j2 or {}).get('gatheringID')}")
 
 # ---- /game/advertisement/update (s31): parser 0x140579020 wants result +
 # updatedAvertisement (the game's own spelling) as one advertisement object,

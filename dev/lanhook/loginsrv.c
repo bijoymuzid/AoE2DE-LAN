@@ -1525,6 +1525,38 @@ static void jstr(BUF *b, const char *s, int n) {
     bput(b, "\"", 1);
 }
 
+// s49 Priority 3 (PLAN §3.3): relayServers[].relayIP must be THIS machine's
+// tailnet IP or a remote peer can never reach BattleServer.exe. One env var,
+// read once at startup, 127.0.0.1 fallback so single-machine hosting is
+// unchanged. Set it in the PLAY-*.cmd beside AOE2LAN_STAGE.
+static char g_RelayIP[64] = "127.0.0.1";
+static void relay_ip_init(void) {
+    char v[sizeof g_RelayIP], b[96];
+    DWORD n = GetEnvironmentVariableA("AOE2LAN_RELAY_IP", v, sizeof v);
+    int k = 0;
+    const char *m = "relayIP: AOE2LAN_RELAY_IP ";
+    while (*m && k < 60) b[k++] = *m++;
+    if (!n || n >= sizeof v) {
+        m = "unset/oversize, using 127.0.0.1";
+        while (*m && k < 90) b[k++] = *m++;
+        b[k] = 0; logn(b); return;
+    }
+    // trust boundary: spliced straight into a JSON string, so only the
+    // characters an IP literal or a hostname can contain are accepted.
+    for (DWORD i = 0; i < n; i++) {
+        char c = v[i];
+        if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')
+              || c == '.' || c == ':' || c == '-')) {
+            m = "rejected (bad char), using 127.0.0.1";
+            while (*m && k < 90) b[k++] = *m++;
+            b[k] = 0; logn(b); return;
+        }
+    }
+    { DWORD i = 0; while (v[i]) { g_RelayIP[i] = v[i]; i++; } g_RelayIP[i] = 0; }
+    { DWORD i = 0; while (v[i] && k < 90) b[k++] = v[i++]; }
+    b[k] = 0; logn(b);
+}
+
 // POST /game/advertisement/... -> the create request as a DTO object: `result`
 // plus the advertisement itself, echoing id/host/connect/slots from the request.
 // s31: the host reply is NOT an advertisement object. The create call parses its
@@ -1548,7 +1580,9 @@ static void build_host_reply(BUF *b, const char *body) {
     int dl = dv ? (int)strlen_f(dv) : 0;
     bs(b, "{\"resultCode\":0,\"gatheringID\":");
     bs(b, sid[0] ? sid : "1");
-    bs(b, ",\"relayAuthToken\":\"lan\",\"relayIP\":\"127.0.0.1\"");
+    bs(b, ",\"relayAuthToken\":\"lan\",\"relayIP\":\"");
+    bs(b, g_RelayIP);
+    bs(b, "\"");
     bs(b, ",\"relayPortRaw\":27012,\"relayPortWebSockets\":27112");
     bs(b, ",\"relayPortOutOfBandSocket\":27212,\"relayRegion\":\"LAN\"");
     bs(b, ",\"yourMatchMembers\":[{\"profileID\":");
@@ -1834,6 +1868,45 @@ static void route(TLSSES *t, const char *method, const char *path,
         adv_store(body);
         log_resp_head(resp.p, (int)resp.len);
         http_respond(t, resp.p);
+    } else if (contains(path, "/game/advertisement/join")) {
+        // s49 Priority 3: there was NO join handler, so the call fell into the
+        // catch-all "[0,[]]". That is a JSON array and the join call parses its
+        // answer with the join-result DTO (parser 0x140572540) - the same
+        // mismatch that made host fail in s31 - so a joiner could never get a
+        // relay address or a member vector.
+        // The host reply already emits that exact DTO (§48j), so reuse
+        // build_host_reply() instead of writing a second builder. It reads its
+        // member/session out of a form body, so hand it a synthetic one:
+        //   hostid    = THIS machine's profileID (yourMatchMembers is the
+        //               caller's own roster, and the caller requires it
+        //               non-empty), not the lobby's host;
+        //   sessionID = the lobby being joined, which becomes gatheringID and
+        //               is copied into the service as the session id.
+        // The request's own key names are not yet measured - no join has ever
+        // been attempted. log_body_head above dumps the real body whole, so the
+        // first live join shows the truth; the fallbacks cover the guesses.
+        // shortcut: the member id is recomputed from the last login's alias, not
+        // read from the join body (its key name is unknown). Upgrade once the
+        // first live join body is measured and shows the joiner's own profileID.
+        char sid[32];
+        int have = form_get(body, "advertisementid", sid, sizeof sid) && sid[0] &&
+                   !(sid[0] == '-' && sid[1] == '1' && !sid[2]);
+        if (!have) have = form_get(body, "sessionID", sid, sizeof sid) && sid[0];
+        if (!have) have = form_get(body, "connect_id", sid, sizeof sid) && sid[0];
+        if (!have) { sid[0] = '1'; sid[1] = 0; }
+        { BUF sb = {0}; IDS ids; mk_ids(g_Alias, &ids);
+          bs(&sb, "hostid="); bnum(&sb, ids.profileId);
+          bs(&sb, "&sessionID="); bs(&sb, sid);
+          bs(&sb, "&description=");
+          if (sb.p) build_host_reply(&resp, sb.p);
+          // log the synthetic body: it carries both numbers that matter
+          { char lb[160]; int i = 0; const char *m = "JOIN: ";
+            while (*m) lb[i++] = *m++;
+            for (int q = 0; sb.p && sb.p[q] && i < 150; q++) lb[i++] = sb.p[q];
+            lb[i] = 0; logn(lb); }
+          if (sb.p) HeapFree(GetProcessHeap(), 0, sb.p); }
+        log_resp_head(resp.p ? resp.p : "[0]", resp.p ? (int)resp.len : 3);
+        http_respond(t, resp.p ? resp.p : "[0]");
     } else if (contains(path, "/game/advertisement/update")) {
         // s31: the host calls this right after hosting and got the catch-all
         // array -> "WorldwideUpdateAdvertisementAsync - response was not formatted
@@ -2532,6 +2605,7 @@ int loginsrv_start(void) {
         logn("srv: proc resolve failed");
         return 0;
     }
+    relay_ip_init();
     if (!mint_cert()) return 0;
     logn("dbg: cert ok");
     if (!acquire_cred()) return 0;
