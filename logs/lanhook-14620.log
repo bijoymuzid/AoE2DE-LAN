@@ -6036,3 +6036,186 @@
 [t=481.156s] HTTP RESP: sent
 [t=482.156s] srv: closed pending#57 n=0
 [t=485.468s] hb alive sec=485
+[t=490.468s] hb alive sec=490
+[t=490.640s] srv: connection accepted
+[t=490.640s] cert: root present=1
+[t=490.687s] TLS: handshake complete (server side)
+[t=490.734s] srv: blk#58 n=475
+[t=490.734s] srv: req#58 n=475
+[t=490.734s] HTTP REQ /game/Leaderboard/getStatsForLeaderboardByProfileName
+[t=490.734s] HTTP RESP BODY [0,[]
+[t=490.734s] HTTP RESP: building head
+[t=490.734s] HTTP RESP: sent
+[t=491.156s] srv: blk#58 n=475
+[t=491.156s] srv: req#58 n=475
+[t=491.156s] HTTP REQ /game/Leaderboard/getStatsForLeaderboardByProfileName
+[t=491.156s] HTTP RESP BODY [0,[]
+[t=491.156s] HTTP RESP: building head
+[t=491.156s] HTTP RESP: sent
+[t=492.156s] srv: closed pending#58 n=0
+[t=495.468s] hb alive sec=495
+[t=500.468s] hb alive sec=500
+[t=500.625s] srv: connection accepted
+[t=500.625s] cert: root present=1
+[t=500.672s] TLS: handshake complete (server side)
+[t=500.718s] srv: blk#59 n=475
+[t=500.718s] srv: req#59 n=475
+[t=500.718s] HTTP REQ /game/Leaderboard/getStatsForLeaderboardByProfileName
+[t=500.718s] HTTP RESP BODY [0,[]
+[t=500.718s] HTTP RESP: building head
+[t=500.718s] HTTP RESP: sent
+[t=501.125s] srv: blk#59 n=475
+[t=501.125s] srv: req#59 n=475
+[t=501.125s] HTTP REQ /game/Leaderboard/getStatsForLeaderboardByProfileName
+[t=501.125s] HTTP RESP BODY [0,[]
+[t=501.125s] HTTP RESP: building head
+[t=501.125s] HTTP RESP: sent
+[t=502.125s] srv: closed pending#59 n=0
+[t=505.484s] hb alive sec=505
+[t=510.484s] hb alive sec=510
+[t=510.609s] srv: connection accepted
+[t=510.609s] cert: root present=1
+[t=510.656s] TLS: handshake complete (server side)
+[t=510.703s] srv: blk#60 n=475
+[t=510.703s] srv: req#60 n=475
+[t=510.703s] HTTP REQ /game/Leaderboard/getStatsForLeaderboardByProfileName
+[t=510.703s] HTTP RESP BODY [0,[]
+[t=510.703s] HTTP RESP: building head
+[t=510.703s] HTTP RESP: sent
+[t=511.109s] srv: blk#60 n=475
+[t=511.109s] srv: req#60 n=475
+[t=511.109s] HTTP REQ /game/Leaderboard/getStatsForLeaderboardByProfileName
+[t=511.109s] HTTP RESP BODY [0,[]
+[t=511.109s] HTTP RESP: building head
+[t=511.109s] HTTP RESP: sent
+[t=512.125s] srv: closed pending#60 n=0
+[t=515.484s] hb alive sec=515
+[t=520.484s] hb alive sec=520
+[t=520.640s] srv: connection accepted
+[t=520.640s] cert: root present=1
+[t=520.687s] TLS: handshake complete (server side)
+[t=520.750s] srv: blk#61 n=475
+[t=520.750s] srv: req#61 n=475
+[t=520.750s] HTTP REQ /game/Leaderboard/getStatsForLeaderboardByProfileName
+[t=520.750s] HTTP RESP BODY [0,[]
+[t=520.750s] HTTP RESP: building head
+[t=520.750s] HTTP RESP: sent
+[t=521.156s] srv: blk#61 n=475
+[t=521.156s] srv: req#61 n=475
+[t=521.156s] HTTP REQ /game/Leaderboard/getStatsForLeaderboardByProfileName
+[t=521.156s] HTTP RESP BODY [0,[]
+[t=521.156s] HTTP RESP: building head
+[t=521.156s] HTTP RESP: sent
+[t=522.156s] srv: closed pending#61 n=0
+[t=524.547s] HIT LogHelper #144: "%s" r8=0x000002512f3d7380 s8="MessageCounts: inval=0/0, seek=0/0, join=0/0, ichk=0/0, sk_r=0/0, deny=" r9=0x00007fffa6f8dc0d s9="H" a5=0x00007ff7c3be0000 a6=0x00007ff7c72643b8 ret=0x00007ff7c4009657
+[t=525.484s] hb alive sec=525
+[t=530.484s] hb alive sec=530
+[t=530.625s] srv: connection accepted
+[t=530.625s] cert: root present=1
+[t=530.672s] TLS: handshake complete (server side)
+[t=530.734s] srv: blk#62 n=475
+[t=530.734s] srv: req#62 n=475
+[t=530.734s] HTTP REQ /game/Leaderboard/getStatsForLeaderboardByProfileName
+[t=530.734s] HTTP RESP BODY [0,[]
+[t=530.734s] HTTP RESP: building head
+[t=530.734s] HTTP RESP: sent
+[t=531.140s] srv: blk#62 n=475
+[t=531.140s] srv: req#62 n=475
+[t=531.140s] HTTP REQ /game/Leaderboard/getStatsForLeaderboardByProfileName
+[t=531.140s] HTTP RESP BODY [0,[]
+[t=531.140s] HTTP RESP: building head
+[t=531.140s] HTTP RESP: sent
+[t=532.140s] srv: closed pending#62 n=0
+[t=535.500s] hb alive sec=535
+[t=540.500s] hb alive sec=540
+[t=540.609s] srv: connection accepted
+[t=540.609s] cert: root present=1
+[t=540.672s] TLS: handshake complete (server side)
+[t=540.718s] srv: blk#63 n=475
+[t=540.718s] srv: req#63 n=475
+[t=540.718s] HTTP REQ /game/Leaderboard/getStatsForLeaderboardByProfileName
+[t=540.718s] HTTP RESP BODY [0,[]
+[t=540.718s] HTTP RESP: building head
+[t=540.718s] HTTP RESP: sent
+[t=541.125s] srv: blk#63 n=475
+[t=541.125s] srv: req#63 n=475
+[t=541.125s] HTTP REQ /game/Leaderboard/getStatsForLeaderboardByProfileName
+[t=541.125s] HTTP RESP BODY [0,[]
+[t=541.125s] HTTP RESP: building head
+[t=541.125s] HTTP RESP: sent
+[t=542.125s] srv: closed pending#63 n=0
+[t=545.500s] hb alive sec=545
+[t=550.500s] hb alive sec=550
+[t=550.609s] srv: connection accepted
+[t=550.609s] cert: root present=1
+[t=550.656s] TLS: handshake complete (server side)
+[t=550.718s] srv: blk#64 n=475
+[t=550.718s] srv: req#64 n=475
+[t=550.718s] HTTP REQ /game/Leaderboard/getStatsForLeaderboardByProfileName
+[t=550.718s] HTTP RESP BODY [0,[]
+[t=550.718s] HTTP RESP: building head
+[t=550.718s] HTTP RESP: sent
+[t=551.125s] srv: blk#64 n=475
+[t=551.125s] srv: req#64 n=475
+[t=551.125s] HTTP REQ /game/Leaderboard/getStatsForLeaderboardByProfileName
+[t=551.125s] HTTP RESP BODY [0,[]
+[t=551.125s] HTTP RESP: building head
+[t=551.125s] HTTP RESP: sent
+[t=552.125s] srv: closed pending#64 n=0
+[t=555.500s] hb alive sec=555
+[t=560.515s] hb alive sec=560
+[t=560.640s] srv: connection accepted
+[t=560.640s] cert: root present=1
+[t=560.703s] TLS: handshake complete (server side)
+[t=560.750s] srv: blk#65 n=475
+[t=560.750s] srv: req#65 n=475
+[t=560.750s] HTTP REQ /game/Leaderboard/getStatsForLeaderboardByProfileName
+[t=560.750s] HTTP RESP BODY [0,[]
+[t=560.750s] HTTP RESP: building head
+[t=560.750s] HTTP RESP: sent
+[t=561.156s] srv: blk#65 n=475
+[t=561.156s] srv: req#65 n=475
+[t=561.156s] HTTP REQ /game/Leaderboard/getStatsForLeaderboardByProfileName
+[t=561.156s] HTTP RESP BODY [0,[]
+[t=561.156s] HTTP RESP: building head
+[t=561.156s] HTTP RESP: sent
+[t=562.156s] srv: closed pending#65 n=0
+[t=565.515s] hb alive sec=565
+[t=570.562s] hb alive sec=570
+[t=570.640s] srv: connection accepted
+[t=570.640s] cert: root present=1
+[t=570.703s] TLS: handshake complete (server side)
+[t=570.750s] srv: blk#66 n=475
+[t=570.750s] srv: req#66 n=475
+[t=570.750s] HTTP REQ /game/Leaderboard/getStatsForLeaderboardByProfileName
+[t=570.750s] HTTP RESP BODY [0,[]
+[t=570.750s] HTTP RESP: building head
+[t=570.750s] HTTP RESP: sent
+[t=571.109s] srv: blk#66 n=475
+[t=571.109s] srv: req#66 n=475
+[t=571.109s] HTTP REQ /game/Leaderboard/getStatsForLeaderboardByProfileName
+[t=571.109s] HTTP RESP BODY [0,[]
+[t=571.109s] HTTP RESP: building head
+[t=571.109s] HTTP RESP: sent
+[t=572.109s] srv: closed pending#66 n=0
+[t=575.562s] hb alive sec=575
+[t=577.484s] GLOG #3423071 site=0x0000000000f1927a [Network] "RLEVENT update service delayed %llu"
+[t=580.625s] hb alive sec=580
+[t=580.640s] srv: connection accepted
+[t=580.640s] cert: root present=1
+[t=580.687s] TLS: handshake complete (server side)
+[t=580.750s] srv: blk#67 n=4703
+[t=580.750s] srv: req#67 n=4703
+[t=580.750s] HTTP REQ /game/Leaderboard/getStatsForLeaderboardByProfileName
+[t=580.750s] HTTP RESP BODY [0,[]
+[t=580.750s] HTTP RESP: building head
+[t=580.750s] HTTP RESP: sent
+[t=581.156s] srv: blk#67 n=475
+[t=581.156s] srv: req#67 n=475
+[t=581.156s] HTTP REQ /game/Leaderboard/getStatsForLeaderboardByProfileName
+[t=581.156s] HTTP RESP BODY [0,[]
+[t=581.156s] HTTP RESP: building head
+[t=581.156s] HTTP RESP: sent
+[t=582.156s] srv: closed pending#67 n=0
+[t=585.547s] HIT LogHelper #145: "%s" r8=0x000002512f3d64a0 s8="MessageCounts: inval=0/0, seek=0/0, join=0/0, ichk=0/0, sk_r=0/0, deny=" r9=0x00007fffa6f8dc0d s9="H" a5=0x00007ff7c3be0000 a6=0x00007ff7c72643b8 ret=0x00007ff7c4009657
+[t=585.640s] hb alive sec=585

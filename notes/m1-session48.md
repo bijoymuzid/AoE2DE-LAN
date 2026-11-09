@@ -215,3 +215,47 @@ Unchanged on purpose: the hook table (19 entries, ids 4/5/13/14/15/16/17/18
 active), the s45 3-variant ladder and its stop-on-no-failure rule, `srvtest.c`,
 `build_match_start()`'s positional array, the cert auto-clicker, the live channel
 protocol, `registry_dump()`.
+
+## 48j. Priority 3 groundwork, measured this session (do not re-derive)
+
+Cheap checks run after the confirming run, so the next session starts from facts:
+
+- **Tailscale is installed but NOT connected.** Service `RUNNING`, version
+  `1.102.2`, `HaveNodeKey: true`, but `BackendState: NoState` and `tailscale ip`
+  → `no current Tailscale IPs; state: NoState`. The Tailscale adapter has only a
+  link-local IPv6, no `100.x` address. **Nothing in Priority 3 can be measured
+  until the operator logs Tailscale back in.** This is an operator action, not code.
+- **The relay layer is already proven cross-tailnet — by W2, not by us.** Repo
+  commit `a890ab3`: "L3 cross-tailnet PASS — relay + host on Arch, joiner on
+  DESKTOP-64DAV0P, B-GD-PING at RJ+3s (55 funnels), derp 85ms". `linux/relay_test.py`
+  runs it; `notes/linux-session1.md` §L3 has the detail. Tailnet IPs seen there:
+  `100.122.146.107`, `100.79.215.72`, path `derp` ~85 ms. So stock
+  `BattleServer.exe` accepts two remote peers and funnels `GAMEDATA`. PLAN §6.4's
+  "if it validates LOBBYCONNECT.secret (unknown)" is answered: it does not block us.
+- **`lanhub` exists and passes its acceptance walk.** Rust, `lanhub/src/main.rs`,
+  `lanhub/test_walk.py`: "11/11 PASS in 2.3 s — HELLO ×2, HOST, cross-instance FIND
+  via gossip, JOIN remote". Control `127.0.0.1:47100`, gossip `:47101`. W1 has not
+  wired the shim to it yet.
+- **`relayIP` is one hardcoded literal**: `loginsrv.c:1551`,
+  `bs(b, ",\"relayAuthToken\":\"lan\",\"relayIP\":\"127.0.0.1\"")` inside
+  `build_host_reply()`. Ports beside it: raw 27012, ws 27112, oob 27212.
+- **There is NO `/game/advertisement/join` handler.** The router
+  (`loginsrv.c:1779..1895`) covers login/readSession/leaderboards, `host`,
+  `update` (prefix-matches `updateTags`+`updateState`), the four browse endpoints,
+  `party/peerAdd`+`peerUpdate`, `news`, then a catch-all empty success. `join` and
+  `leave` currently fall into the catch-all.
+- **Head start on the join reply:** the comment at `loginsrv.c:1531` records that
+  the *host* call parses its answer with the **join-result DTO** (parser
+  `0x140572540`, DTO built by `0x14032f5e0`), members in parser order:
+  `resultCode, gatheringID, relayAuthToken, relayIP, relayPortRaw/WebSockets/
+  OutOfBandSocket, relayRegion, yourMatchMembers[], steamLobbyID…,
+  filteredDescription`. So `build_host_reply()` already emits the shape a join
+  reply needs. Member element parser is `0x14056eb40` — the same reader §48c
+  dumped (`sessionID, profileID, ranking, statGroupID, raceID, teamID, url`).
+- **The browse list only ever returns this machine's own lobby.** `g_AdvBody` is
+  filled by `host`/`update` on this shim, and `getLanAdvertisements`/
+  `findAdvertisements`/`getAdvertisements`/`findObservableAdvertisements` all
+  answer `{"result":0,"advertisements":[<g_AdvBody or nothing>],"playerRatings":[]}`.
+  A second machine runs its own shim with its own empty `g_AdvBody`, so it will
+  never see the host's lobby. **That is the discovery gap, and it is what `lanhub`
+  is for.**
