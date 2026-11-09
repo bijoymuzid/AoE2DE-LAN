@@ -32,7 +32,7 @@ static int  memcmp_f(const void *a, const void *b, size_t n);
 static int atoi_f(const char *s);
 
 // ---------------------------------------------------------------- dyn loads
-static HMODULE g_hSecur, g_hCrypt, g_hAdv, g_hWs2, g_hNc;
+static HMODULE g_hSecur, g_hCrypt, g_hAdv, g_hWs2;
 
 typedef SECURITY_STATUS (WINAPI *PfnACH)(PCWSTR, PCWSTR, ULONG, PVOID, PVOID, PVOID, PVOID, PCredHandle, PTimeStamp);
 typedef SECURITY_STATUS (WINAPI *PfnFCH)(PCredHandle);
@@ -491,36 +491,21 @@ static int g_CredOk;
 // default-container path, avoided here via a unique per-launch container).
 // The public key comes from the CSP, so no hand-built DER is needed.
 
-typedef LONG (WINAPI *PfnNOSP)(void**, LPCWSTR, DWORD);
-typedef LONG (WINAPI *PfnNCPK)(void*, void**, LPCWSTR, LPCWSTR, DWORD, DWORD);
-typedef LONG (WINAPI *PfnNSP)(void*, LPCWSTR, void*, DWORD, DWORD);
-typedef LONG (WINAPI *PfnNFK)(void*, DWORD);
-typedef LONG (WINAPI *PfnNDFK)(void*, DWORD);
-typedef LONG (WINAPI *PfnNEK)(void*, void*, LPCWSTR, void*, BYTE*, DWORD, DWORD*, DWORD);
-typedef LONG (WINAPI *PfnNSH)(void*, void*, const BYTE*, DWORD, BYTE*, DWORD, DWORD*, DWORD);
-typedef void *(WINAPI *PfnCCC)(DWORD, const BYTE*, DWORD);
-typedef BOOL (WINAPI *PfnCSCP)(void*, DWORD, DWORD, const void*);
+// s49: the seven NCrypt (CNG) pointers that used to live here, plus
+// CertCreateCertificateContext / CertSetCertificateContextProperty, were dead -
+// nothing called them since the CSP path below won - but they were in the hard
+// resolve check, so a missing ncrypt.dll export killed the whole shim at boot.
+// Deleted: one less DLL dependency, and Wine/Proton has no ncrypt to speak of.
 typedef BOOL (WINAPI *PfnCACPK)(void*, DWORD, void*, void**, DWORD*, DWORD*);
 typedef BOOL (WINAPI *PfnCCH)(unsigned long long, DWORD, unsigned long long, DWORD, unsigned long long*);
 typedef BOOL (WINAPI *PfnCHD)(unsigned long long, const BYTE*, DWORD, DWORD);
 typedef BOOL (WINAPI *PfnCGHP)(unsigned long long, DWORD, BYTE*, DWORD*, DWORD);
 typedef BOOL (WINAPI *PfnCDH)(unsigned long long);
-static PfnNOSP pNOSP;   // NCryptOpenStorageProvider
-static PfnNCPK pNCPK;   // NCryptCreatePersistedKey (no persist flag = ephemeral)
-static PfnNSP  pNSP;    // NCryptSetProperty
-static PfnNFK  pNFK;    // NCryptFinalizeKey
-static PfnNDFK pNDFK;   // NCryptDeleteKey
-static PfnNEK  pNEK;    // NCryptExportKey
-static PfnNSH  pNSH;    // NCryptSignHash
-static PfnCCC  pCCC;    // CertCreateCertificateContext
-static PfnCSCP pCSCP;   // CertSetCertificateContextProperty
 static PfnCACPK pCACPK; // CryptAcquireCertificatePrivateKey
 static PfnCCH  pCCH;    // CryptCreateHash
 static PfnCHD  pCHD;    // CryptHashData
 static PfnCGHP pCGHP;   // CryptGetHashParam
 static PfnCDH  pCDH;    // CryptDestroyHash
-static void *g_NcProv;  // MS_KEY_STORAGE_PROVIDER handle
-static void *g_NcKey;   // ephemeral RSA key handle
 
 // ---- tiny DER builder (append-only, fixed buffers) ----
 typedef struct { unsigned char *p; size_t n; } DER;
@@ -630,7 +615,7 @@ static int mint_cert(void) {
     static wchar_t wcont[48];
     (void)dnb;
 
-    if (!pCAC || !pCGK || !pCertCSSC || !pCertCTNW || !pCACPK || !pCCC || !pCEOE) { logn("cert: fns missing"); return 0; }
+    if (!pCAC || !pCGK || !pCertCSSC || !pCertCTNW || !pCACPK || !pCEOE) { logn("cert: fns missing"); return 0; }
     logn("cert: fns ok");
     // unique per-launch container so no existing key/UI is ever touched
     { DWORD t = GetTickCount(); int i;
@@ -2554,8 +2539,7 @@ int loginsrv_start(void) {
     logn("dbg: crypt loaded");
     g_hAdv  = LoadLibraryExW(L"ADVAPI32.dll", NULL, 0);
     logn("dbg: adv loaded");
-    g_hNc   = LoadLibraryExW(L"ncrypt.dll", NULL, 0);
-    if (!g_hWs2 || !g_hSecur || !g_hCrypt || !g_hAdv || !g_hNc) { logn("srv: dyn load failed"); return 0; }
+    if (!g_hWs2 || !g_hSecur || !g_hCrypt || !g_hAdv) { logn("srv: dyn load failed"); return 0; }
 #define GPA(h, n) ((void*)GetProcAddress(h, n))
     p_socket = (int (WINAPI*)(int,int,int))GPA(g_hWs2, "socket");
     p_bind = (int (WINAPI*)(SOCKET, const struct sockaddr*, int))GPA(g_hWs2, "bind");
@@ -2577,11 +2561,7 @@ int loginsrv_start(void) {
     pDM  = (PfnDM)GPA(g_hSecur, "DecryptMessage");
     pACT = (PfnACT)GPA(g_hSecur, "ApplyControlToken");
     pCertCSSC = (PfnCertCSSC)GPA(g_hCrypt, "CertCreateSelfSignCertificate");
-    pCCC  = (PfnCCC)GPA(g_hCrypt, "CertCreateCertificateContext");
-    pCSCP = (PfnCSCP)GPA(g_hCrypt, "CertSetCertificateContextProperty");
     pCACPK = (PfnCACPK)GPA(g_hCrypt, "CryptAcquireCertificatePrivateKey");
-    pNEK  = (PfnNEK)GPA(g_hNc, "NCryptExportKey");
-    pNSH  = (PfnNSH)GPA(g_hNc, "NCryptSignHash");
     pCCH  = (PfnCCH)GPA(g_hAdv, "CryptCreateHash");
     pCHD  = (PfnCHD)GPA(g_hAdv, "CryptHashData");
     pCGHP = (PfnCGHP)GPA(g_hAdv, "CryptGetHashParam");
@@ -2592,16 +2572,10 @@ int loginsrv_start(void) {
     pCAC = (PfnCAC)GPA(g_hAdv, "CryptAcquireContextA");
     pCGK = (PfnCGK)GPA(g_hAdv, "CryptGenKey");
     pCRC = (PfnCRC)GPA(g_hAdv, "CryptReleaseContext");
-    pNOSP = (PfnNOSP)GPA(g_hNc, "NCryptOpenStorageProvider");
-    pNCPK = (PfnNCPK)GPA(g_hNc, "NCryptCreatePersistedKey");
-    pNSP  = (PfnNSP)GPA(g_hNc, "NCryptSetProperty");
-    pNFK  = (PfnNFK)GPA(g_hNc, "NCryptFinalizeKey");
-    pNDFK = (PfnNDFK)GPA(g_hNc, "NCryptDeleteKey");
 #undef GPA
     if (!p_socket || !p_bind || !p_listen || !p_accept || !p_recv || !p_send ||
         !pACH || !pASC || !pDSC || !pQCA || !pEM || !pDM ||
-        !pCCC || !pCSCP || !pCACPK || !pNEK || !pNSH || !pCCH || !pCHD || !pCGHP || !pCDH ||
-        !pNOSP || !pNCPK || !pNSP || !pNFK || !pCAC) {
+        !pCACPK || !pCCH || !pCHD || !pCGHP || !pCDH || !pCAC) {
         logn("srv: proc resolve failed");
         return 0;
     }

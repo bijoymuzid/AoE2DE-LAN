@@ -1,8 +1,8 @@
 # Prompt for the next chat (paste this whole file into a new chat)
 
 Continue AoE2LAN (AoE2:DE LAN mod). This is the **session 50 brief**. It supersedes the
-session 49 brief. Read `notes/m1-session48.md` in full before touching anything, then
-`PLAN.md` §0–§3, §6.1, §6.2, §6.4 and §17.
+session 49 brief. Read `notes/m1-session49.md` first (current state), then
+`notes/m1-session48.md` in full, then `PLAN.md` §0–§3, §6.1, §6.2, §6.4 and §17.
 
 Say everything in plain English: short sentences, no jargon, no code dumps, no leaps. If
 something is unknown, say it is unknown.
@@ -44,7 +44,8 @@ Priority 1 (a hosted match loads and runs) and Priority 2 (AI in that match) are
 measured, shipped, gated. Do not reopen them.** The front of the queue is **Priority 3: a
 second human joining over the tailnet** (PLAN §W1-c / M2).
 
-Session 49 shipped two of the four Priority 3 steps. Commit `533993f`.
+Session 49 shipped two of the four Priority 3 steps plus one Proton fix. Commits `533993f`
+and later. Full detail in `notes/m1-session49.md`.
 
 - **Step 1, `relayIP` — DONE.** `loginsrv.c` now has `g_RelayIP` plus `relay_ip_init()`,
   called from `loginsrv_start()`. It reads `AOE2LAN_RELAY_IP` once, logs
@@ -67,15 +68,25 @@ Session 49 shipped two of the four Priority 3 steps. Commit `533993f`.
   ever been attempted. The whole body is logged, so the first live join shows the truth.
 - **Step 3, `matchMembers` must carry the joiner — NOT DONE.** `emit_advertisement()` still
   hardcodes ONE member. That is correct for co-op-vs-AI (§48e) and wrong the moment a human
-  joins. The brief for s49 said: test the 2-member shape with `work/s48b.py` against a live
-  lobby **before** committing to it. That is job B.
-- **Step 4, discovery — NOT STARTED, and it has a new blocker.** The four browse endpoints
-  answer only from this shim's own `g_AdvBody`, so a second machine never sees the host's
-  lobby. `lanhub` exists (Rust, W2's file, passes 11/11 on Linux) but **this Windows machine
-  has no Rust toolchain and no `lanhub.exe`**. So step 4 needs one of: install Rust here,
-  get a Windows build from W2, or the lazy shortcut the s49 brief pre-authorises — feed the
-  joiner's shim the host's advertisement blob from a file or env var for a first
-  two-machine proof only, named as a shortcut and not shipped as the design.
+  joins. Test the 2-member shape with `work/s48b.py` against a live lobby **before**
+  committing to it. That is job B, and it is the only part of job B still open.
+- **Also shipped in s49: dead `ncrypt` dependency removed.** Seven NCrypt pointers plus
+  `CertCreateCertificateContext`/`CertSetCertificateContextProperty` were resolved at boot,
+  never called, and sat in the hard resolve check — one missing Wine `ncrypt` export would
+  have killed the shim with `srv: proc resolve failed`. `ncrypt.dll` is no longer loaded.
+  No Windows behaviour change (`dbg: cert ok`, `dbg: cred ok`).
+- **Step 4, discovery — NOT STARTED, one blocker cleared, one new.** The four browse
+  endpoints answer only from this shim's own `g_AdvBody`, so a second machine never sees the
+  host's lobby. Rust is now installed on this box (`cargo 1.99.1` at
+  `C:\Users\Bijoy\.cargo\bin`, not on the bash PATH yet), `cargo build --release` in
+  `D:\aoe2lan-repo\lanhub` works (6 s), and `lanhub/.gitignore` covers `/target`.
+  **But `test_walk.py` gives 9/11 here, twice, deterministic**: the two failures are exactly
+  the cross-instance gossip pair (`B: FIND sees A's lobby via gossip`,
+  `B: JOIN remote lobby`). Everything local passes. So the shim↔lanhub wiring can be built
+  and tested on one machine (control port only), but cross-machine discovery is blocked until
+  W2's gossip works on Windows — or until we use the file/env shortcut (first two-machine
+  proof only, named as a shortcut, not shipped as the design). `lanhub/**` is W2's: report,
+  do not edit. Details in §49f.
 - **Step 5, the relay needs no work.** Stock `BattleServer.exe` is already proven
   cross-tailnet by W2 (repo commit `a890ab3`, `GAMEDATA` funnelled, derp ~85 ms).
   Do NOT build `lanrelay`.
@@ -83,9 +94,10 @@ Session 49 shipped two of the four Priority 3 steps. Commit `533993f`.
 ### Gates, all re-run and passed at the end of session 49
 
 - `AoE2DE_s.exe` MD5 `affb19f03ca96965abf9e56775cab688` (untouched)
-- `dbghelp.dll` MD5 **`bb31158c4dd13ba2706f1334aaf4e5e3`**, identical in the game dir AND
-  `dev/lanhook/`. Backups taken BEFORE the build: `.prev-s49-before` =
-  `fa9330748b0fe297675f44e2828e738d` (the s48 build) in both places.
+- `dbghelp.dll` MD5 **`d5cee0abac99629c36f13407f84985ef`**, identical in the game dir AND
+  `dev/lanhook/`. **This build has not been in the game yet — offline gates only.** Backups:
+  `.prev-s49b-before` = `bb31158c4dd13ba2706f1334aaf4e5e3` (relayIP + join; the build the
+  7-AI run used), `.prev-s49-before` = `fa9330748b0fe297675f44e2828e738d` (s48).
 - `hooktest.exe`: `post-hook ok (21, 210, 2100, 6)`, `T7 ok (210, 6)`, `swapped 68 of 68`
 - `AOE2LAN_LIVE=1 srvtest.exe 90` + `C:/Python314/python.exe -X utf8 srvclient.py` → **PASS**
   (run srvclient FIRST, then `work/livetest.py` → **PASS**; livetest needs the advertisement
@@ -95,18 +107,16 @@ Session 49 shipped two of the four Priority 3 steps. Commit `533993f`.
   body with no `alias=`, which clears the shim's stored alias
 - `work/verifydll.py` → **19** HOOKDEF entries, `MSThunk va=0x1407b66f0 … kind=0`,
   `GLog va=0x1407db520 … kind=7`; `dumpbin -IMPORTS` → **KERNEL32.dll only**
-- Build warnings are the pre-existing C4090 five, now at loginsrv.c **690/692/694/2001/2032**
+- Build warnings are the pre-existing C4090 five, now at loginsrv.c **675/677/679/1986/2017**
 - Never launch the game while `srvtest.exe` lives or `127.0.0.1:443` has a **LISTENING**
   socket (`TIME_WAIT` is harmless). Two srvtest instances at once produce
   `ConnectionResetError` in srvclient — that is the trap, not a code bug.
 
-### A game may still be running from session 49
+### The session-49 game is closed
 
-Session 49 launched the game and left it at the main menu: PID log `logs/lanhook-15940.log`,
-healthy boot, `livepush.py ping` → `PONG armed=1`. At the end of session 49 it was **still
-up** (t≈815 s, 2.17 GB, `BattleServer.exe` running, no `advertisement/host` yet, so no lobby
-hosted). If it is still up, job B can use it — skip B1. Check with
-`tasklist | grep -i AoE2DE_s` and relaunch if it is gone (job A's reboot kills it).
+The 7-AI run happened in `logs/lanhook-15940.log` and the game is no longer running, so job
+B starts from a fresh launch (B1). That run used build `bb31158…`; the current build
+`d5cee0ab…` has only passed offline gates.
 
 ---
 
@@ -150,9 +160,15 @@ Do not write code against an IP you cannot see.
 
 ---
 
-## JOB B — one game run: does 7 AI work, and does a 2-member roster parse
+## JOB B — the 2-member roster test (7 AI and `nAI` are already CLOSED)
 
-This answers two open questions in one run. It does NOT need Tailscale.
+**Closed in session 49, do not redo:** 7 AI works (operator confirmed in the match), and
+`nAI` stays `0x2` with 7 AI just as it was with 3 AI — and the same `val=0x2 kind=2 nAI=0x2`
+fires at the main menu with no lobby at all. So `nAI` is not the lobby's AI count; it is a
+constant field the hook reads. Nothing to fix, and do NOT touch the AISlotPick hook or add AI
+to the advertisement (§49c).
+
+What is left is the roster shape, and it needs one live lobby. It does NOT need Tailscale.
 
 **B1. Launch (only if the game is not already up).** Confirm `srvtest.exe` is not running
 (`tasklist | grep -i srvtest`) and that `127.0.0.1:443` has no LISTENING socket
@@ -207,13 +223,11 @@ say so and move to B4 with a fresh lobby.
 `MSLADDER PARSED - no failure logged, ladder stops`. The process grows to ~3 GB when the map
 loads.
 
-**B5. Read the log and ask me one question.** Grep `HIT AISlotPick` and report every `nAI`
-value, then ask me: *how many AI are visibly in the match?* Session 48 saw `nAI=0x2` with
-3 AI placed, in two runs, before and after Start — unexplained. **New evidence from run
-15940:** `HIT AISlotPick … val=0x2 kind=2 nAI=0x2` fires at t=29.4 s, at the MAIN MENU,
-with no lobby hosted and no AI placed at all. So `nAI=2` is some default or a different
-counter, not the lobby's AI count — job B5 is now "does `nAI` change at all with 7 AI",
-and if it stays 0x2 the hook is reading the wrong field and there is nothing to fix. With 7 AI placed, if `nAI`
+**B5. Also confirm the new build boots.** This is the first live run of `d5cee0ab…`. In the
+log check `relayIP: AOE2LAN_RELAY_IP 127.0.0.1`, `dbg: cert ok`, `dbg: cred ok`,
+`TLS: handshake complete (server side)`, `VERBOSE: log level byte … 0 -> 2`, and that the
+match still loads (`SendSyncPacketRawMemCopy`). If `srv: proc resolve failed` appears, the
+s49 deletion broke something — restore `.prev-s49b-before` and say so. With 7 AI placed, if `nAI`
 tracks the count the s48 reading was a stale or different counter and there is nothing to
 fix. Nothing we emit depends on the AI count: AI are host-local simulation, they never enter
 `slotinfo` (slots 1–7 stay empty even with 3 AI) and never enter `matchMembers`.
@@ -302,8 +316,8 @@ ReadString. Browse-list reply parser `0x140571ae0` (`result`, `advertisements`, 
   matters, order does not.
 - Do NOT remove `"id"` from `emit_advertisement`, and do not change its value away from the
   sessionID without a measurement. `srvclient.py` asserts it.
-- Do NOT add AI to `slotinfo` or `matchMembers` to "fix" Priority 2 (§48e measures they
-  already work). Answer the `nAI` vs 7-AI question first (job B5).
+- Do NOT add AI to `slotinfo` or `matchMembers` to "fix" Priority 2 (§48e and §49c measure
+  they already work), and do NOT touch the AISlotPick hook because of `nAI` (§49c closed it).
 - Do NOT build `lanrelay`. Stock `BattleServer.exe` is proven cross-tailnet (§48j).
 - Do NOT edit W2's files (`lanhub/**`, `linux/**`, `notes/linux-*.md`) — §17.1. `PLAN.md` and
   `README.md` are shared: append only, never rewrite the other worker's section.
