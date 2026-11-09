@@ -27,10 +27,43 @@ fn fnv1a64(s: &str) -> u64 {
 
 fn rand_hex(n: usize) -> String {
     let mut b = vec![0u8; n];
-    if let Ok(mut f) = std::fs::File::open("/dev/urandom") {
-        let _ = f.read_exact(&mut b);
+    if std::fs::File::open("/dev/urandom")
+        .and_then(|mut f| f.read_exact(&mut b))
+        .is_err()
+    {
+        mix_bytes(&mut b);
     }
     b.iter().map(|x| format!("{x:02x}")).collect()
+}
+
+// No /dev/urandom on Windows and std has no RNG, so the old code silently returned
+// all-zero ids there: both hubs got nodeGUID 000..0 and every node dropped the
+// other's ADVERT as its own (s49f, 9/11). Mix what the process already knows.
+// shortcut: not a CSPRNG - fine for ids that must differ, weak for relayAuthToken;
+// take the getrandom crate if that token ever guards anything.
+fn mix_bytes(b: &mut [u8]) {
+    static CTR: AtomicU64 = AtomicU64::new(0);
+    let ctr = CTR.fetch_add(1, Ordering::Relaxed);
+    let sp = &ctr as *const _ as usize; // ASLR
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_nanos())
+        .unwrap_or(0);
+    let host = std::env::var("COMPUTERNAME")
+        .or_else(|_| std::env::var("HOSTNAME"))
+        .unwrap_or_default();
+    let pid = std::process::id();
+    let n = b.len();
+    let mut i = 0;
+    while i < n {
+        let h = fnv1a64(&format!("{host}|{pid}|{now}|{sp}|{ctr}|{i}"));
+        for x in h.to_be_bytes() {
+            if i < n {
+                b[i] = x;
+                i += 1;
+            }
+        }
+    }
 }
 
 fn own_tailnet_ip() -> String {
@@ -682,4 +715,23 @@ fn main() {
         thread::spawn(move || seed_loop(st, p));
     }
     thread::park();
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // guards s49f: on Windows there is no /dev/urandom, and the all-zero ids that
+    // resulted made every hub drop the other's ADVERT as its own.
+    #[test]
+    fn mix_bytes_is_nonzero_and_distinct() {
+        let mut a = [0u8; 16];
+        let mut b = [0u8; 16];
+        mix_bytes(&mut a);
+        mix_bytes(&mut b);
+        assert!(a.iter().any(|x| *x != 0), "mix_bytes returned an all-zero id");
+        assert_ne!(a, b, "two mix_bytes calls in one process collided");
+        assert_eq!(rand_hex(16).len(), 32);
+        assert_eq!(rand_hex(4).len(), 8);
+    }
 }
