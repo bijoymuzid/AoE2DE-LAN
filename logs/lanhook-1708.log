@@ -4292,3 +4292,191 @@
 [t=215.140s] hb alive sec=215
 [t=215.234s] srv: closed pending#20 n=0
 [t=220.140s] hb alive sec=220
+[t=225.140s] hb alive sec=225
+[t=230.140s] hb alive sec=230
+[t=235.140s] hb alive sec=235
+[t=240.140s] hb alive sec=240
+[t=244.140s] srv: connection accepted
+[t=244.140s] cert: root present=1
+[t=244.187s] TLS: handshake complete (server side)
+[t=244.234s] srv: blk#21 n=6100
+[t=244.234s] srv: req#21 n=6100
+[t=244.234s] HTTP REQ /game/CommunityEvent/getAvailableCommunityEvents
+[t=244.234s] HTTP RESP BODY [0,[]
+[t=244.234s] HTTP RESP: building head
+[t=244.234s] HTTP RESP: sent
+[t=245.140s] hb alive sec=245
+[t=245.234s] srv: closed pending#21 n=0
+[t=250.156s] hb alive sec=250
+[t=255.156s] hb alive sec=255
+[t=258.015s] srv: connection accepted
+[t=258.031s] cert: root present=1
+[t=258.078s] TLS: handshake complete (server side)
+[t=258.125s] srv: blk#22 n=384
+[t=258.125s] srv: req#22 n=384
+[t=258.125s] HTTP REQ /game/news/getNews
+[t=258.125s] HTTP RESP BODY [0,[]
+[t=258.125s] HTTP RESP: building head
+[t=258.125s] HTTP RESP: sent
+[t=259.125s] srv: closed pending#22 n=0
+[t=260.156s] hb alive sec=260
+[t=265.156s] hb alive sec=265
+[t=270.156s] hb alive sec=270
+[t=274.140s] srv: connection accepted
+[t=274.156s] cert: root present=1
+[t=274.203s] TLS: handshake complete (server side)
+[t=274.250s] srv: blk#23 n=414
+[t=274.250s] srv: req#23 n=414
+[t=274.250s] HTTP REQ /game/CommunityEvent/getAvailableCommunityEvents
+[t=274.250s] HTTP RESP BODY [0,[]
+[t=274.250s] HTTP RESP: building head
+[t=274.250s] HTTP RESP: sent
+[t=275.156s] hb alive sec=275
+[t=275.250s] srv: closed pending#23 n=0
+[t=280.156s] hb alive sec=280
+[t=285.156s] hb alive sec=285
+[t=290.172s] hb alive sec=290
+[t=295.172s] hb alive sec=295
+[t=300.172s] hb alive sec=300
+[t=304.125s] srv: connection accepted
+[t=304.125s] cert: root present=1
+[t=304.172s] TLS: handshake complete (server side)
+[t=304.218s] srv: blk#24 n=414
+[t=304.218s] srv: req#24 n=414
+[t=304.218s] HTTP REQ /game/CommunityEvent/getAvailableCommunityEvents
+[t=304.218s] HTTP RESP BODY [0,[]
+[t=304.218s] HTTP RESP: building head
+[t=304.218s] HTTP RESP: sent
+[t=305.172s] hb alive sec=305
+[t=305.218s] srv: closed pending#24 n=0
+[t=310.172s] hb alive sec=310
+[t=315.187s] hb alive sec=315
+[t=318.984s] srv: connection accepted
+[t=318.984s] cert: root present=1
+[t=319.031s] TLS: handshake complete (server side)
+[t=319.093s] srv: blk#25 n=1930
+[t=319.093s] srv: req#25 n=1930
+[t=319.093s] HTTP REQ /game/news/getNews
+[t=319.093s] HTTP RESP BODY [0,[]
+[t=319.093s] HTTP RESP: building head
+[t=319.093s] HTTP RESP: sent
+[t=320.093s] srv: closed pending#25 n=0
+[t=320.187s] hb alive sec=320
+[t=325.187s] hb alive sec=325
+[t=330.187s] hb alive sec=330
+[t=334.140s] srv: connection accepted
+[t=334.140s] cert: root present=1
+[t=334.187s] TLS: handshake complete (server side)
+[t=334.250s] srv: blk#26 n=6772
+[t=334.250s] srv: req#26 n=6772
+[t=334.250s] HTTP REQ /game/CommunityEvent/getAvailableCommunityEvents
+[t=334.250s] HTTP RESP BODY [0,[]
+[t=334.250s] HTTP RESP: building head
+[t=334.250s] HTTP RESP: sent
+[t=335.187s] hb alive sec=335
+[t=335.250s] srv: closed pending#26 n=0
+[t=340.187s] hb alive sec=340
+[t=345.187s] hb alive sec=345
+[t=350.203s] hb alive sec=350
+[t=355.203s] hb alive sec=355
+[t=360.203s] hb alive sec=360
+[t=364.156s] srv: connection accepted
+[t=364.156s] cert: root present=1
+[t=364.203s] TLS: handshake complete (server side)
+[t=364.265s] srv: blk#27 n=4811
+[t=364.265s] srv: req#27 n=4811
+[t=364.265s] HTTP REQ /game/CommunityEvent/getAvailableCommunityEvents
+[t=364.265s] HTTP RESP BODY [0,[]
+[t=364.265s] HTTP RESP: building head
+[t=364.265s] HTTP RESP: sent
+[t=365.203s] hb alive sec=365
+[t=365.265s] srv: closed pending#27 n=0
+[t=370.203s] hb alive sec=370
+[t=375.203s] hb alive sec=375
+[t=380.000s] srv: connection accepted
+[t=380.015s] cert: root present=1
+[t=380.062s] TLS: handshake complete (server side)
+[t=380.109s] srv: blk#28 n=384
+[t=380.109s] srv: req#28 n=384
+[t=380.109s] HTTP REQ /game/news/getNews
+[t=380.109s] HTTP RESP BODY [0,[]
+[t=380.109s] HTTP RESP: building head
+[t=380.109s] HTTP RESP: sent
+[t=380.203s] hb alive sec=380
+[t=381.109s] srv: closed pending#28 n=0
+[t=385.218s] hb alive sec=385
+[t=390.218s] hb alive sec=390
+[t=394.140s] srv: connection accepted
+[t=394.140s] cert: root present=1
+[t=394.187s] TLS: handshake complete (server side)
+[t=394.234s] srv: blk#29 n=414
+[t=394.234s] srv: req#29 n=414
+[t=394.234s] HTTP REQ /game/CommunityEvent/getAvailableCommunityEvents
+[t=394.234s] HTTP RESP BODY [0,[]
+[t=394.234s] HTTP RESP: building head
+[t=394.234s] HTTP RESP: sent
+[t=395.218s] hb alive sec=395
+[t=395.234s] srv: closed pending#29 n=0
+[t=400.218s] hb alive sec=400
+[t=405.218s] hb alive sec=405
+[t=410.218s] hb alive sec=410
+[t=415.218s] hb alive sec=415
+[t=420.218s] hb alive sec=420
+[t=424.140s] srv: connection accepted
+[t=424.140s] cert: root present=1
+[t=424.203s] TLS: handshake complete (server side)
+[t=424.250s] srv: blk#30 n=414
+[t=424.250s] srv: req#30 n=414
+[t=424.250s] HTTP REQ /game/CommunityEvent/getAvailableCommunityEvents
+[t=424.250s] HTTP RESP BODY [0,[]
+[t=424.250s] HTTP RESP: building head
+[t=424.250s] HTTP RESP: sent
+[t=425.234s] hb alive sec=425
+[t=425.250s] srv: closed pending#30 n=0
+[t=430.234s] hb alive sec=430
+[t=431.484s] GLOG #9977 site=0x0000000000f1927a [Network] "RLEVENT long update time %llu"
+[t=435.234s] hb alive sec=435
+[t=440.250s] hb alive sec=440
+[t=441.015s] srv: connection accepted
+[t=441.015s] cert: root present=1
+[t=441.062s] TLS: handshake complete (server side)
+[t=441.125s] srv: blk#31 n=7110
+[t=441.125s] srv: req#31 n=7110
+[t=441.125s] HTTP REQ /game/news/getNews
+[t=441.125s] HTTP RESP BODY [0,[]
+[t=441.125s] HTTP RESP: building head
+[t=441.125s] HTTP RESP: sent
+[t=442.125s] srv: closed pending#31 n=0
+[t=445.250s] hb alive sec=445
+[t=448.515s] GLOG #10088 site=0x0000000000f1927a [Network] "TComm_Provider_RL::rlUpdateLoop COMPLETE"
+[t=448.515s] GLOG #10090 site=0x0000000000f1927a [Network] "TComm_Matchmaking_RL::~TComm_Matchmaking_RL"
+[t=448.515s] GLOG #10092 site=0x0000000000f1927a [Network] "TComm_Matchmaking_RL::AbortMatch"
+[t=448.515s] GLOG #10094 site=0x0000000000f1927a [Network] "TComm_Matchmaking_RL::Reset"
+[t=448.609s] GLOG #10097 site=0x0000000000f1934c [rlink - warning] "NetworkManagerInternal::FlushJobs - flushing remaining (%lld) dynamic jobs:"
+[t=448.609s] GLOG #10099 site=0x0000000000f1934c [rlink - warning] "Dynamic job %s still running"
+[t=448.609s] GLOG #10107 site=0x0000000000f1934c [rlink - notice] "call to FlushJobs"
+[t=448.672s] srv: connection accepted
+[t=448.672s] cert: root present=1
+[t=448.718s] TLS: handshake complete (server side)
+[t=448.765s] srv: blk#32 n=7393
+[t=448.765s] srv: blk#32 n=53
+[t=448.765s] srv: req#32 n=7446
+[t=448.765s] HTTP REQ /game/login/logout
+[t=448.765s] HTTP BODY callNum=50&connect_id=1194185387&sessionID=1194185387
+[t=448.765s] HTTP RESP BODY [0,[]
+[t=448.765s] HTTP RESP: building head
+[t=448.765s] HTTP RESP: sent
+[t=448.875s] GLOG #10115 site=0x0000000000f1934c [rlink - error] "WorldwideItemService failed to load offline profile info because signedInventory profileID is invalid or defaultProfileInfo is invalid"
+[t=448.875s] GLOG #10117 site=0x0000000000f1934c [rlink - error] "WorldwideAccountService failed to load offline profile info after logging out"
+[t=448.922s] WS: closed, frames=179
+[t=448.922s] WS: data frames ignored=1
+[t=448.922s] srv: closed pending#3 n=213
+[t=449.218s] GLOG #10123 site=0x0000000000f1934c [rlink - error] "TlsConnection::Shutdown: socket %d/%lld SSL shut down failed; %s"
+[t=449.375s] HIT LogHelper #85: "WebSocketConnection::Process: Connection closed (State::FreeingSocket); m_resumeState=%d" r8=0x0000000000000000 r9=0x000001bc65580b80 a5=0x000001bc6ffdc310 a6=0x00000002f59ffa60 ret=0x00007ff6f25e0f60
+[t=449.375s] GLOG #10125 site=0x0000000000f1934c [rlink - info] "WebSocketConnection::Process: Connection closed (State::FreeingSocket); m_resumeState=%d"
+[t=449.765s] srv: closed pending#32 n=0
+[t=450.250s] hb alive sec=450
+[t=453.218s] GLOG #10155 site=0x0000000000f1934c [rlink - warning] "NetworkManagerInternal waited %llu ms for async jobs to complete successfully"
+[t=453.718s] GLOG #10181 site=0x0000000000f1934c [rlink - notice] "Beginning call to ~NetworkManagerInternal"
+[t=453.718s] GLOG #10183 site=0x0000000000f1934c [rlink - notice] "~NetworkManagerInternal is about to join threads"
+[t=453.765s] GLOG #10185 site=0x0000000000f1934c [rlink - notice] "We have reached the end of ~NetworkManagerInternal"

@@ -1564,7 +1564,7 @@ static void build_host_reply(BUF *b, const char *body) {
 // ------------------------------------------------- advertisement object
 // The list/update replies carry the ADVERTISEMENT dto, whose member names the
 // game's own reader states (parser 0x14056cce0, same order as the writer at
-// 0x14056dda0): steamLobbyID, goodOldGamesLobbyID, psnPlayerSessionID,
+// 0x14056dda0): id, steamLobbyID, goodOldGamesLobbyID, psnPlayerSessionID,
 // psnMatchId, xboxSessionID, hostProfileID, matchState, description,
 // filteredDescription, visible, mapName, options, isPassworded, maxPlayerCount,
 // encodedSlots, matchTypeID, matchMembers, observerNum, observerMax,
@@ -1611,13 +1611,20 @@ static void emit_advertisement(BUF *b, const char *body) {
     char hostid[32], sid[32];
     if (!form_get(body, "hostid", hostid, sizeof hostid)) hostid[0] = 0;
     if (!form_get(body, "sessionID", sid, sizeof sid)) sid[0] = 0;
-    bs(b, "{\"hostProfileID\":");
+    bs(b, "{\"id\":");
+    bs(b, sid[0] ? sid : "0");
+    bs(b, ",\"hostProfileID\":");
     bs(b, hostid[0] ? hostid : "0");
-    // s47: keys in the order the notification reader 0x14056cce0 checks them,
-    // which is the order its writer 0x14056dda0 emits them. That reader matches
-    // the 27 keys sequentially and NextKey skips what did not match in turn, so a
-    // key out of order can be dropped - and matchMembers/encodedSlots are exactly
-    // what WorldwideNotifier::ProcessNotification fills the slots from.
+    // s48: `id` is LOAD-BEARING. Without it the frame still parses and still
+    // fires AET_MatchStartNotify, but the match never leaves the lobby: no
+    // SendSyncPacketRawMemCopy, no scenario load. With it the same frame takes
+    // the game into the lockstep layer (measured live, run 15416 t=539.9, one
+    // key added to an otherwise identical 1717-byte push). The game's own
+    // advertisementid equals the sessionID we issued as gatheringID.
+    // s48 also corrects s47: reader 0x14056cce0 is a NAME CASCADE that restarts
+    // at `id` for every key (each block falls through to the next name without
+    // consuming, and the tail calls NextKey then jumps back to the first), so
+    // key order cannot drop fields. We still emit in reader order.
     // matchState: the state the game last told us, else this body's own, else -1
     { char st[8];
       if (!adv_get_state(st, sizeof st) &&

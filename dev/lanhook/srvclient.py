@@ -508,6 +508,10 @@ if ms:
     chk(got == [k for k in ADV_ORDER if k in got],
         f"pushed advert keys out of reader order: {got}")
     chk(pa.get("matchState") == 1, f"pushed advert matchState {pa.get('matchState')!r}, want 1")
+    # s48: `id` is what makes the match actually load; without it the frame
+    # parses, AET_MatchStartNotify fires, and the lobby never leaves.
+    chk(pa.get("id") == 1194243939 or str(pa.get("id", "")).isdigit(),
+        f"pushed advert id {pa.get('id')!r}, want the sessionID")
     chk(pa.get("hostProfileID") == 3842241165083521967,
         f"pushed advert hostProfileID {pa.get('hostProfileID')!r}")
     chk(pa.get("encodedSlots") == blob, "pushed advert must carry the hosted slot blob")

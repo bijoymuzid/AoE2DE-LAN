@@ -5,8 +5,9 @@ blocked on M1). Phase M1 (Identity / LoginShim) is mid-flight.
 **How to use this file in a new chat:** read §0 → §1 → §2, then start at M1 below
 (§9 milestone table + "M1 entry state"), then notes/m0-findings.md §10a–10e.
 Everything a fresh assistant needs to continue without redoing the analysis
-is here. **Start at notes/m1-session29.md (current state; supersedes everything older)**, then
-notes/m1-session28.md (the twin-rule cause chain), then
+is here. **Start at notes/m1-session48.md (current state; supersedes everything older)** — a
+hosted match now loads and runs with AI. Then notes/m1-session47.md (the websocket
+notification wire format), then
 notes/m1-session21.md (the login reply that made the client login), then §9 milestone table +
 "M1 entry state" below, then notes/m0-findings.md §10a–10e.
 
@@ -681,8 +682,8 @@ a file (the repo git-ignores binaries): W2 drops it next to the game exe inside 
 | # | Task | Done when |
 |---|---|---|
 | W1-a | **Hosting** — **DONE in session 30**: the `Expect: 100-continue` fix (session 30h) makes the game send `/game/advertisement/host`. | `srv: 100-continue` then `HTTP REQ /game/advertisement/host` with the full body — measured |
-| W1-b | **The host reply**: give `/game/advertisement/host` a real object so the game gets an advertisement id instead of -1 (session 30j/30k; the parse is `0x140309298`, the id lands in `[svc+0x80]`). Then the same for `getLanAdvertisements`, `findAdvertisements`, `join`, `update`, `leave`, one at a time, each measured. | `Created Matchinfo for sessionID` prints a real number and a lobby appears; each cache's `not formatted correctly` line disappears |
-| W1-c | **Relay wiring**: make the host's advertisement point at this machine's **tailnet IP**, not `192.168.0.x`, and prove the relay accepts both peers. | a second machine on the tailnet joins and both peers relay `GAMEDATA` |
+| W1-b | **The host reply** — **DONE in session 48**: `host`/`update`/`updateTags`/`updateState` all answer real objects, the game takes `gatheringID` as its advertisement id, and pressing Start loads the scenario and runs the match with AI (`notes/m1-session48.md`). The last blocker was one missing key, `id`, in the pushed `matchAdvertisement`. | measured: `MSLADDER PARSED`, `AET_MatchStartNotify`, `SendSyncPacketRawMemCopy`, map loads |
+| W1-c | **Relay wiring — NOW THE FRONT OF THE QUEUE**: the host reply still says `"relayIP":"127.0.0.1"`, so no remote peer can connect. Make it this machine's **tailnet IP**, then prove the relay accepts both peers. Change only `relayIP` first and measure; do not bundle it with the `matchMembers` change a joiner needs (§48g). | a second machine on the tailnet joins and both peers relay `GAMEDATA` |
 | W1-d | **The other caches, one at a time**, each only when a measurement points at it: leaderboard stats, news, community events, item bundles, item categories, challenges, chat channels, achievements, offline messages, cloud credentials. | each cache's `response was not formatted correctly` line goes away and nothing else regresses |
 
 Rules that still apply to both: never patch or hook code that is encrypted on disk; hook ids 4, 5
