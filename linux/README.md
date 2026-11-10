@@ -53,3 +53,17 @@ is refused instantly and the game gets the same `-47` failure Windows does. Undo
   `sudo ufw allow in on tailscale0 to any port 47110:47114`
 - MTU: tailscale0 is 1280; do not raise `[net] mtu` past 1200 in `aoe2lan.ini`.
 - Path quality: `lanhub peers` — anything `derp` means +100–200 ms relayed traffic.
+
+## Session-3 findings (2026-11-10) — read notes/linux-session3.md
+
+- The game **does** launch on wine 10. `AOE2LAN_STAGE=8` (the login shim) deadlocks the boot at
+  `Main.txt` line 18 on wine: with the grp2/grp3 detours a game thread spins inside wine's
+  `RtlWakeAddressAll`; with the server up a game thread busy-polls `fsync_msgwait` at ~4k/s
+  (wineserver ~35% CPU) and everything else parks. Details, stacks and the bisect ladder in
+  `notes/linux-session3.md` 3a–3e; W1 asks in 3h.
+- Interim boot without login: `AOE2LAN_STAGE=1` (DLL inert) or `AOE2LAN_STAGE=7` (IAT only)
+  reach the main menu in under a minute on `pfx-wine10`; Multiplayer stays greyed because no
+  login server runs. Use these to test anything menu-side on Linux.
+- Ops traps: `pgrep -f 'AoE2DE_s.exe'` matches the python launcher — use `pgrep -x`; there is no
+  `xwininfo`/`xdotool` here (use `import` + `identify`); the shim's 900/1400-line log caps are
+  burned by t≈3.6 s on Linux, so post-boot visibility needs strace or `WINEDEBUG=+server`.

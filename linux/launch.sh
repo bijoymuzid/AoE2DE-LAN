@@ -40,7 +40,9 @@ export STEAM_COMPAT_CLIENT_INSTALL_PATH="$HOME/.steam/steam"
 export WINEDLLOVERRIDES="dbghelp,winmm=n,b"
 #    ntsync off: a failing exit can wedge a thread spinning at 100% CPU that outlives the
 #    launcher (notes/linux-session2.md 2d/2f). Revisit once the game reaches the menu.
-export PROTON_NO_NTSYNC=1
+#    Overridable: PROTON_NO_NTSYNC="" selects ntsync, which is itself a variable under
+#    test on wine 10 (notes/linux-session3.md).
+export PROTON_NO_NTSYNC="${PROTON_NO_NTSYNC-1}"
 # telemetry env knobs: unknown semantics beyond PLAN §2.5 names — H4 owns silence
 # in-process; nothing set here until a measurement says otherwise.
 #    runinprefix, not run: "run" goes through Proton's steam.exe stub, which under
