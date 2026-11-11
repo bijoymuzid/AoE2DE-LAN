@@ -25,6 +25,7 @@
 #include "iathook.h"
 
 typedef void *HIN;
+int strcmp_f(const char *a, const char *b);   // defined below; used by realfn()
 
 // ---------------------------------------------------------------- patch table
 // flat name->stub map; names are unique across the three DLLs.
@@ -39,22 +40,6 @@ int WINAPI Hook_HCCallSetHeader(void*, const char*, const char*, int);
 int WINAPI Hook_HCWsConnect(void*, const char*, const char*, void*);
 int WINAPI Hook_HCWsSend(void*, const char*, void*);
 
-int WINAPI Hook_getaddrinfo(const char*, const char*, const void*, void**);
-int WINAPI Hook_WSAConnect(unsigned long long, const void*, int, void*, void*, void*, void*);
-int WINAPI Hook_connect(unsigned long long, const void*, int);
-int WINAPI Hook_send(unsigned long long, const char*, int, int);
-int WINAPI Hook_WSASend(unsigned long long, void*, unsigned long, unsigned long*, unsigned long, void*, void*);
-int WINAPI Hook_recv(unsigned long long, char*, int, int);
-int WINAPI Hook_WSARecv(unsigned long long, void*, unsigned long, unsigned long*, unsigned long*, void*, void*);
-int WINAPI Hook_recvfrom(unsigned long long, char*, int, int, void*, int*);
-int WINAPI Hook_WSARecvFrom(unsigned long long, void*, unsigned long, unsigned long*, unsigned long*, void*, int*, void*, void*);
-BOOL WINAPI Hook_WSAGetOverlappedResult(unsigned long long, void*, unsigned long*, BOOL, unsigned long*);
-int WINAPI Hook_closesocket(unsigned long long);
-BOOL WINAPI Hook_CertGetCertificateChain(void*, void*, void*, void*, void*, unsigned long, void*, void**);
-BOOL WINAPI Hook_CertVerifyChainPolicy(const char*, void*, void*, void*);
-void *WINAPI Hook_CertCreateChainEngine(void*);
-void *WINAPI Hook_CertFindCertificateInStore(void*, unsigned long, unsigned long, unsigned long, const void*, void*);
-int WINAPI Hook_WSAIoctl(unsigned long long, DWORD, void*, DWORD, void*, DWORD, DWORD*, void*, void*);
 unsigned long long WINAPI Hook_WSASocketA(int, int, int, void*, unsigned int, DWORD);
 unsigned long long WINAPI Hook_socket(int, int, int);
 BOOL WINAPI Hook_ConnectEx(unsigned long long, const void*, int, void*, DWORD, DWORD*, void*);
@@ -152,11 +137,6 @@ static struct { const char *fn; void *stub; void *real; } g_Map[] = {
     {"GetQueuedCompletionStatus",   (void*)&Hook_GQCS,                   0},
 };
 #define NMAP (int)(sizeof(g_Map)/sizeof(g_Map[0]))
-// certified g_Map indices (layout sensitive — edits above must update these):
-#define IDX_ADDCTX   55  // CertAddCertificateContextToStore
-#define IDX_CLOSE    57  // CertCloseStore
-#define IDX_FREECTX  58  // CertFreeCertificateContext
-#define IDX_ENUM     54  // CertEnumCertificatesInStore
 // certified g_Map indices (layout sensitive — edits above must update these):
 #define IDX_ADDCTX   55  // CertAddCertificateContextToStore
 #define IDX_CLOSE    57  // CertCloseStore
@@ -275,14 +255,45 @@ static int take_resp(void) { return InterlockedDecrement(&g_IatRespCap) > 0; }
 static int safe_len(const char *s, int cap) {
     int i = 0;
     if (!s) return 0;
-    __try {
+    HC_TRY
         while (i < cap && s[i]) i++;
     } __except (EXCEPTION_EXECUTE_HANDLER) { return 0; }
     return i;
 }
 
+// small printers so a log line can carry the HCCall pointer + both error codes
+static int bsput_i(char *b, int i, const char *s) { while (*s) b[i++] = *s++; b[i] = 0; return i; }
+static int hput(char *b, int i, DWORD64 v) {
+    static const char hx[] = "0123456789abcdef"; char t[20]; int n = 0;
+    b[i++] = '0'; b[i++] = 'x';
+    if (!v) t[n++] = '0';
+    while (v) { t[n++] = hx[v & 15]; v >>= 4; }
+    while (n) b[i++] = t[--n];
+    b[i] = 0;
+    return i;
+}
+static int dput(char *b, int i, DWORD v) {
+    char t[12]; int n = 0;
+    if (!v) t[n++] = '0';
+    while (v) { t[n++] = (char)('0' + (v % 10)); v /= 10; }
+    while (n) b[i++] = t[--n];
+    b[i] = 0;
+    return i;
+}
+
 // ---------------------------------------------------------------- libHttpClient
 // HRESULT (int) return for all HC calls. Plain char* strings.
+
+// NOTE (wine): XAL's 1DS telemetry POST to self.events.data.microsoft.com fails
+// here every ~19 s with HC E_FAIL / provider pe=0x80072f78
+// (ERROR_HTTP_INVALID_SERVER_RESPONSE). It is NOT fatal - three 100 s runs each
+// took 5 of those failures and held the menu throughout. An earlier run did log
+// out + exit 0.7 s after its 2nd failure, but that has not reproduced in 3/3
+// runs since (including with AOE2LAN_DUMPTEXT=1, the other suspect). Rewriting
+// the URL to our own TLS server was tried and removed: libHttpClient.Win32.dll
+// resolves and connects through its OWN IAT, so the rewrite never moved the
+// socket - the server saw zero /OneCollector requests with it enabled.
+// Evidence: notes/linux-session4.md §4c, /tmp/exp-{telem1,telem0,dumptext2}.shim.log.
 
 typedef int (WINAPI *PfnHCSetUrl)(void*, const char*, const char*);
 typedef int (WINAPI *PfnHCSetBodyStr)(void*, const char*);
@@ -299,9 +310,10 @@ int WINAPI Hook_HCCallSetUrl(void *call, const char *method, const char *url) {
     if (take_req() && url) {
         char b[384]; int i=0; const char *m="HC SET ";
         while (*m) b[i++]=*m++;
-        for (int j=0; method && method[j] && i<360; j++) b[i++]=method[j];
+        for (int j=0; method && method[j] && i<330; j++) b[i++]=method[j];
         b[i++]=' ';
-        for (int j=0; url && url[j] && i<360; j++) b[i++]=url[j];
+        for (int j=0; url && url[j] && i<330; j++) b[i++]=url[j];
+        i = bsput_i(b, i, " call="); i = hput(b, i, (DWORD64)call);
         b[i]=0; log_line(b);
     }
     return real(call, method, url);
@@ -326,7 +338,11 @@ int WINAPI Hook_HCCallSetBodyBytes(void *call, const unsigned char *bytes, DWORD
 
 int WINAPI Hook_HCCallPerform(void *call, void *async) {
     PfnHCPerform real = (PfnHCPerform)g_Map[27].real;
-    if (take_req()) log_line("HC PERFORM (request sent)");
+    if (take_req()) {
+        char b[64]; int i=0; const char *m="HC PERFORM call=";
+        while (*m) b[i++]=*m++;
+        i = hput(b, i, (DWORD64)call); b[i]=0; log_line(b);
+    }
     return real(call, async);
 }
 
@@ -350,7 +366,7 @@ int WINAPI Hook_HCCallGetRespStr(void *call, const char **str, DWORD *len) {
     if (hr == 0 && str && *str && take_resp()) {
         // full JSON first line(s): log in 300-char slices, SEH-guarded
         DWORD total = 0;
-        __try {
+        HC_TRY
             if (len) total = *len;
             if (!total) { const char *q = *str; while (q[total] && total < 100000) total++; }
         } __except (EXCEPTION_EXECUTE_HANDLER) { total = 0; }
@@ -360,7 +376,7 @@ int WINAPI Hook_HCCallGetRespStr(void *call, const char **str, DWORD *len) {
             DWORD chunk = total - off; if (chunk > 300) chunk = 300;
             char b[384]; int i=0; const char *m = (off==0) ? "HC RESP " : "HC resp+";
             while (*m) b[i++]=*m++;
-            __try {
+            HC_TRY
                 for (DWORD j=0; j<chunk; j++) {
                     char c = (*str)[off+j];
                     b[i++] = (char)((c=='\n'||c=='\r') ? ' ' : c);
@@ -385,11 +401,14 @@ int WINAPI Hook_HCCallGetNetErr(void *call, DWORD *e, DWORD *pe) {
     PfnHCGetNetErr real = (PfnHCGetNetErr)g_Map[30].real;
     int hr = real(call, e, pe);
     if (take_resp() && e && *e) {
-        char b[96]; int i=0; const char *m="HC NETERR ";
+        // pe is the provider's own code (CURLE_* / WinHTTP), the only thing that
+        // says WHY a call failed - E_FAIL alone is the same for every failure.
+        char b[160]; int i=0; const char *m="HC NETERR ";
         while (*m) b[i++]=*m++;
-        { char t[12]; int tl=0; DWORD v=*e;
-          do { t[tl++]=(char)('0'+(v%10)); v/=10; } while(v);
-          while (tl) b[i++]=t[--tl]; }
+        i = dput(b, i, *e); i = hput(b, i, *e);
+        i = bsput_i(b, i, " pe="); i = dput(b, i, pe ? *pe : 0);
+        i = hput(b, i, pe ? *pe : 0);
+        i = bsput_i(b, i, " call="); i = hput(b, i, (DWORD64)call);
         b[i]=0; log_line(b);
     }
     return hr;
@@ -455,7 +474,7 @@ int WINAPI Hook_HCCallGetHeader(void *call, const char *name, const char **val) 
         while (*m) b[i++]=*m++;
         { int n = safe_len(name, 200); for (int j=0; j<n && i<280; j++) b[i++]=name[j]; }
         b[i++]='=';
-        __try {
+        HC_TRY
             if (val && *val) { int n = safe_len(*val, 200); for (int j=0; j<n && i<280; j++) b[i++]=(*val)[j]; }
         } __except (EXCEPTION_EXECUTE_HANDLER) { }
         b[i]=0; log_line(b);
@@ -473,7 +492,7 @@ int WINAPI Hook_HCCallGetHeaderAt(void *call, DWORD idx, const char **name, cons
     int hr = real(call, idx, name, val);
     if (hr == 0 && take_resp()) {
         char b[300]; int i=0;
-        __try {
+        HC_TRY
             if (name && *name) { int n = safe_len(*name, 200); for (int j=0; j<n && i<280; j++) b[i++]=(*name)[j]; }
             b[i++]='=';
             if (val && *val) { int n = safe_len(*val, 200); for (int j=0; j<n && i<280; j++) b[i++]=(*val)[j]; }
@@ -588,7 +607,7 @@ static void fmt_peer(const void *name, int fam_req, char *out, int cap) {
     const unsigned char *p = (const unsigned char*)name;
     out[0] = 0;
     if (!p) return;
-    __try {
+    HC_TRY
         int fam = *(const short*)p;
         if (fam == 2) { // AF_INET: port BE at +2, addr at +4
             unsigned a = p[4], b = p[5], c = p[6], d = p[7];
@@ -656,7 +675,7 @@ int WINAPI Hook_getaddrinfo(const char *node, const char *service, const void *h
       if (r == 0 && result && *result && take_req() && !redirected) {
           // log the resolved addresses (first 4 entries)
           void *ai = *result; int cnt = 0;
-          __try {
+          HC_TRY
               while (ai && cnt < 4) {
                   const char *ad = *(const char**)((char*)ai + 32);   // ai_addr
                   char peer[28]; fmt_peer(ad, 0, peer, 28);
@@ -726,8 +745,6 @@ int WINAPI Hook_send(SOCKT s, const char *buf, int len, int flags) {
     }
     return real(s, buf, len, flags);
 }
-
-typedef struct { unsigned long long len; char *buf; } WSABUF64;
 
 int WINAPI Hook_WSASend(SOCKT s, WSABUF64 *bufs, DWORD cnt, DWORD *sent, DWORD flags, void *ov, void *cb) {
     typedef int (WINAPI *Pfn)(SOCKT, WSABUF64*, DWORD, DWORD*, DWORD, void*, void*);
@@ -853,7 +870,7 @@ void *g_RealConnectEx;   // the real ConnectEx captured from WSAIoctl output
 static int guid_eq(const void *a, const unsigned char *g) {
     const unsigned char *p = (const unsigned char*)a;
     int i;
-    __try {
+    HC_TRY
         for (i = 0; i < 16; i++) if (p[i] != g[i]) return 0;
         return 1;
     } __except (EXCEPTION_EXECUTE_HANDLER) { return 0; }
@@ -912,7 +929,7 @@ int iathook_log_clienthello(const char *tag, const unsigned char *p, DWORD n) {
     unsigned vmaj, vmin;
     DWORD cslen;
     if (n < 44) return 0;
-    __try {
+    HC_TRY
         if (p[0] != 0x16) return 0;
         vmaj = p[1]; vmin = p[2];
         if (vmaj != 3) return 0;
@@ -963,7 +980,7 @@ int iathook_log_clienthello(const char *tag, const unsigned char *p, DWORD n) {
 static void tls_note_recv(const unsigned char *p, DWORD n) {
     char b[96]; int i;
     if (n < 2) return;
-    __try {
+    HC_TRY
         if (p[0] == 0x15 && n >= 3) {        // alert: level, description
             i = 0;
             { const char *m="TLS ALERT level="; while (*m) b[i++]=*m++; }
@@ -1002,7 +1019,7 @@ int WINAPI Hook_WSAIoctl(SOCKT s, DWORD code, void *in, DWORD inLen, void *out, 
         } else if (in && inLen >= 16 && take_req()) {
             char b[96]; int i=0; const char *m="WSAIoctl: ext-fn GUID ";
             while (*m) b[i++]=*m++;
-            __try {
+            HC_TRY
                 const unsigned char *g=(const unsigned char*)in;
                 for (int k=0;k<16 && i<90;k++) {
                     int hi=g[k]>>4, lo=g[k]&15;
@@ -1134,14 +1151,22 @@ void *WINAPI Hook_CertOpenStore(const char *prov, DWORD enc, unsigned long long 
     if (take_resp()) {
         char b[200]; int i=0; const char *m="CRYPT32 OpenStore prov=";
         while (*m) b[i++]=*m++;
-        __try { for (int j=0; prov && prov[j] && i<120; j++) b[i++]=prov[j]; } __except (EXCEPTION_EXECUTE_HANDLER) { }
-        __try {
-            const char *pn = (const char*)para;
-            if (pn && pn[0] > 0x20 && pn[0] < 0x7f) {
-                b[i++]=' ';
-                for (int j=0; pn[j]>0x20 && pn[j]<0x7f && j<40 && i<180; j++) b[i++]=pn[j];
-            }
-        } __except (EXCEPTION_EXECUTE_HANDLER) { }
+        if (HC_IS_PTR(prov)) {
+            HC_TRY for (int j=0; prov[j] && i<120; j++) b[i++]=prov[j]; } __except (EXCEPTION_EXECUTE_HANDLER) { }
+        } else if (prov) {
+            DWORD v = (DWORD)(ULONG_PTR)prov; char t[12]; int tl=0;
+            b[i++]='#'; while (v && tl<10) { t[tl++]=(char)('0'+(v%10)); v/=10; }
+            while (tl) b[i++]=t[--tl];
+        }
+        if (HC_IS_PTR(para)) {
+            HC_TRY
+                const char *pn = (const char*)para;
+                if (pn[0] > 0x20 && pn[0] < 0x7f) {
+                    b[i++]=' ';
+                    for (int j=0; pn[j]>0x20 && pn[j]<0x7f && j<40 && i<180; j++) b[i++]=pn[j];
+                }
+            } __except (EXCEPTION_EXECUTE_HANDLER) { }
+        }
         b[i]=0; log_line(b);
     }
     return h;
@@ -1173,7 +1198,7 @@ void *WINAPI Hook_CertEnumCertificatesInStore(void *store, void *prev) {
             { char t[8]; int tl=0; DWORD v=(DWORD)n; if(!v)t[tl++]='0';
               while (v && tl<7) { t[tl++]=(char)('0'+(v%10)); v/=10; }
               while (tl) b[i++]=t[--tl]; }
-            __try {
+            HC_TRY
                 DWORD cb = *(DWORD*)ctx;
                 const unsigned char *pb = *(const unsigned char**)((char*)ctx+8);
                 { const char *t=" enc="; while (*t) b[i++]=*t++;
@@ -1208,7 +1233,7 @@ BOOL WINAPI Hook_CertAddCtxToStore(void *store, void *ctx, DWORD flags, void **o
           for (int k=15;k>=0;k--) { int d=(int)(((DWORD64)(uintptr_t)ctx>>(k*4))&15); b[i++]=(char)(d<10?'0'+d:'a'+d-10); } }
         { const char *t=" flags=0x"; while (*t) b[i++]=*t++;
           for (int k=7;k>=0;k--) { int d=(int)((flags>>(k*4))&15); b[i++]=(char)(d<10?'0'+d:'a'+d-10); } }
-        __try {
+        HC_TRY
             DWORD cb = *(DWORD*)ctx;
             const unsigned char *pb = *(const unsigned char**)((char*)ctx+8);
             { const char *t=" enc="; while (*t) b[i++]=*t++;
@@ -1232,7 +1257,7 @@ BOOL WINAPI Hook_CryptStringToBinaryA(const char *in, DWORD inLen, DWORD flags, 
     if (take_resp() && in) {
         char b[160]; int i=0; const char *m="CRYPT32 StrToBin ";
         while (*m) b[i++]=*m++;
-        __try { for (int j=0; in[j] && j<56 && i<150; j++) b[i++]=in[j]; } __except (EXCEPTION_EXECUTE_HANDLER) { }
+        HC_TRY for (int j=0; in[j] && j<56 && i<150; j++) b[i++]=in[j]; } __except (EXCEPTION_EXECUTE_HANDLER) { }
         b[i]=0; log_line(b);
     }
     return ok;
@@ -1254,10 +1279,10 @@ BOOL WINAPI Hook_CryptQueryObject(DWORD objType, const void *pvObject, DWORD exp
                                   DWORD *pEnc, DWORD *pContent, DWORD *pFormat, void **phStore, const void **ppvCtx) {
     typedef BOOL (WINAPI *Pfn)(DWORD, const void*, DWORD, DWORD, DWORD, DWORD*, DWORD*, DWORD*, void**, const void**);
     Pfn real = (Pfn)realfn("CryptQueryObject");
-    if (take_resp() && pvObject) {
+    if (take_resp() && HC_IS_PTR(pvObject)) {
         char b[200]; int i=0; const char *m="CRYPT32 QueryObject ";
         while (*m) b[i++]=*m++;
-        __try { for (int j=0; ((const char*)pvObject)[j] && j<100 && i<180; j++) b[i++]=((const char*)pvObject)[j]; } __except (EXCEPTION_EXECUTE_HANDLER) { }
+        HC_TRY for (int j=0; ((const char*)pvObject)[j] && j<100 && i<180; j++) b[i++]=((const char*)pvObject)[j]; } __except (EXCEPTION_EXECUTE_HANDLER) { }
         b[i]=0; log_line(b);
     }
     return real(objType, pvObject, expContent, expFormat, flags, pEnc, pContent, pFormat, phStore, ppvCtx);
@@ -1270,7 +1295,7 @@ DWORD WINAPI Hook_CertGetNameStringW(void *ctx, DWORD type, DWORD flags, void *p
     if (r && out && out[0] && take_resp()) {
         char b[160]; int i=0; const char *m="CRYPT32 cert name=";
         while (*m) b[i++]=*m++;
-        __try { for (int j=0; out[j] && j<60 && i<150; j++) b[i++]=(char)(out[j]<128?out[j]:'?'); } __except (EXCEPTION_EXECUTE_HANDLER) { }
+        HC_TRY for (int j=0; out[j] && j<60 && i<150; j++) b[i++]=(char)(out[j]<128?out[j]:'?'); } __except (EXCEPTION_EXECUTE_HANDLER) { }
         b[i]=0; log_line(b);
     }
     return r;
@@ -1322,7 +1347,7 @@ BOOL WINAPI Hook_CertGetCertificateChain(void *engine, void *certCtx, void *pTim
         while (*m) b[i++]=*m++;
         { for (int k=15;k>=0;k--) { int d=(int)(((DWORD64)certCtx>>(k*4))&15); b[i++]=(char)(d<10?'0'+d:'a'+d-10); } }
         b[i++]=ok?' ':'!';
-        __try {
+        HC_TRY
             if (ok && ppChain && *ppChain) {
                 TRUSTSTATUS_HDR *ts = (TRUSTSTATUS_HDR*)((char*)*ppChain + 4);
                 const char *t=" err=0x"; while (*t) b[i++]=*t++;
@@ -1345,7 +1370,7 @@ BOOL WINAPI Hook_CertVerifyChainPolicy(const char *oid, void *chain, void *para,
         while (*m) b[i++]=*m++;
         for (int j=0; oid && oid[j] && i<180; j++) b[i++]=oid[j];
         b[i++]=ok?' ':'!';
-        __try {
+        HC_TRY
             if (status) {
                 DWORD dwErr = *(DWORD*)((char*)status + 4); // PCERT_CHAIN_POLICY_STATUS: cbSize; dwError
                 const char *t=" dwError="; while (*t) b[i++]=*t++;
@@ -1782,7 +1807,7 @@ int iathook_patch_module(HMODULE mod) {
     IMAGE_IMPORT_DESCRIPTOR *imp;
     int swapped = 0;
     if (!mod) return 0;
-    __try {
+    HC_TRY
         dos = (IMAGE_DOS_HEADER*)base;
         if (dos->e_magic != 0x5A4D) return 0;
         nt = (IMAGE_NT_HEADERS*)(base + dos->e_lfanew);
@@ -1793,7 +1818,7 @@ int iathook_patch_module(HMODULE mod) {
 
     for (; imp->Name; imp++) {
         const char *dllName;
-        __try { dllName = (const char*)(base + imp->Name); }
+        HC_TRY dllName = (const char*)(base + imp->Name); }
         __except (EXCEPTION_EXECUTE_HANDLER) { continue; }
         if (!ascii_ieq(dllName, "WINHTTP.dll", 12) &&
             !ascii_ieq(dllName, "WININET.dll", 11) &&
@@ -1811,7 +1836,7 @@ int iathook_patch_module(HMODULE mod) {
               const char *fnName = 0;
               if (!(thunk[i] & IMAGE_ORDINAL_FLAG64)) {
                   IMAGE_IMPORT_BY_NAME *ibn = (IMAGE_IMPORT_BY_NAME*)(base + (DWORD)(thunk[i] & 0xFFFFFFFF));
-                  __try { fnName = (const char*)ibn->Name; }
+                  HC_TRY fnName = (const char*)ibn->Name; }
                   __except (EXCEPTION_EXECUTE_HANDLER) { fnName = 0; }
               }
               if (!fnName) {
@@ -1834,7 +1859,7 @@ int iathook_patch_module(HMODULE mod) {
               if (!fnName) {
                   // legacy/bound slot (name unreadable): identify by resolved
                   // address via GetProcAddress on the owning DLL
-                  __try {
+                  HC_TRY
                       HMODULE hm = GetModuleHandleA(dllName);
                       if (hm) {
                           for (int k = 0; k < NMAP; k++) {

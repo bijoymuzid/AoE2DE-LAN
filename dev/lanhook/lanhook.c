@@ -33,6 +33,15 @@
 #include "iathook.h"
 #include "loginsrv.h"
 
+#ifdef __clang__
+// clang/mingw has no MSVC intrinsic; with a frame pointer [rbp+8] IS the
+// return-address slot, which is what the MSVC intrinsic returns a pointer to.
+#define _AddressOfReturnAddress() ((void*)((char*)__builtin_frame_address(0) + 8))
+#endif
+static int cput(char *b, int i, const char *s);            // defined below
+static int chx(char *b, int i, DWORD64 v);
+static int cpct(char *b, int i, unsigned long long v);
+
 // ---------------------------------------------------------------- stages:
 // 7 = IAT intercept only (no E9 game-code patches): log all WinHTTP/WININET
 //     traffic at the decrypted-data layer. Capture run for M1 synthesis.
@@ -171,8 +180,8 @@ BOOL WINAPI Hook_SymFromAddr(HANDLE hProcess, DWORD64 Address,
 // ---------------------------------------------------------------- probes
 static void probe_exec(void) {
     BYTE p = 0;
-    __try {
-        p = *(volatile BYTE*)(g_Base + (0x140F19680 - 0x140000000));
+    HC_TRY
+        p = HC_RD8((g_Base + (0x140F19680 - 0x140000000)));
         logf1("probe: OnAppSuspending byte readable =", (DWORD64)p);
     } __except (EXCEPTION_EXECUTE_HANDLER) {
         log_line("probe: OnAppSuspending byte NOT readable (guarded page)");
@@ -222,6 +231,7 @@ static int is_game_exe(void) {
 static signed char g_HState[HK_MAX];
 static DWORD g_Stage = 1;
 static signed char g_Only[HK_MAX];   // set when AOE2LAN_HOOKS restricts installs
+static int g_NoHooks = 0;
 
 // ---------------------------------------------------------------- MP unlock
 // Session 26: the s23/s25 target was wrong. The read-only map proved the live
@@ -258,7 +268,7 @@ typedef int (*PfnPriv)(void *self, int priv, void *out, unsigned char b);
 static void spy_callers(const char *tag, void *self) {
     char b[256]; int i = 0;
     DWORD64 *sp = 0;
-    __try { sp = (DWORD64*)_AddressOfReturnAddress(); }   // caller's rsp after the call
+    HC_TRY sp = (DWORD64*)_AddressOfReturnAddress(); }   // caller's rsp after the call
     __except (EXCEPTION_EXECUTE_HANDLER) { return; }
     i = cput(b, i, "callers "); 
     for (const char *t = tag; t && *t && i < 30; t++) b[i++] = *t;
@@ -269,7 +279,7 @@ static void spy_callers(const char *tag, void *self) {
     if (!sp) return;
     for (int k = 0; k < 12; k++) {
         DWORD64 v = 0;
-        __try { v = sp[k]; } __except (EXCEPTION_EXECUTE_HANDLER) { break; }
+        HC_TRY v = HC_RD64((DWORD64)(sp + k)); } __except (EXCEPTION_EXECUTE_HANDLER) { break; }
         if (v >= g_Base && v < g_Base + 0x5000000) {
             char l[96]; int j = 0;
             j = cput(l, j, "  ret["); j = cpct(l, j, (unsigned long long)k);
@@ -411,6 +421,9 @@ static DWORD WINAPI MainThread(LPVOID p) {
                   b[i++]=','; }
               if (i>0) i--;
               b[i]=0; log_line(b);
+          } else {
+              g_NoHooks = 1;
+              log_line("hook filter: none (all E9 detours disabled)");
           }
       } }
     if (!g_Base) g_Base = (DWORD64)GetModuleHandleW(NULL);
@@ -440,8 +453,33 @@ static DWORD WINAPI MainThread(LPVOID p) {
               while(tl) b[i++]=t[--tl]; }
             { const char *t=" IAT slots (winhttp+wininet+libHC+ws2+wsock+crypt32+k32)"; while(*t) b[i++]=*t++; }
             b[i]=0; log_line(b); } }
-        if (!loginsrv_start()) log_line("loginsrv: START FAILED");
-        g_LoginInjectCert = loginsrv_inject_cert();
+        if (!getenv_flag(L"AOE2LAN_NOREDIR")) g_IatRedirect = 1;
+        else { g_IatRedirect = 0; log_line("stage=8: AOE2LAN_NOREDIR=1 (redirect disabled)"); }
+        if (!getenv_flag(L"AOE2LAN_NOSRV")) {
+            if (!loginsrv_start()) log_line("loginsrv: START FAILED");
+            if (!getenv_flag(L"AOE2LAN_NOCERT")) g_LoginInjectCert = loginsrv_inject_cert();
+        } else log_line("stage=8: AOE2LAN_NOSRV=1 (server disabled)");
+        if (g_NoHooks || getenv_flag(L"AOE2LAN_NOHOOKS")) {
+            log_line("stage=8: skipping all E9 detours");
+            { WCHAR hv[16];
+              if (GetEnvironmentVariableW(L"AOE2LAN_HOOKDELAY", hv, 16) && hv[0]) {
+                  DWORD ms = 0;
+                  for (int i = 0; hv[i] >= L'0' && hv[i] <= L'9'; i++) ms = ms * 10 + (DWORD)(hv[i] - L'0');
+                  if (ms > 0) { logf1("stage=8: delaying wset_vt install ms=", ms); Sleep(ms); }
+              } }
+            hc_install_wset_vtables(g_Base);
+            if (getenv_flag(L"AOE2LAN_MPUNLOCK")) mp_unlock();
+            return 0;
+        }
+        { WCHAR hv[16];
+          if (GetEnvironmentVariableW(L"AOE2LAN_HOOKDELAY", hv, 16) && hv[0]) {
+              DWORD ms = 0;
+              for (int i = 0; hv[i] >= L'0' && hv[i] <= L'9'; i++) ms = ms * 10 + (DWORD)(hv[i] - L'0');
+              if (ms > 0) {
+                  logf1("stage=8: delaying E9 hook install ms=", ms);
+                  Sleep(ms);
+              }
+          } }
         log_line("LanHookThread stage=8 (H1): redirect+server live, installing LogHelpers");
         // stage 8: force the AOE2LAN_HOOKS filter to the proven-clean
         // log-sink detours (group 2: LogHelper, LogHelper2, LogWarn) plus the
@@ -545,7 +583,7 @@ static int mod_of(DWORD64 a, DWORD64 *base, DWORD64 *size) {
     for (int k = 0; k < 512 && p > 0x10000; k++, p -= 0x10000) {
         if (!VirtualQuery((LPCVOID)p, &mbi, sizeof(mbi))) break;
         if (mbi.State != MEM_COMMIT || (mbi.Protect & PAGE_NOACCESS)) continue;
-        __try {
+        HC_TRY
             if (*(WORD*)p == 0x5A4D) {
                 DWORD lf = *(DWORD*)(p + 0x3C);
                 DWORD64 nt = p + lf;
@@ -587,7 +625,7 @@ static LONG WINAPI LanCrashFilter(EXCEPTION_POINTERS *ep) {
             if (!VirtualQuery((LPCVOID)(sp + k), &mbi, sizeof(mbi))) break;
             if (mbi.State != MEM_COMMIT || (mbi.Protect & (PAGE_NOACCESS | PAGE_GUARD))) break;
             DWORD64 v = 0;
-            __try { v = sp[k]; } __except (EXCEPTION_EXECUTE_HANDLER) { break; }
+            HC_TRY v = HC_RD64((DWORD64)(sp + k)); } __except (EXCEPTION_EXECUTE_HANDLER) { break; }
             if (v >= g_Base && v < g_Base + 0x5000000) {
                 char l[128]; int j = 0;
                 j = cput(l, j, "CRASH stack["); j = cpct(l, j, (unsigned long long)k);
@@ -607,7 +645,7 @@ static void mp_check_slots(void) {
     for (unsigned k = 0; k < sizeof(g_MpSlots)/sizeof(g_MpSlots[0]); k++) {
         DWORD64 v = 0;
         if (g_MpReverted[k]) continue;
-        __try { v = *(volatile DWORD64*)(g_Base + (g_MpSlots[k].va - (DWORD64)0x140000000)); }
+        HC_TRY v = HC_RD64((g_Base + (g_MpSlots[k].va - (DWORD64)0x140000000))); }
         __except (EXCEPTION_EXECUTE_HANDLER) { continue; }
         if (v != (DWORD64)g_MpSlots[k].repl) {
             char b[160]; int i = 0;
@@ -641,7 +679,7 @@ static void spy_rva(const char *tag, DWORD64 va) {
 // slots the privilege chain calls. Reads only.
 static void spy_iface(const char *tag, unsigned off, DWORD64 plat) {
     DWORD64 p = 0, vt = 0;
-    __try { p = *(volatile DWORD64*)(plat + off); }
+    HC_TRY p = HC_RD64((plat + off)); }
     __except (EXCEPTION_EXECUTE_HANDLER) { return; }
     { char b[160]; int i = 0;
       i = cput(b, i, "mpspy: ");
@@ -649,14 +687,14 @@ static void spy_iface(const char *tag, unsigned off, DWORD64 plat) {
       i = cput(b, i, " ptr="); i = chx(b, i, p);
       b[i] = 0; log_line(b); }
     if (!p) return;
-    __try { vt = *(volatile DWORD64*)p; }
+    HC_TRY vt = HC_RD64(p); }
     __except (EXCEPTION_EXECUTE_HANDLER) { return; }
     spy_rva("  vtable", vt);
     if (!(vt >= g_Base && vt < g_Base + 0x5000000)) return;
     { const unsigned in[] = { 0xb0, 0xb8, 0xc0, 0xc8 };
       for (unsigned k = 0; k < sizeof(in)/sizeof(in[0]); k++) {
         DWORD64 s = 0;
-        __try { s = *(volatile DWORD64*)(vt + in[k]); }
+        HC_TRY s = HC_RD64((vt + in[k])); }
         __except (EXCEPTION_EXECUTE_HANDLER) { continue; }
         { char b[160]; int i = 0;
           i = cput(b, i, "mpspy:     slot+0x"); i = chx(b, i, in[k]); i = cput(b, i, " -> ");
@@ -669,17 +707,17 @@ static void spy_iface(const char *tag, unsigned off, DWORD64 plat) {
 static void mp_spy(void) {
     if (!g_MpSpy) return;
     DWORD64 plat = 0, vt = 0;
-    __try { plat = *(volatile DWORD64*)(g_Base + PLATFORM_GLOBAL); }
+    HC_TRY plat = HC_RD64((g_Base + PLATFORM_GLOBAL)); }
     __except (EXCEPTION_EXECUTE_HANDLER) { log_line("mpspy: read of platform failed"); return; }
     spy_rva("platform obj", plat);
     if (!plat) { log_line("mpspy: platform is null"); return; }
-    __try { vt = *(volatile DWORD64*)plat; }
+    HC_TRY vt = HC_RD64(plat); }
     __except (EXCEPTION_EXECUTE_HANDLER) { log_line("mpspy: read of vtable failed"); return; }
     spy_rva("platform vtable", vt);
     if (!(vt >= g_Base && vt < g_Base + 0x5000000)) return;
     for (unsigned k = 0; k < sizeof(g_SpyOffs)/sizeof(g_SpyOffs[0]); k++) {
         DWORD64 s = 0;
-        __try { s = *(volatile DWORD64*)(vt + g_SpyOffs[k]); }
+        HC_TRY s = HC_RD64((vt + g_SpyOffs[k])); }
         __except (EXCEPTION_EXECUTE_HANDLER) { continue; }
         { char b[160]; int i = 0; DWORD64 off = g_SpyOffs[k];
           i = cput(b, i, "mpspy:   slot+"); i = chx(b, i, off);
@@ -717,7 +755,7 @@ static int uiw_in_rdata(DWORD64 v) { return v >= g_Base + UIW_RDATA0 && v < g_Ba
 // does the code at p look like "mov byte ptr [rcx(+disp)], dl" in its first 32 bytes?
 static int uiw_setbool(DWORD64 p) {
     int hit = 0;
-    __try {
+    HC_TRY
         const BYTE *c = (const BYTE*)p;
         for (int k = 0; k < 32; k++) {
             int b0 = c[k], b1 = c[k + 1];
@@ -732,13 +770,15 @@ static void uiw_log_vt(DWORD64 vt, unsigned hits) {
     char b[200]; int i = 0;
     i = cput(b, i, "uiw: vtable+0x"); i = chx(b, i, vt - g_Base);
     i = cput(b, i, " objs="); i = cpct(b, i, hits);
-    i = cput(b, i, " setter+0x"); i = chx(b, i, *(volatile DWORD64*)(vt + 0x68) - g_Base);
-    i = cput(b, i, " bytes=");
-    __try {
-        const BYTE *c = (const BYTE*)*(volatile DWORD64*)(vt + 0x68);
+    i = cput(b, i, " setter+0x");
+    HC_TRY
+        const BYTE *c = (const BYTE*)HC_RD64((vt + 0x68));
+        i = chx(b, i, (DWORD64)c - g_Base);
+        i = cput(b, i, " bytes=");
         for (int k = 0; k < 12 && i < 190; k++) {
             const char *hx = "0123456789abcdef";
-            b[i++] = hx[c[k] >> 4]; b[i++] = hx[c[k] & 15];
+            BYTE cb = HC_RD8((DWORD64)c + k);
+            b[i++] = hx[cb >> 4]; b[i++] = hx[cb & 15];
         }
     } __except (EXCEPTION_EXECUTE_HANDLER) { i = cput(b, i, "?"); }
     b[i] = 0; log_line(b);
@@ -759,11 +799,11 @@ static void ui_widget_probe(void) {
         scanned += mbi.RegionSize;
         for (DWORD64 p = (DWORD64)mbi.BaseAddress; p + 8 <= (DWORD64)mbi.BaseAddress + mbi.RegionSize; p += 8) {
             DWORD64 v = 0;
-            __try { v = *(volatile DWORD64*)p; } __except (EXCEPTION_EXECUTE_HANDLER) { continue; }
+            HC_TRY v = HC_RD64(p); } __except (EXCEPTION_EXECUTE_HANDLER) { continue; }
             if (!uiw_in_rdata(v)) continue;
             DWORD64 s0 = 0, s1 = 0, s2 = 0, set = 0;
-            __try { s0 = *(volatile DWORD64*)v; s1 = *(volatile DWORD64*)(v + 8);
-                    s2 = *(volatile DWORD64*)(v + 16); set = *(volatile DWORD64*)(v + 0x68); }
+            HC_TRY s0 = HC_RD64(v); s1 = HC_RD64((v + 8));
+                    s2 = HC_RD64((v + 16)); set = HC_RD64((v + 0x68)); }
             __except (EXCEPTION_EXECUTE_HANDLER) { continue; }
             if (!uiw_in_text(s0) || !uiw_in_text(s1) || !uiw_in_text(s2)) continue;
             if (!uiw_in_text(set) || !uiw_setbool(set)) continue;
@@ -800,7 +840,7 @@ static void ui_widget_keyprobe(void) {
         scanned += mbi.RegionSize;
         for (DWORD64 q = (DWORD64)mbi.BaseAddress; q + 8 <= (DWORD64)mbi.BaseAddress + mbi.RegionSize; q += 8) {
             DWORD64 v = 0;
-            __try { v = *(volatile DWORD64*)q; } __except (EXCEPTION_EXECUTE_HANDLER) { continue; }
+            HC_TRY v = HC_RD64(q); } __except (EXCEPTION_EXECUTE_HANDLER) { continue; }
             if (v != key) continue;
             if (n >= 8) continue;
             n++;
@@ -811,12 +851,12 @@ static void ui_widget_keyprobe(void) {
             // the object base is not known; dump the 0x60 bytes before and after the pointer
             for (int back = 1; back <= 3; back++) {
                 DWORD64 base = q - 8 * back, vt = 0, set = 0;
-                __try { vt = *(volatile DWORD64*)base; set = *(volatile DWORD64*)(vt + 0x68); }
+                HC_TRY vt = HC_RD64(base); set = HC_RD64((vt + 0x68)); }
                 __except (EXCEPTION_EXECUTE_HANDLER) { continue; }
                 { char b[200]; int i = 0;
                   i = cput(b, i, "uiwK:   base=q-"); i = cpct(b, i, 8 * back);
                   i = cput(b, i, " q0=");
-                  __try {
+                  HC_TRY
                       const BYTE *c = (const BYTE*)base;
                       for (int k = 0; k < 8; k++) { const char *hx = "0123456789abcdef";
                           b[i++] = hx[c[k] >> 4]; b[i++] = hx[c[k] & 15]; }
@@ -831,7 +871,7 @@ static void ui_widget_keyprobe(void) {
             // byte map of the 0x100 bytes around the pointer, to spot the name field
             { char b[200]; int i = 0;
               unsigned nz = 0;
-              __try {
+              HC_TRY
                   const DWORD64 *c = (const DWORD64*)(q - 0x40);
                   for (int k = 0; k < 8; k++) if (c[k]) nz++;
               } __except (EXCEPTION_EXECUTE_HANDLER) { nz = 99; }
@@ -891,13 +931,13 @@ typedef int (*PfnInt)(void *self, int arg);
 
 static int rl_call1(DWORD64 vt, unsigned off, DWORD64 self) {
     int r;
-    __try { r = ((PfnVoid)*(volatile DWORD64*)(vt + off))((void*)self); }
+    HC_TRY r = ((PfnVoid)HC_RD64((vt + off)))((void*)self); }
     __except (EXCEPTION_EXECUTE_HANDLER) { r = -2; }
     return r;
 }
 static int rl_call2(DWORD64 vt, unsigned off, DWORD64 self, int arg) {
     int r;
-    __try { r = ((PfnInt)*(volatile DWORD64*)(vt + off))((void*)self, arg); }
+    HC_TRY r = ((PfnInt)HC_RD64((vt + off)))((void*)self, arg); }
     __except (EXCEPTION_EXECUTE_HANDLER) { r = -2; }
     return r;
 }
@@ -905,27 +945,27 @@ static int rl_call2(DWORD64 vt, unsigned off, DWORD64 self, int arg) {
 static void rules_probe(void) {
     DWORD64 cfg = 0, vt = 0, root = 0, svc = 0;
     if (!getenv_flag(L"AOE2LAN_RULES")) return;
-    __try { cfg = *(volatile DWORD64*)(g_Base + RULES_CFG); }
+    HC_TRY cfg = HC_RD64((g_Base + RULES_CFG)); }
     __except (EXCEPTION_EXECUTE_HANDLER) { cfg = 0; }
     rl_h("cfg", " [0x1443552b8]", cfg);
     if (cfg) {
-        __try { vt = *(volatile DWORD64*)cfg; } __except (EXCEPTION_EXECUTE_HANDLER) { vt = 0; }
+        HC_TRY vt = HC_RD64(cfg); } __except (EXCEPTION_EXECUTE_HANDLER) { vt = 0; }
         rl_rva("cfg", " vtable", vt);
         { DWORD64 b698 = 0; long long d680 = 0, d6b4 = 0;
-          __try { b698 = *(volatile BYTE*)(cfg + 0x698); } __except (EXCEPTION_EXECUTE_HANDLER) { b698 = 999; }
-          __try { d680 = *(volatile int*)(cfg + 0x680); } __except (EXCEPTION_EXECUTE_HANDLER) { d680 = -999; }
-          __try { d6b4 = *(volatile int*)(cfg + 0x6b4); } __except (EXCEPTION_EXECUTE_HANDLER) { d6b4 = -999; }
+          HC_TRY b698 = HC_RD8((cfg + 0x698)); } __except (EXCEPTION_EXECUTE_HANDLER) { b698 = 999; }
+          HC_TRY d680 = HC_RD32((cfg + 0x680)); } __except (EXCEPTION_EXECUTE_HANDLER) { d680 = -999; }
+          HC_TRY d6b4 = HC_RD32((cfg + 0x6b4)); } __except (EXCEPTION_EXECUTE_HANDLER) { d6b4 = -999; }
           rl_d("cfg", " byte+0x698  (rule 13)", (long long)b698);
           rl_d("cfg", " dword+0x680 (rule 15)", d680);
           rl_d("cfg", " dword+0x6b4 (rule 15)", d6b4); }
     }
-    __try { root = *(volatile DWORD64*)(g_Base + RULES_SVC); }
+    HC_TRY root = HC_RD64((g_Base + RULES_SVC)); }
     __except (EXCEPTION_EXECUTE_HANDLER) { root = 0; }
     rl_h("svc", " owner [0x1442dc4f0]", root);
-    if (root) { __try { svc = *(volatile DWORD64*)(root + 0x2e8); } __except (EXCEPTION_EXECUTE_HANDLER) { svc = 0; } }
+    if (root) { HC_TRY svc = HC_RD64((root + 0x2e8)); } __except (EXCEPTION_EXECUTE_HANDLER) { svc = 0; } }
     rl_h("svc", " object [+0x2e8]", svc);
     if (svc) {
-        __try { vt = *(volatile DWORD64*)svc; } __except (EXCEPTION_EXECUTE_HANDLER) { vt = 0; }
+        HC_TRY vt = HC_RD64(svc); } __except (EXCEPTION_EXECUTE_HANDLER) { vt = 0; }
         rl_rva("svc", " vtable", vt);
         if (rl_in_module(vt)) {
             rl_d("svc", " slot+0x80        (rule 0)", (long long)rl_call1(vt, 0x80, svc));
@@ -937,23 +977,23 @@ static void rules_probe(void) {
             // vector at owner+0x2628, then appends "Use Local Lan Server"
             // (0x143322df0, index -1) only if this slot returns true.
             { DWORD64 f = 0;
-              __try { f = *(volatile DWORD64*)(vt + 0x418); } __except (EXCEPTION_EXECUTE_HANDLER) { f = 0; }
+              HC_TRY f = HC_RD64((vt + 0x418)); } __except (EXCEPTION_EXECUTE_HANDLER) { f = 0; }
               rl_rva("svc", " slot+0x418 fn", f); }
             rl_d("svc", " slot+0x418 LAN item gate", (long long)rl_call1(vt, 0x418, svc));
         }
     }
     if (root) {
         DWORD64 rb = 0, re = 0;
-        __try { rb = *(volatile DWORD64*)(root + 0x2628); } __except (EXCEPTION_EXECUTE_HANDLER) { rb = 0; }
-        __try { re = *(volatile DWORD64*)(root + 0x2630); } __except (EXCEPTION_EXECUTE_HANDLER) { re = 0; }
+        HC_TRY rb = HC_RD64((root + 0x2628)); } __except (EXCEPTION_EXECUTE_HANDLER) { rb = 0; }
+        HC_TRY re = HC_RD64((root + 0x2630)); } __except (EXCEPTION_EXECUTE_HANDLER) { re = 0; }
         rl_d("root", " dropdown item count (0x50)", (re >= rb) ? (long long)((re - rb) / 0x50) : -1);
     }
     // rule 2 is "logged in AND leaderboard registry non-empty"; the count is
     // (end-begin)/0xc0 of the vector at 0x1442e18b0.
     { DWORD64 beg = 0, end = 0, mroot = 0;
-      __try { beg = *(volatile DWORD64*)(g_Base + 0x42e18b0ULL); } __except (EXCEPTION_EXECUTE_HANDLER) { beg = 0; }
-      __try { end = *(volatile DWORD64*)(g_Base + 0x42e18b8ULL); } __except (EXCEPTION_EXECUTE_HANDLER) { end = 0; }
-      __try { mroot = *(volatile DWORD64*)(g_Base + 0x42e18c8ULL); } __except (EXCEPTION_EXECUTE_HANDLER) { mroot = 0; }
+      HC_TRY beg = HC_RD64((g_Base + 0x42e18b0ULL)); } __except (EXCEPTION_EXECUTE_HANDLER) { beg = 0; }
+      HC_TRY end = HC_RD64((g_Base + 0x42e18b8ULL)); } __except (EXCEPTION_EXECUTE_HANDLER) { end = 0; }
+      HC_TRY mroot = HC_RD64((g_Base + 0x42e18c8ULL)); } __except (EXCEPTION_EXECUTE_HANDLER) { mroot = 0; }
       rl_h("lb", " registry begin [0x1442e18b0]", beg);
       rl_h("lb", " registry end   [0x1442e18b8]", end);
       rl_h("lb", " registry map   [0x1442e18c8]", mroot);
@@ -975,9 +1015,9 @@ static void rl_ids(const char *tag, DWORD64 beg, DWORD64 end) {
     char b[200]; int i = 0, n = 0;
     i = cput(b, i, "rules:   "); i = cput(b, i, tag); i = cput(b, i, " ids=");
     if (beg == end) i = cput(b, i, "(empty)");
-    __try {
+    HC_TRY
         for (DWORD64 q = beg; q + 4 <= end && n < 24; q += 4, n++) {
-            int id = *(volatile int*)q;
+            int id = HC_RD32(q);
             if (n) b[i++] = ',';
             if (id < 0) { b[i++] = '-'; id = -id; }
             i = cpct(b, i, (unsigned long long)id);
@@ -989,9 +1029,9 @@ static void rl_ids(const char *tag, DWORD64 beg, DWORD64 end) {
 static int rl_ids_ok(DWORD64 beg, DWORD64 end) {
     if (beg == end) return 0;
     if ((end - beg) > 64 || ((end - beg) & 3)) return 0;
-    __try {
+    HC_TRY
         for (DWORD64 q = beg; q + 4 <= end; q += 4) {
-            int id = *(volatile int*)q;
+            int id = HC_RD32(q);
             if (id < 0 || id > 15) return 0;
         }
     } __except (EXCEPTION_EXECUTE_HANDLER) { return 0; }
@@ -1014,18 +1054,18 @@ static void rules_scan(void) {
         DWORD64 lo = (DWORD64)mbi.BaseAddress, hi = lo + mbi.RegionSize;
         for (DWORD64 p = lo; p + 0x48 <= hi; p += 8) {
             int st = 0; DWORD64 b0 = 0, e0 = 0, c0 = 0, b1 = 0, e1 = 0, c1 = 0, wa = 0, wb = 0;
-            __try {
-                st = *(volatile int*)p;
+            HC_TRY
+                st = HC_RD32(p);
                 if (st < 0 || st > 8) continue;
-                b0 = *(volatile DWORD64*)(p + 8);    e0 = *(volatile DWORD64*)(p + 0x10); c0 = *(volatile DWORD64*)(p + 0x18);
-                b1 = *(volatile DWORD64*)(p + 0x20); e1 = *(volatile DWORD64*)(p + 0x28); c1 = *(volatile DWORD64*)(p + 0x30);
-                wa = *(volatile DWORD64*)(p + 0x38); wb = *(volatile DWORD64*)(p + 0x40);
+                b0 = HC_RD64((p + 8));    e0 = HC_RD64((p + 0x10)); c0 = HC_RD64((p + 0x18));
+                b1 = HC_RD64((p + 0x20)); e1 = HC_RD64((p + 0x28)); c1 = HC_RD64((p + 0x30));
+                wa = HC_RD64((p + 0x38)); wb = HC_RD64((p + 0x40));
             } __except (EXCEPTION_EXECUTE_HANDLER) { continue; }
             if (b0 > e0 || e0 > c0 || b1 > e1 || e1 > c1) continue;
             if (!rl_ids_ok(b0, e0) || !rl_ids_ok(b1, e1)) continue;
             if (!wa || !wb || wa == wb) continue;
             { DWORD64 va = 0, vb = 0;
-              __try { va = *(volatile DWORD64*)wa; vb = *(volatile DWORD64*)wb; }
+              HC_TRY va = HC_RD64(wa); vb = HC_RD64(wb); }
               __except (EXCEPTION_EXECUTE_HANDLER) { continue; }
               if (!rl_in_rdata(va) || !rl_in_rdata(vb)) continue; }
             if (n >= 24) continue;
@@ -1046,14 +1086,363 @@ static void rules_scan(void) {
       b[i] = 0; log_line(b); }
 }
 
+// ---------------------------------------------------------------- host lobby AI gate
+// The host-lobby populator 0x141a344f0 emits the settings rows only when
+//   [screen+0x1cf8] == [0x14326b258]                          (0x141a35db1..dbf)
+// and its arg4 is produced by 0x141a3e730 as
+//   cl = ([screen+0x24f4]==1 && !+0x24e6 && !+0x24e5 && !+0x24c0)  (0x141a3ec9d..ecbf)
+//   bl = (mode kind == 3|0xe|0xf) | cl ; [rsp+0x31] = bl           (0x141a3ed00..ed04)
+//   bl==0 -> the call to 0x141a43d50 (the AI-slot rebuild) is skipped entirely.
+// The cached-mode path (0x141a3ed47) also lands on `or bl,cl`, so cl=1 gives arg4=1
+// and the rebuild either way. All five are plain fields of the 0x7df8-byte
+// UIScreenMultiplayerLobbyHost object, so they can be held at the wanted values
+// from outside - find the object by its primary vtable (base+0x33416e0, written by
+// the ctor at 0x141a23ec0) and keep the fields set. Nothing in the image is touched,
+// which is the whole point: Arxan checksums all of .text and at least the
+// VCRUNTIME140!__RTDynamicCast IAT slot, and killed AOE2LAN_RTDYN=1 at t~3s
+// (notes/linux-session4.md §4d/§4e). AOE2LAN_AIGATE=1 enables this thread.
+#define LOBBY_VT_RVA    0x33416e0ULL   // UIScreenMultiplayerLobbyHost primary vtable
+#define LOBBY_SENT_RVA  0x326b258ULL   // global the gate compares +0x1cf8 against
+#define LOBBY_F_GATE    0x1cf8ULL      // qword, want == [LOBBY_SENT_RVA]
+#define LOBBY_F_24F4    0x24f4ULL      // byte, want 1
+#define LOBBY_F_24E6    0x24e6ULL      // byte, want 0
+#define LOBBY_F_24E5    0x24e5ULL      // byte, want 0
+#define LOBBY_F_24C0    0x24c0ULL      // byte, want 0
+
+static DWORD64 g_LobbyObj = 0;
+
+// First committed RW qword equal to the vtable whose +0x1cf8 holds a plausible gate
+// value (0 = open, -1 = the locked value the game writes, or the sentinel itself).
+static DWORD64 lobby_find(DWORD64 vt, DWORD64 sent) {
+    BYTE *a = 0;
+    MEMORY_BASIC_INFORMATION mbi;
+    for (;;) {
+        if (!VirtualQuery(a, &mbi, sizeof mbi)) break;
+        a = (BYTE*)mbi.BaseAddress + mbi.RegionSize;
+        if ((DWORD64)mbi.BaseAddress >= g_Base && (DWORD64)mbi.BaseAddress < g_Base + 0x5000000) continue;
+        if (mbi.State != MEM_COMMIT || !(mbi.Protect & (PAGE_READWRITE | PAGE_WRITECOPY))) continue;
+        if (mbi.RegionSize > (64u << 20)) continue;
+        for (DWORD64 p = (DWORD64)mbi.BaseAddress; p + 8 <= (DWORD64)mbi.BaseAddress + mbi.RegionSize; p += 8) {
+            DWORD64 v = 0, f = 0;
+            HC_TRY v = HC_RD64(p); } __except (EXCEPTION_EXECUTE_HANDLER) { continue; }
+            if (v != vt) continue;
+            HC_TRY f = HC_RD64((p + LOBBY_F_GATE)); } __except (EXCEPTION_EXECUTE_HANDLER) { continue; }
+            if (f != 0 && f != (DWORD64)-1 && f != sent) continue;
+            return p;
+        }
+    }
+    return 0;
+}
+
+static void lobby_gate(void) {
+    DWORD64 obj = g_LobbyObj;
+    int fixed = 0, found = 0;
+    DWORD r24f4 = 0x100;                  // 0x100 = not read
+    HC_TRY
+        DWORD64 vt = g_Base + LOBBY_VT_RVA, sent = HC_RD64((g_Base + LOBBY_SENT_RVA));
+        if (obj && HC_RD64(obj) != vt) obj = 0;      // screen freed or rebuilt
+        if (!obj) obj = lobby_find(vt, sent);
+        if (obj) {
+            found = 1;
+            r24f4 = HC_RD8((obj + LOBBY_F_24F4));
+            if (HC_RD64((obj + LOBBY_F_GATE)) != sent) { HC_WR64((obj + LOBBY_F_GATE), sent); fixed |= 1; }
+            if (r24f4 != 1)                            { HC_WR8((obj + LOBBY_F_24F4), 1);      fixed |= 2; }
+            if (HC_RD8((obj + LOBBY_F_24E6)) != 0)     { HC_WR8((obj + LOBBY_F_24E6), 0);     fixed |= 4; }
+            if (HC_RD8((obj + LOBBY_F_24E5)) != 0)     { HC_WR8((obj + LOBBY_F_24E5), 0);     fixed |= 8; }
+            if (HC_RD8((obj + LOBBY_F_24C0)) != 0)     { HC_WR8((obj + LOBBY_F_24C0), 0);     fixed |= 16; }
+        }
+    } __except (EXCEPTION_EXECUTE_HANDLER) { g_LobbyObj = 0; return; }
+    g_LobbyObj = obj;
+    // Log only on a state change (new object / different fix mask / different
+    // +0x24f4 read-back): proves whether our write survives the game's own
+    // per-frame refresh, instead of spamming one line per 50 ms poll.
+    { static DWORD64 last_obj = 0; static int last_fixed = -1; static DWORD last_24f4 = 0x101;
+      static volatile LONG n = 0;
+      if (obj != last_obj || fixed != last_fixed || r24f4 != last_24f4) {
+          last_obj = obj; last_fixed = fixed; last_24f4 = r24f4;
+          if (InterlockedIncrement(&n) <= 200) {
+              char b[192]; int i = cput(b, 0, "lobbygate: obj=");
+              i = chx(b, i, obj);
+              i = cput(b, i, " 24f4_was="); i = chx(b, i, r24f4);
+              i = cput(b, i, " fixed=0x"); i = chx(b, i, (DWORD64)(unsigned)fixed);
+              b[i] = 0; log_line(b);
+          } }
+      (void)found; }
+}
+
+// 10 ms while the object is cached (6 reads + at most 5 writes) - measured: the
+// game resets screen+0x24f4 to 0 every ~250 ms, so a 50 ms poll only held our
+// value ~50 % of the time; at 10 ms it holds ~95 % with negligible CPU. The full
+// heap scan still only runs 1/s until the object is found.
+static DWORD WINAPI LobbyGateThread(LPVOID p) {
+    (void)p;
+    log_line("lobbygate: thread up (AOE2LAN_AIGATE=1), scanning 1/s for the host lobby screen");
+    for (int k = 0; k < 2000000; k++) {         // ~5.5 h, same lifetime as the heartbeat
+        Sleep(10);
+        if (g_LobbyObj || (k % 100) == 99) {
+            static int miss = 0;
+            lobby_gate();
+            // twice, ~20 s in: distinguishes "thread dead" from "object not found"
+            if (!g_LobbyObj && (++miss == 20 || miss == 21))
+                log_line("lobbygate: no UIScreenMultiplayerLobbyHost in the heap yet");
+        }
+    }
+    return 0;
+}
+
+// AOE2LAN_DUMPTEXT=1: write the live (Arxan-decrypted) .text — RVA 0x1000, the
+// section's 0x3195000 raw bytes — to logs\gametext.bin, so dev/lanhook/{aoe2re,
+// dz,fn,xr}.py can analyse the real image off-line. In-process because the
+// decrypted bytes exist only here: yama ptrace_scope=1 blocks /proc/<pid>/mem
+// from a non-ancestor, and the on-disk .text is still encrypted.
+#define DUMPTEXT_RVA  0x1000ULL
+#define DUMPTEXT_SIZE 0x3195000UL
+static void dumptext(void) {
+    if (!getenv_flag(L"AOE2LAN_DUMPTEXT")) return;
+    HANDLE h = CreateFileW(L"logs\\gametext.bin", GENERIC_WRITE, 0, NULL,
+                           CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (h == INVALID_HANDLE_VALUE) { log_line("dumptext: CreateFile failed"); return; }
+    const BYTE *p = (const BYTE *)(g_Base + DUMPTEXT_RVA);
+    DWORD off = 0;
+    while (off < DUMPTEXT_SIZE) {
+        DWORD want = DUMPTEXT_SIZE - off; if (want > (1u << 20)) want = 1u << 20;
+        DWORD got = 0;
+        if (!WriteFile(h, p + off, want, &got, NULL) || !got) break;
+        off += got;
+    }
+    CloseHandle(h);
+    { char b[96]; int i = 0;
+      i = cput(b, i, "dumptext: wrote 0x"); i = chx(b, i, off);
+      i = cput(b, i, " of 0x"); i = chx(b, i, DUMPTEXT_SIZE);
+      b[i] = 0; log_line(b); }
+}
+
+// AOE2LAN_TEXTPOKE=<hexrva>:<same|flip> — the Step-3 discriminator. Two questions
+// the RTDYN failure left open (its IAT-slot patch killed the process at t~3 s):
+//   same  write the identical byte back -> does the sweep notice the write /
+//         the VirtualProtect at all?
+//   flip  change one byte of a function nothing ever calls in a boot-to-menu run
+//         (0x141a23ec0 = the UIScreenMultiplayerLobbyHost ctor) -> is the sweep
+//         blanket over .text, or per-function / on-call?
+// Runs at k==20, after dumptext, so the byte is already Arxan-decrypted.
+static void textpoke(void) {
+    char v[48];
+    DWORD64 rva = 0; int i = 0, flip = 0;
+    if (!GetEnvironmentVariableA("AOE2LAN_TEXTPOKE", v, sizeof v) || !v[0]) return;
+    while (v[i] && v[i] != ':') {
+        char c = v[i++];
+        if (c >= '0' && c <= '9') rva = rva * 16 + (unsigned)(c - '0');
+        else if ((c | 32) >= 'a' && (c | 32) <= 'f') rva = rva * 16 + (unsigned)((c | 32) - 'a' + 10);
+        else { log_line("poke: bad rva, expected <hex>[:same|flip]"); return; }
+    }
+    if (v[i] == ':') flip = (v[i + 1] == 'f' || v[i + 1] == 'F');
+    { BYTE *p = (BYTE *)(g_Base + rva), was, now; DWORD old = 0;
+      if (!VirtualProtect(p, 1, PAGE_EXECUTE_READWRITE, &old)) { log_line("poke: VirtualProtect failed"); return; }
+      was = *p; now = (BYTE)(flip ? (was ^ 0x01) : was);
+      *p = now;
+      VirtualProtect(p, 1, old, &old);
+      { char b[160]; int j = cput(b, 0, "poke: rva=0x"); j = chx(b, j, rva);
+        j = cput(b, j, flip ? " FLIP was=0x" : " SAME was=0x"); j = chx(b, j, was);
+        j = cput(b, j, " now=0x"); j = chx(b, j, now);
+        b[j] = 0; log_line(b); } }
+}
+
+// ---------------------------------------------------------------- log sink probe
+// Read-only. LogHelper (0x1402bcb30) is only a dispatcher: it loads the sink
+// object out of the lazily-inited global 0x144c9e248 and calls [[sink]+0x20]
+// (and [+0x30] when the record level >= 4). The E9 detours on the three log
+// sinks do install on wine and produce real game-side lines (19 LogWarn hits),
+// but the process dies at t~3.4 s - so .text is closed to us here, unlike on
+// Windows where the same detours survive 600 s runs. This prints the sink chain
+// to show whether the sink OBJECT is heap (then its vptr can be swapped for a
+// fake vtable in our own memory - a heap write, the same class as lobbygate,
+// which survives) or inside the image (then that route is dead too).
+// Opt-in: AOE2LAN_LOGSINK=1.
+#define LOGSINK_GLOBAL 0x4c9e248ULL
+
+static void ls_line(const char *tag, DWORD64 v) {
+    char b[176]; int i = 0;
+    i = cput(b, i, "logsink: "); i = cput(b, i, tag);
+    i = cput(b, i, " = 0x"); i = chx(b, i, v);
+    if (v >= g_Base && v < g_Base + 0x5000000) {
+        i = cput(b, i, " (image+0x"); i = chx(b, i, v - g_Base); i = cput(b, i, ")");
+    } else if (v) { i = cput(b, i, " (outside image)"); }
+    b[i] = 0; log_line(b);
+}
+
+static void logsink_probe(void) {
+    if (!getenv_flag(L"AOE2LAN_LOGSINK")) return;
+    HC_TRY
+        DWORD64 sink = HC_RD64((g_Base + LOGSINK_GLOBAL));
+        ls_line("sink ptr [0x144c9e248]", sink);
+        if (sink) {
+            DWORD64 vt = HC_RD64(sink);
+            ls_line("sink vtable [sink+0]", vt);
+            if (vt) for (unsigned off = 0; off <= 0x40; off += 8) {
+                char t[24]; int j = cput(t, 0, "  slot+0x"); j = chx(t, j, off);
+                ls_line(t, HC_RD64((vt + off)));
+            }
+        }
+    } __except (EXCEPTION_EXECUTE_HANDLER) { log_line("logsink: read faulted"); }
+}
+
+// The rlink sink object is HEAP (measured 0x660d1e0), its vtable is the 7-slot
+// table at image+0x328a068, and slots 1..5 are all the same 5-instruction thunk
+//   (rcx=self, rdx=fmt, r8=va_list) -> jmp 0x140f192f0("rlink - <level>", ...)
+//   1=error 2=warning 3=notice 4=info 5=debug; slot 0 is the deleting dtor,
+//   slot 6 is `ret 0`.
+// E9 detours on the log sinks die at t~3.4 s on wine, so instead: copy the
+// vtable (including the RTTI locator at [-1]) into our own VirtualAlloc block,
+// aim slots 1..5 at stubs in THIS dll, and swap the object's vptr. That is one
+// 8-byte heap write - the same class as lobbygate, which survives - and not one
+// byte of the game image changes. Opt-in: AOE2LAN_LOGVT=1.
+#define LOGSINK_VT_RVA 0x328a068ULL
+#define LS_NSLOT       7
+
+typedef void (*PFN_LSSLOT)(void *, const char *, void *);
+static PFN_LSSLOT g_LsReal[LS_NSLOT];
+static DWORD64    g_LsObj  = 0;   // sink object whose vptr we swapped
+static DWORD64    g_LsFake = 0;   // our vtable copy; [0]=RTTI locator, [1..7]=slots
+
+// NUL-terminated printable-ASCII read through the guarded accessor. -1 on fault
+// or on any non-printable byte, so a %d argument is never mistaken for a string.
+static int ls_cstr(DWORD64 p, char *out, int maxn) {
+    int n = 0, bad = 0;
+    if (!HC_IS_PTR(p)) return -1;
+    HC_TRY
+        for (; n < maxn - 1; n++) {
+            BYTE c = HC_RD8((p + (unsigned)n));
+            if (!c) break;
+            if (c < 0x20 || c > 0x7e) { bad = 1; break; }
+            out[n] = (char)c;
+        }
+    } __except (EXCEPTION_EXECUTE_HANDLER) { return -1; }
+    if (bad) return -1;
+    out[n] = 0;
+    return n;
+}
+
+// Same readout style as the Windows E9 detours (hookcore.c HK_RDSTR): the raw
+// format string plus the first four varargs as hex, and quoted when the value
+// is a printable string. No CRT in this DLL, so no vsnprintf - and the argument
+// home slots are left untouched for the real sink.
+static volatile LONG g_LsLines = 0;
+
+static void ls_emit(const char *lvl, const char *fmt, void *va) {
+    char fs[160]; char b[640]; int i = 0;
+    if (InterlockedIncrement(&g_LsLines) > 20000) return;
+    if (ls_cstr((DWORD64)fmt, fs, sizeof fs) < 0) return;
+    i = cput(b, i, "rlink "); i = cput(b, i, lvl); i = cput(b, i, ": \"");
+    i = cput(b, i, fs); i = cput(b, i, "\"");
+    HC_TRY
+        for (int k = 0; k < 4 && i < (int)sizeof b - 128; k++) {
+            DWORD64 a = HC_RD64(((DWORD64)va + 8 * (unsigned)k));
+            char s[64];
+            i = cput(b, i, " a"); b[i++] = (char)('0' + k);
+            i = cput(b, i, "=0x"); i = chx(b, i, a);
+            if (ls_cstr(a, s, sizeof s) > 0) {
+                i = cput(b, i, " \""); i = cput(b, i, s); i = cput(b, i, "\"");
+            }
+        }
+    } __except (EXCEPTION_EXECUTE_HANDLER) { i = cput(b, i, " ?"); }
+    b[i] = 0; log_line(b);
+}
+
+static void ls_error (void *s, const char *f, void *v) { ls_emit("ERROR",  f, v); g_LsReal[1](s, f, v); }
+static void ls_warn  (void *s, const char *f, void *v) { ls_emit("WARN",   f, v); g_LsReal[2](s, f, v); }
+static void ls_notice(void *s, const char *f, void *v) { ls_emit("NOTICE", f, v); g_LsReal[3](s, f, v); }
+static void ls_info  (void *s, const char *f, void *v) { ls_emit("INFO",   f, v); g_LsReal[4](s, f, v); }
+static void ls_debug (void *s, const char *f, void *v) { ls_emit("DEBUG",  f, v); g_LsReal[5](s, f, v); }
+static const PFN_LSSLOT g_LsStub[LS_NSLOT] = { 0, ls_error, ls_warn, ls_notice, ls_info, ls_debug, 0 };
+
+// Called every 5 s from the heartbeat: cheap (two reads + compare), and it
+// re-hooks if the game ever recreates the sink object.
+static void logsink_hook(void) {
+    DWORD64 obj = 0, vt = 0, slots[LS_NSLOT];
+    if (!getenv_flag(L"AOE2LAN_LOGVT")) return;
+    HC_TRY
+        obj = HC_RD64((g_Base + LOGSINK_GLOBAL));
+        if (obj && obj != g_LsObj) {
+            vt = HC_RD64(obj);
+            if (vt == g_Base + LOGSINK_VT_RVA)
+                for (int k = 0; k < LS_NSLOT; k++) slots[k] = HC_RD64((vt + 8 * (unsigned)k));
+            else vt = 0;
+        }
+    } __except (EXCEPTION_EXECUTE_HANDLER) { log_line("logvt: read faulted"); return; }
+    if (!vt) return;
+    if (!g_LsFake) {
+        DWORD64 *f = (DWORD64 *)VirtualAlloc(NULL, 8 * (LS_NSLOT + 1),
+                                             MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+        if (!f) { log_line("logvt: VirtualAlloc failed"); return; }
+        g_LsFake = (DWORD64)f;
+        HC_TRY f[0] = HC_RD64((vt - 8)); }   // RTTI complete-object locator
+        __except (EXCEPTION_EXECUTE_HANDLER) { f[0] = 0; }
+    }
+    { DWORD64 *f = (DWORD64 *)g_LsFake;
+      for (int k = 0; k < LS_NSLOT; k++) {
+          g_LsReal[k] = (PFN_LSSLOT)slots[k];
+          f[1 + k] = g_LsStub[k] ? (DWORD64)g_LsStub[k] : slots[k];
+      } }
+    HC_TRY HC_WR64(obj, g_LsFake + 8); }
+    __except (EXCEPTION_EXECUTE_HANDLER) { log_line("logvt: vptr write faulted"); return; }
+    g_LsObj = obj;
+    { char b[128]; int i = cput(b, 0, "logvt: sink obj=0x"); i = chx(b, i, obj);
+      i = cput(b, i, " vptr -> fake vtable 0x"); i = chx(b, i, g_LsFake + 8);
+      i = cput(b, i, " (error/warn/notice/info/debug)");
+      b[i] = 0; log_line(b); }
+}
+
+// ---------------------------------------------------------------- game-layer log level
+// The game drops every level-0 message before it reaches any sink:
+//   cmp byte [0x144356c66], 2 ; jae emit ; test dl,dl ; je return
+// and EVERY TComm_* message is level 0 (CreateLobby at 0x140ee75d5 is `xor edx,edx`).
+// That is why 10 wine sessions saw no game-layer line at click time: the log was
+// filtered, not silent. Raising the byte is a .data write (same class as
+// lobbygate), so it is open on wine where the .text GLOG detour that owns this
+// lever on Windows is not. hookcore.c's verbose_on() is that lever; it is only
+// reachable from the GLOG hook, which dies on wine at t~3.4 s.
+// Guard: the level-0 writer 0x14101bb50 dereferences [[0x144356c88]+0x6f0] with no
+// null check (0x14101c6fa), so the byte only goes to 2 once the game has built
+// that object. Measured safe on Windows (s43 N13b). Opt-in: AOE2LAN_VERBOSE=1.
+#define GAME_LOGLEVEL_RVA  0x4356c66ULL
+#define GAME_LOGSINK2_RVA  0x4356c88ULL
+static int g_VerboseState = -1;   // -1 = not read yet, 0 = off/done, 1 = armed, 2 = written
+
+static void verbose_setup(void) {
+    if (g_VerboseState < 0) {
+        g_VerboseState = getenv_flag(L"AOE2LAN_VERBOSE") ? 1 : 0;
+        if (g_VerboseState) log_line("verbose: AOE2LAN_VERBOSE=1, will raise [0x144356c66] to 2");
+    }
+    if (g_VerboseState != 1) return;
+    { BYTE old = 0; DWORD64 sink = 0, sub = 0;
+      HC_TRY
+        old = HC_RD8((g_Base + GAME_LOGLEVEL_RVA));
+        sink = HC_RD64((g_Base + GAME_LOGSINK2_RVA));
+        if (sink) sub = HC_RD64((sink + 0x6f0));
+      } __except (EXCEPTION_EXECUTE_HANDLER) { log_line("verbose: read faulted, giving up"); g_VerboseState = 0; return; }
+      if (old >= 2) { g_VerboseState = 0; return; }          // already verbose
+      if (!sink || !HC_IS_PTR(sub)) return;                  // retry on the next pass
+      HC_TRY HC_WR8((g_Base + GAME_LOGLEVEL_RVA), 2); }
+      __except (EXCEPTION_EXECUTE_HANDLER) { log_line("verbose: write faulted"); g_VerboseState = 0; return; }
+      g_VerboseState = 2;
+      { char b[160]; int i = cput(b, 0, "verbose: [0x144356c66] ");
+        i = cput(b, i, "-> 2 (was "); i = chx(b, i, old);
+        i = cput(b, i, "), game-layer level-0 lines now reach LogHelper; sink2=0x"); i = chx(b, i, sink);
+        b[i] = 0; log_line(b); } }
+}
+
 static DWORD WINAPI HeartbeatThread(LPVOID p) {
     (void)p;
     for (int k = 1;; k++) {
         Sleep(1000);
+        if (k == 20) { dumptext(); textpoke(); }   // past Main.txt=46: TLS login done, .text decrypted
         if (k == 6 || k == 10 || k == 20 || k == 40) mp_spy();   // once after login
         if (k == 60) ui_widget_probe();
         if (k == 60) ui_widget_keyprobe();
         if (k == 25 || k == 40 || k == 70) rules_probe();
+        if (k == 25) logsink_probe();
+        if (k % 5 == 0) logsink_hook();            // hook first: the verbose lines need the vptr swap
+        if (k % 5 == 1) verbose_setup();           // then un-filter level 0 halfway between hooks
         if (k == 75 || k == 95) rules_scan();
         mp_check_slots();
         if (k % 5 == 0) {   // keep the old 5 s liveness cadence
@@ -1074,14 +1463,16 @@ BOOL WINAPI DllMain(HINSTANCE hMod, DWORD reason, LPVOID pvRes) {
         g_Base = (DWORD64)GetModuleHandleW(NULL);
         DisableThreadLibraryCalls(hMod);
         CreateDirectoryW(L"logs", NULL);
-        { WCHAR fn[64]; WCHAR *w = fn; const WCHAR *pre = L"logs\\lanhook-";
-          DWORD pid = GetCurrentProcessId(); WCHAR tmp[12]; int tl=0;
+        { WCHAR fn[80]; WCHAR *w = fn; const WCHAR *pre = L"logs\\lanhook-";
+          DWORD vals[2] = { GetCurrentProcessId(), t0 };
           while (*pre) *w++ = *pre++;
-          if (!pid) tmp[tl++] = L'0';
-          { WCHAR rev[12]; int rl=0; DWORD v=pid;
-            while (v) { rev[rl++]=(WCHAR)(L'0'+(v%10)); v/=10; }
-            while (rl--) tmp[tl++]=rev[rl]; }
-          for (int i=0;i<tl;i++) *w++ = tmp[i];
+          for (int p = 0; p < 2; p++) {
+              WCHAR rev[12]; int rl = 0; DWORD v = vals[p];
+              if (p) *w++ = L'-';
+              if (!v) *w++ = L'0';
+              while (v) { rev[rl++] = (WCHAR)(L'0' + (v % 10)); v /= 10; }
+              while (rl--) *w++ = rev[rl];
+          }
           *w++=L'.'; *w++=L'l'; *w++=L'o'; *w++=L'g'; *w++=0;
           { HANDLE h = CreateFileW(fn, GENERIC_WRITE, FILE_SHARE_READ,
                                 NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -1102,6 +1493,10 @@ BOOL WINAPI DllMain(HINSTANCE hMod, DWORD reason, LPVOID pvRes) {
           logf1("crash filter installed, prev=", (DWORD64)prev); }
         { HANDLE h = CreateThread(NULL, 0, HeartbeatThread, NULL, 0, NULL);
           if (h) CloseHandle(h); else log_line("heartbeat thread failed"); }
+        if (getenv_flag(L"AOE2LAN_AIGATE")) {
+            HANDLE h = CreateThread(NULL, 0, LobbyGateThread, NULL, 0, NULL);
+            if (h) CloseHandle(h); else log_line("lobby gate thread failed");
+        }
         { HANDLE h = CreateThread(NULL, 0, MainThread, NULL, 0, NULL);
           if (h) CloseHandle(h); else { log_line("CreateThread failed"); return FALSE; } }
     }

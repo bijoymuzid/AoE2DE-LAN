@@ -12,6 +12,12 @@ PROTON="${AOE2LAN_PROTON:-$AOE/Proton-CachyOS Latest-x86_64_v3/proton}"
 GAMEDIR="$PFX/pfx/drive_c/Games/AoE2DE"
 DLL="${AOE2LAN_DLL:-$REPO/dbghelp.dll}"   # delivered by W1 (gitignored); cannot be built on Linux
 export AOE2LAN_STAGE="${AOE2LAN_STAGE:-8}"
+export AOE2LAN_NOHOOKS="${AOE2LAN_NOHOOKS:-1}"
+export AOE2LAN_AIGATE="${AOE2LAN_AIGATE:-1}"
+# AOE2LAN_RTDYN=1 additionally re-points the __RTDynamicCast IAT slot, which is how
+# the host-lobby AI gate (screen+0x1cf8) gets written without touching .text/.rdata.
+# Not default yet: untested on wine (needs a display + a click into the host lobby).
+export AOE2LAN_RTDYN="${AOE2LAN_RTDYN:-0}"
 
 # 1. stage the proxy DLL (plain dbghelp import in the game = crash reporting only;
 #    WINEDLLOVERRIDES makes ours win over Wine's builtin)

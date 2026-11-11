@@ -16,6 +16,10 @@
 #include <stdint.h>
 #include "hookcore.h"
 
+#ifdef __clang__
+#define _AddressOfReturnAddress() ((void*)((char*)__builtin_frame_address(0) + 8))
+#endif
+
 // ---------------------------------------------------------------- logging
 static HANDLE g_hLog = INVALID_HANDLE_VALUE;
 static volatile LONG g_logLock = 0;
@@ -26,6 +30,12 @@ DWORD64 g_ModBase(void) { return g_ModBaseVal; }
 void hc_set_modbase(DWORD64 base) { g_ModBaseVal = base; }
 
 void hc_set_log(HANDLE h, DWORD t0) { g_hLog = h; g_t0 = t0; }
+
+#ifdef __clang__
+// HC_TRY's two clang-mingw workarounds: the anchor that keeps the handler alive,
+// and the accessors that put a faulting access inside a callee.
+#include "hcaccess.inc"
+#endif
 
 void log_line(const char *s) {
     if (g_hLog == INVALID_HANDLE_VALUE) return;
@@ -72,12 +82,18 @@ static volatile LONG g_NearUsed = 0;
 BYTE *hc_near_page(void) { return g_NearPage; }
 
 void hc_alloc_near(BYTE *probe) {
-    BYTE *lo = (BYTE*)((DWORD64)(probe - 0x20000000) & ~0xFFFFULL);
-    BYTE *hi = (BYTE*)((DWORD64)(probe + 0x20000000) & ~0xFFFFULL);
-    for (int attempt=0; attempt<8 && !g_NearPage; attempt++) {
-        for (BYTE *cand=lo; cand<hi && !g_NearPage; cand+=0x4000000) {
-            BYTE *a = (BYTE*)VirtualAlloc(cand, 0x1000, MEM_COMMIT|MEM_RESERVE, PAGE_EXECUTE_READWRITE);
-            if (a) g_NearPage = a;
+    DWORD64 p = (DWORD64)probe;
+    DWORD64 lo = (p > 0x70000000ULL) ? ((p - 0x70000000ULL) & ~0xFFFFULL) : 0x10000ULL;
+    DWORD64 hi = (p + 0x70000000ULL) & ~0xFFFFULL;
+    static const DWORD64 steps[2] = { 0x1000000ULL, 0x10000ULL };
+    for (int s = 0; s < 2 && !g_NearPage; s++) {
+        for (DWORD64 cand = lo; cand < hi && !g_NearPage; cand += steps[s]) {
+            BYTE *a = (BYTE*)VirtualAlloc((void*)cand, 0x1000, MEM_COMMIT|MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+            if (a) {
+                int64_t d = (int64_t)a - (int64_t)probe;
+                if (d > -0x7FFF0000LL && d < 0x7FFF0000LL) g_NearPage = a;
+                else VirtualFree(a, 0, MEM_RELEASE);
+            }
         }
     }
 }
@@ -145,7 +161,7 @@ static int hook_len(const BYTE *p) {
 
 // ---------------------------------------------------------------- install
 int hc_match_now(const BYTE *t, const BYTE *exp) {
-    __try {
+    HC_TRY
         for (int i=0;i<8;i++) if (t[i]!=exp[i]) return 0;
         return 1;
     } __except (EXCEPTION_EXECUTE_HANDLER) { return 0; }
@@ -158,8 +174,8 @@ int hc_install_hook(BYTE *target, int id) {
     if (id < 0 || id >= HK_MAX) return 0;
     if (((DWORD64)target & 15) != 0) { log_line("install: target not 16-aligned"); return 0; }
     if (!g_NearPage) { log_line("install: no near page"); return 0; }
-    __try {
-        for (int i=0;i<16;i++) ob[i] = ((volatile BYTE*)target)[i];
+    HC_TRY
+        for (int i=0;i<16;i++) ob[i] = HC_RD8((DWORD64)target + i);
     } __except (EXCEPTION_EXECUTE_HANDLER) { log_line("install: target read fault"); return 0; }
     n = hook_len(ob);
     if (n < 5) { log_line("install: LDE rejected prologue"); return 0; }
@@ -184,10 +200,10 @@ int hc_install_hook(BYTE *target, int id) {
     FlushInstructionCache(GetCurrentProcess(), slot, 40);
     // patch target: E9 rel32 -> slot+16, as ONE aligned qword (CAS)
     { DWORD old=0; int vpOk=0; int ok=1;
-      __try { vpOk = VirtualProtect(target, 8, PAGE_EXECUTE_READWRITE, &old); }
+      HC_TRY vpOk = VirtualProtect(target, 8, PAGE_EXECUTE_READWRITE, &old); }
       __except (EXCEPTION_EXECUTE_HANDLER) { log_line("install: VP fault"); vpOk = 0; }
       if (!vpOk) { log_line("install: VP fail"); return 0; }
-      __try {
+      HC_TRY
           BYTE nb[8]; DWORD64 new8, cur, orig8;
           int64_t rel = (int64_t)(slot + 16) - (int64_t)((BYTE*)target + 5);
           nb[0]=0xE9; nb[1]=(BYTE)rel; nb[2]=(BYTE)(rel>>8);
@@ -240,6 +256,116 @@ static int aigate(void) {
     return g_AiGate;
 }
 
+// Re-point the __RTDynamicCast IAT slot (0x143198960) and the 3 widget
+// vtable[+0x78] slots in .rdata (Checkbox/Button 0x143219728, DropDown
+// 0x14321a0a8, Text/Label 0x14321a898) so host-lobby settings rows and the
+// AI slot item unlock on Wine 11 without any E9 .text modification.
+typedef void *(*PFN_RTDynamicCast)(void *inptr, LONG vfDelta, void *srcType, void *targetType, BOOL isReference);
+static PFN_RTDynamicCast g_RealRTDynamicCast = 0;
+
+static void *Hook_RTDynamicCast(void *inptr, LONG vfDelta, void *srcType, void *targetType, BOOL isReference) {
+    DWORD64 base = g_ModBase();
+    if (base && (DWORD64)srcType == base + 0x4179368ULL && (DWORD64)targetType == base + 0x4179430ULL) {
+        DWORD64 *sp = (DWORD64 *)_AddressOfReturnAddress();
+        DWORD64 ret = 0;
+        HC_TRY ret = sp[0] - base; } __except (EXCEPTION_EXECUTE_HANDLER) { ret = 0; }
+        if (ret == 0x1a1e496ULL || ret == 0x1a403f2ULL) {
+            HC_TRY
+                DWORD64 screen = (ret == 0x1a1e496ULL) ? sp[506] : sp[578];
+                DWORD64 sent   = HC_RD64((base + 0x326b258ULL));
+                DWORD64 w1     = HC_RD64((screen + 0x2690));
+                if (w1 > 0x10000 && HC_RD64((w1 + 0x4a0)) > 0x10000 && aigate()) {
+                    g_LobbySent = sent;
+                    g_LobbyScreen = screen;
+                    HC_WR64((screen + 0x1cf8), sent);
+                }
+            } __except (EXCEPTION_EXECUTE_HANDLER) { }
+        }
+        if (ret == 0x1a3595fULL) {
+            // Host lobby slot-dropdown populator 0x141a344f0:
+            //   entry rsp = sp + 1; rbp = sp + 150; saved rsi = sp[301].
+            HC_TRY
+                DWORD64 screen = sp[301];
+                DWORD64 sent   = HC_RD64((base + 0x326b258ULL));
+                DWORD64 field  = HC_RD64((screen + 0x1cf8));
+                DWORD   arg4   = HC_RD8(((const BYTE *)(sp + 1) + 0x30));
+                DWORD   slot   = HC_RD32(((const BYTE *)(sp + 150) - 0x7c));
+                DWORD64 w1     = 0;
+                int ok = 0, wrote = 0;
+                if (slot < 16) w1 = HC_RD64((screen + slot * 8 + 0x2688));
+                if (w1 > 0x10000 && HC_RD64((w1 + 0x4a0)) > 0x10000) ok = 1;
+                if (ok && aigate()) {
+                    g_LobbySent = sent;
+                    g_LobbyScreen = screen;
+                    if (field != sent) { HC_WR64((screen + 0x1cf8), sent); wrote |= 1; }
+                    if (arg4 != 1)     { HC_WR8(((BYTE *)(sp + 1) + 0x30), 1); wrote |= 2; }
+                }
+                { static volatile LONG s_Logged = 0;
+                  LONG n = InterlockedIncrement(&s_Logged);
+                  if (n <= 32) {
+                      char b[192]; int i = bsput(b, 0, "HIT RTDynCast populator #");
+                      i = bnput(b, i, (DWORD)n);
+                      i = bsput(b, i, " screen=0x"); i = bxput(b, i, screen);
+                      i = bsput(b, i, " field=0x");  i = bxput(b, i, field);
+                      i = bsput(b, i, " arg4=");     i = bnput(b, i, arg4);
+                      i = bsput(b, i, " slot=");     i = bnput(b, i, slot);
+                      i = bsput(b, i, ok ? " frame=ok" : " frame=BAD");
+                      if (wrote & 1) i = bsput(b, i, " WROTE-field");
+                      if (wrote & 2) i = bsput(b, i, " WROTE-arg4");
+                      b[i] = 0; log_line(b);
+                  } }
+            } __except (EXCEPTION_EXECUTE_HANDLER) { }
+        }
+    }
+    return g_RealRTDynamicCast ? g_RealRTDynamicCast(inptr, vfDelta, srcType, targetType, isReference) : 0;
+}
+
+// Wait until Arxan's boot integrity pass finishes (by watching the clean-on-disk
+// prologue of 0x140f19680 and giving the main menu 14s to settle), then re-point
+// the __RTDynamicCast IAT slot (0x143198960) and the 3 widget vtable[+0x78]
+// slots in .rdata (Checkbox/Button 0x143219728, DropDown 0x14321a0a8,
+// Text/Label 0x14321a898).
+int hc_install_wset_vtables(DWORD64 base) {
+    static const DWORD64 vts[3] = { 0x3219728ULL, 0x321a0a8ULL, 0x321a898ULL };
+    DWORD64 orig = base + 0xab6300ULL;
+    DWORD64 iat  = base + 0x3198960ULL;
+    int n = 0;
+    g_TailTable[14] = (unsigned long long)orig;
+    { char v[8];
+      if (GetEnvironmentVariableA("AOE2LAN_RTDYN", v, sizeof v) && v[0] == '1') {
+          DWORD64 cur = 0;
+          HC_TRY cur = HC_RD64(iat); } __except (EXCEPTION_EXECUTE_HANDLER) { cur = 0; }
+          if (cur > 0x10000 && cur != (DWORD64)&Hook_RTDynamicCast) {
+              DWORD old = 0;
+              if (VirtualProtect((void *)iat, 8, PAGE_READWRITE, &old)) {
+                  g_RealRTDynamicCast = (PFN_RTDynamicCast)cur;
+                  *(volatile DWORD64 *)iat = (DWORD64)&Hook_RTDynamicCast;
+                  VirtualProtect((void *)iat, 8, old, &old);
+                  log_line("wset_vt: hooked IAT VCRUNTIME140!__RTDynamicCast for AI slot unlock");
+              }
+          }
+      } }
+    { char v[8];
+      if (!GetEnvironmentVariableA("AOE2LAN_WSETVT", v, sizeof v) || v[0] == '0') return 0; }
+    for (int k = 0; k < 3; k++) {
+        DWORD64 p = base + vts[k] + 0x78ULL;
+        DWORD64 v = 0;
+        HC_TRY v = HC_RD64(p); }
+        __except (EXCEPTION_EXECUTE_HANDLER) { continue; }
+        if (v != orig) continue;
+        { DWORD old = 0;
+          if (!VirtualProtect((void *)p, 8, PAGE_READWRITE, &old)) continue;
+          *(volatile DWORD64 *)p = (DWORD64)&lanhook_wset_vt;
+          VirtualProtect((void *)p, 8, old, &old);
+          n++; }
+    }
+    { char b[96]; int i = bsput(b, 0, "wset_vt: patched ");
+      i = bnput(b, i, (DWORD)n);
+      i = bsput(b, i, " .rdata vtable[+0x78] slots -> lanhook_wset_vt");
+      b[i] = 0; log_line(b); }
+    return n;
+}
+
 // Re-assert screen+0x1cf8 == sentinel. Only ever writes the sentinel, only when
 // the field holds exactly -1, and only after the screen's slot-widget chain
 // still resolves - so a freed/reused block is very unlikely to be touched.
@@ -249,12 +375,12 @@ static void lobby_keepgate(void) {
     static volatile LONG s_Fixed = 0;
     DWORD64 s = g_LobbyScreen;
     if (!s) return;
-    __try {
-        if (*(const volatile DWORD64 *)(s + 0x1cf8) != (DWORD64)-1) return;
-        { DWORD64 w = *(const volatile DWORD64 *)(s + 0x2690);   // slot 1 widget
+    HC_TRY
+        if (HC_RD64((s + 0x1cf8)) != (DWORD64)-1) return;
+        { DWORD64 w = HC_RD64((s + 0x2690));   // slot 1 widget
           if (w < 0x10000) return;
-          if (*(const volatile DWORD64 *)(w + 0x4a0) < 0x10000) return; }
-        *(volatile DWORD64 *)(s + 0x1cf8) = g_LobbySent;
+          if (HC_RD64((w + 0x4a0)) < 0x10000) return; }
+        HC_WR64((s + 0x1cf8), g_LobbySent);
         { LONG k = InterlockedIncrement(&s_Fixed);
           if (k <= 16) { char b[64]; int i = bsput(b, 0, "keepgate: field -1 -> 0, fix #");
                          i = bnput(b, i, (DWORD)k); b[i] = 0; log_line(b); }
@@ -264,10 +390,10 @@ static void lobby_keepgate(void) {
 
 static int read_cstr(const void *p, char *out, int maxn) {
     int i = 0;
-    __try {
-        const volatile char *q = (const volatile char*)p;
+    HC_TRY
+        DWORD64 q = (DWORD64)p;
         for (i = 0; i < maxn-1; i++) {
-            char c = q[i];
+            char c = (char)HC_RD8(q + i);
             if (c == 0 || c < 0x20 || c > 0x7e) break;
             out[i] = c;
         }
@@ -317,12 +443,12 @@ static void verbose_on(void) {
     }
     if (g_Verbose != 1) return;
     p = (volatile BYTE *)(g_ModBase() + 0x4356c66);
-    __try {
+    HC_TRY
         old = *p;
         // Level 0 with [c66]>=2 also routes to the second writer 0x14101bb50,
         // which does `mov rax,[sink]; mov rcx,[rax+0x6f0]` at 0x14101c6fa with no
         // null check. So only raise the level once the game has built that sink.
-        sink = *(const volatile DWORD64 *)(g_ModBase() + 0x4356c88);
+        sink = HC_RD64((g_ModBase() + 0x4356c88));
         if (old >= 2) return;
         if (!sink) {
             static volatile LONG s_Said;
@@ -447,20 +573,20 @@ void lanhook_log_hit(int id, const unsigned long long *ctx) {
         // s41: keep the lobby's AI/row-lock gate at the sentinel between refreshes
         if (g_LobbyScreen) lobby_keepgate();
         if (w < 0x10000) return;
-        __try {
-            vt = *(const volatile DWORD64*)w;
-            oldf = *(const volatile DWORD64*)(w + 0x3d8);
+        HC_TRY
+            vt = HC_RD64(w);
+            oldf = HC_RD64((w + 0x3d8));
             const volatile BYTE *s = (const volatile BYTE*)(w + 0x3e8);
-            DWORD64 sz = *(const volatile DWORD64*)(s + 0x10);
-            DWORD64 cap = *(const volatile DWORD64*)(s + 0x18);
-            const void *p = (cap > 15) ? (const void*)*(const volatile DWORD64*)s : (const void*)s;
+            DWORD64 sz = HC_RD64((s + 0x10));
+            DWORD64 cap = HC_RD64((s + 0x18));
+            const void *p = (cap > 15) ? (const void*)HC_RD64(s) : (const void*)s;
             if (sz > 0 && sz < 256 && cap >= sz && cap < 4096 && (DWORD64)p > 0x10000) {
                 int r = read_cstr(p, nm, 96);
                 if (r > 0) nml = r;
             }
             const volatile DWORD64 *sp = (const volatile DWORD64*)(ctx + 20);
             for (int k = 0; k < 12; k++) {
-                DWORD64 v = sp[k];
+                DWORD64 v = HC_RD64((DWORD64)(sp + k));
                 if (v >= g_ModBase() + 0x1aa0000 && v < g_ModBase() + 0x1ad0000) {
                     lcaller = v - g_ModBase();
                     break;
@@ -558,15 +684,15 @@ void lanhook_log_hit(int id, const unsigned long long *ctx) {
               j = (s_Force < 0) ? bsput(bb, j, "off (log only)") : bnput(bb, j, (DWORD)s_Force);
               bb[j] = 0; log_line(bb); }
         }
-        __try {
-            tag = *(const volatile BYTE *)(obj + 0x684);
-            val = *(const volatile DWORD *)(obj + 0x680);
+        HC_TRY
+            tag = HC_RD8((obj + 0x684));
+            val = HC_RD32((obj + 0x680));
             if (tag == 0) kind = (int)val;
             else if (tag == 1) kind = (val == 3) ? 2 : 0;
             if ((unsigned)kind < 3u) {
                 DWORD64 s = tbl + (DWORD64)kind * 0x110;
-                DWORD64 vb = *(const volatile DWORD64 *)(s + 0x28);
-                DWORD64 ve = *(const volatile DWORD64 *)(s + 0x30);
+                DWORD64 vb = HC_RD64((s + 0x28));
+                DWORD64 ve = HC_RD64((s + 0x30));
                 cnt = (ve >= vb) ? (DWORD)((ve - vb) / 0x40) : 0xFFFFFFFE;
             }
         } __except (EXCEPTION_EXECUTE_HANDLER) { kind = -1; cnt = 0xFFFFFFFF; }
@@ -582,11 +708,11 @@ void lanhook_log_hit(int id, const unsigned long long *ctx) {
                                             0xe79002, 0x13d4564, 0x1ab4c59,
                                             0x1c93e78 };
             if (caller == 0xbf3c8b) {
-                __try {
+                HC_TRY
                     const volatile DWORD64 *sp = (const volatile DWORD64 *)(ctx + 20);
                     DWORD64 mb = g_ModBase();
                     for (int k = 0; k < 200 && !via; k++) {
-                        DWORD64 v = sp[k];
+                        DWORD64 v = HC_RD64((DWORD64)(sp + k));
                         DWORD r;
                         if (v < mb + 0x1000 || v > mb + 0x4000000) continue;
                         r = (DWORD)(v - mb);
@@ -669,23 +795,23 @@ void lanhook_log_hit(int id, const unsigned long long *ctx) {
         screen = ctx[-7];        // rsi
         frame  = ctx[-5];        // rbp
         field = sent = 0;
-        __try {
-            field = *(const volatile DWORD64 *)(screen + 0x1cf8);
-            sent  = *(const volatile DWORD64 *)(g_ModBase() + 0x326b258);
-            arg4  = *(const volatile BYTE *)(frame - 0xd0);
-            slot  = *(const volatile DWORD *)(frame - 0x7c);
+        HC_TRY
+            field = HC_RD64((screen + 0x1cf8));
+            sent  = HC_RD64((g_ModBase() + 0x326b258));
+            arg4  = HC_RD8((frame - 0xd0));
+            slot  = HC_RD32((frame - 0x7c));
             // self-check on both captured registers: the builder set
             // r15 = [[screen + slot*8 + 0x2688] + 0x4a0] and bailed if either was 0
             if (slot < 16) {
-                DWORD64 w = *(const volatile DWORD64 *)(screen + slot * 8 + 0x2688);
-                if (w > 0x10000 && *(const volatile DWORD64 *)(w + 0x4a0) > 0x10000) ok = 1;
+                DWORD64 w = HC_RD64((screen + slot * 8 + 0x2688));
+                if (w > 0x10000 && HC_RD64((w + 0x4a0)) > 0x10000) ok = 1;
             }
         } __except (EXCEPTION_EXECUTE_HANDLER) { ok = 0; }
         if (ok && gate) { g_LobbySent = sent; g_LobbyScreen = screen; }
         if (gate && ok && (field != sent || arg4 != 1)) {
-            __try {
-                if (field != sent) { *(volatile DWORD64 *)(screen + 0x1cf8) = sent; wrote |= 1; }
-                if (arg4 != 1)     { *(volatile BYTE *)(frame - 0xd0) = 1;    wrote |= 2; }
+            HC_TRY
+                if (field != sent) { HC_WR64((screen + 0x1cf8), sent); wrote |= 1; }
+                if (arg4 != 1)     { HC_WR8((frame - 0xd0), 1);    wrote |= 2; }
             } __except (EXCEPTION_EXECUTE_HANDLER) { wrote = 0; }
         }
         // boot-window rule as in HK_WSET/HK_AISLOT: logging only, the write above

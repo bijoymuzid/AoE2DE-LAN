@@ -352,7 +352,7 @@ int main(void) {
         printf("p7      : %p  slot: %p  delta=0x%llX\n", p7, slot7,
                (unsigned long long)((BYTE*)p7 - slot7)); }
     }
-    __try {
+    HC_TRY
         r = f6(1,2,3,4,5,6);
     } __except (printf("EXC in f6: code=0x%lX\n", GetExceptionCode())) { return 1; }
     if (r != 21)   { printf("FAIL: post-hook f6=%d\n", r); return 1; }
@@ -363,7 +363,7 @@ int main(void) {
     r = f5(1,1,1,1,1,1);
     if (r != 6)    { printf("FAIL: post-hook f5b=%d\n", r); return 1; }
     printf("post-hook ok (21, 210, 2100, 6) — thunk/trampoline verified\n");
-    __try {
+    HC_TRY
         r = f7(10,20,30,40,50,60);
     } __except (printf("EXC in f7: code=0x%lX\n", GetExceptionCode())) { return 1; }
     if (r != 210) { printf("FAIL: post-hook f7=%d\n", r); return 1; }

@@ -7,6 +7,7 @@
 ; callee-saved GPRs at ctx[-8..-5] (rbx, rsi, rdi, rbp) so a handler can see the
 ; CALLER's object pointers; they are recorded, never modified.
 PUBLIC lanhook_thunk
+PUBLIC lanhook_wset_vt
 PUBLIC g_TailTable
 EXTERN lanhook_log_hit:PROC
 
@@ -15,6 +16,15 @@ ALIGN 8
 g_TailTable QWORD 20 DUP(?)
 
 .code
+; .rdata vtable[+0x78] entry for widget SetStateFlags (0x140ab6300) when E9
+; .text detours are disabled on Wine 11. Sets r10d = 14 (hook id 14) and falls
+; into lanhook_thunk; g_TailTable[14] holds 0x140ab6300 so the tail jump runs
+; the unpatched original with all registers/stack restored.
+lanhook_wset_vt PROC
+    mov  r10d, 14
+    jmp  lanhook_thunk
+lanhook_wset_vt ENDP
+
 lanhook_thunk PROC
     push rax
     push rcx

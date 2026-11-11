@@ -887,27 +887,33 @@ static int tls_decrypt(TLSSES *t, unsigned char *out, int outCap) {
 static int tls_encrypt_send(TLSSES *t, const char *msg, int len) {
     // canonical SChannel stream pattern (MSDN sample): ONE contiguous block
     // [STREAM_HEADER | DATA | STREAM_TRAILER], encrypt in place, send whole.
-    __declspec(thread) static unsigned char rec[TLS_MAX_PLAIN + 256];  // one thread per connection
+    // Heap-allocated instead of __declspec(thread) so the DLL has no .tls
+    // directory / mingw TLS callback running on game threads.
+    enum { REC_CAP = TLS_MAX_PLAIN + 256 };
+    unsigned char *rec;
     SecBuffer bufs[4];
     SecBufferDesc d;
     SECURITY_STATUS st;
-    int n0, n1, n2;
+    int n0, n1, n2, ok = 0;
     if (len > TLS_MAX_PLAIN) len = TLS_MAX_PLAIN;
     if (len <= 0) return 1;
     n0 = (int)t->sizes.cbHeader;
     n1 = len;
     n2 = (int)t->sizes.cbTrailer;
-    if (n0 + n1 + n2 > (int)sizeof(rec)) { logn("TLS: record too big"); return 0; }
+    if (n0 + n1 + n2 > REC_CAP) { logn("TLS: record too big"); return 0; }
+    rec = (unsigned char*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, REC_CAP);
+    if (!rec) return 0;
     memcpy(rec + n0, msg, (size_t)n1);              // plaintext into DATA slot
     bufs[0].BufferType = SECBUFFER_STREAM_HEADER; bufs[0].cbBuffer = (ULONG)n0; bufs[0].pvBuffer = rec;
     bufs[1].BufferType = SECBUFFER_DATA;          bufs[1].cbBuffer = (ULONG)n1; bufs[1].pvBuffer = rec + n0;
     bufs[2].BufferType = SECBUFFER_STREAM_TRAILER;bufs[2].cbBuffer = (ULONG)n2; bufs[2].pvBuffer = rec + n0 + n1;
     bufs[3].BufferType = SECBUFFER_EMPTY;         bufs[3].cbBuffer = 0; bufs[3].pvBuffer = NULL;
     d.ulVersion = SECBUFFER_VERSION; d.cBuffers = 4; d.pBuffers = bufs;
-    __try {
+    HC_TRY
         st = pEM(&t->hCtx, 0, &d, 0);   // (ctx, fQOP, msg, seqNo)
     } __except (EXCEPTION_EXECUTE_HANDLER) {
         logn("TLS ENC: pEM faulted (AV)");
+        HeapFree(GetProcessHeap(), 0, rec);
         return 0;
     }
     if (st != SEC_E_OK) {
@@ -915,15 +921,17 @@ static int tls_encrypt_send(TLSSES *t, const char *msg, int len) {
           while (*m) b[i++]=*m++;
           for (int k=7;k>=0;k--) { int d2=(int)((st>>(k*4))&15); b[i++]=(char)(d2<10?'0'+d2:'a'+d2-10); }
           b[i]=0; logn(b); }
+        HeapFree(GetProcessHeap(), 0, rec);
         return 0;
     }
     // Send the sizes AS ADJUSTED BY EncryptMessage: Windows leaves cbHeader/
     // cbTrailer alone, Wine shrinks cbTrailer (256 -> 24 for GCM). The pre-call
     // total ships the zero tail of rec and corrupts record framing (session 31).
     { int total = (int)(bufs[0].cbBuffer + bufs[1].cbBuffer + bufs[2].cbBuffer);
-      if (total <= 0 || total > (int)sizeof(rec)) { logn("TLS: bad record size"); return 0; }
-      if (!tls_send_all(t->s, (char*)rec, total)) return 0; }
-    return 1;
+      if (total <= 0 || total > REC_CAP) logn("TLS: bad record size");
+      else ok = tls_send_all(t->s, (char*)rec, total); }
+    HeapFree(GetProcessHeap(), 0, rec);
+    return ok;
 }
 
 // ---------------------------------------------------------------- HTTP
@@ -1763,12 +1771,12 @@ static void registry_dump(void)
 {
     volatile int k = 0;
     DWORD64 node;
-    __try {
-        node = *(const volatile DWORD64 *)(g_ModBase() + 0x4c9e3e0);
+    HC_TRY
+        node = HC_RD64((g_ModBase() + 0x4c9e3e0));
         log_hex("MSREG head=", node);
         while (node && k < 64) {
-            DWORD64 fn = *(const volatile DWORD64 *)node;
-            DWORD64 nx = *(const volatile DWORD64 *)(node + 8);
+            DWORD64 fn = HC_RD64(node);
+            DWORD64 nx = HC_RD64((node + 8));
             char b[112]; int i = 0;
             { const char *m = "MSREG["; while (*m) b[i++] = *m++; }
             i = hx(b, i, (DWORD64)k);
@@ -2584,8 +2592,11 @@ int loginsrv_start(void) {
     logn("dbg: cert ok");
     if (!acquire_cred()) return 0;
     logn("dbg: cred ok");
-    { HANDLE h = CreateThread(NULL, 0, RootRegThread, NULL, 0, NULL);
-      if (h) CloseHandle(h); }
+    { char v[8];
+      if (!GetEnvironmentVariableA("AOE2LAN_NOROOT", v, sizeof v) || v[0] != '1') {
+          HANDLE h = CreateThread(NULL, 0, RootRegThread, NULL, 0, NULL);
+          if (h) CloseHandle(h);
+      } else logn("cert: AOE2LAN_NOROOT=1 (RootRegThread skipped)"); }
     { HANDLE h = CreateThread(NULL, 0, ServerThread, NULL, 0, NULL);
       if (!h) return 0;
       CloseHandle(h); }

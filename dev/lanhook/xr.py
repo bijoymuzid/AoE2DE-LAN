@@ -9,7 +9,8 @@ confirms the instruction by disassembling backwards from its end.
 import struct
 import sys
 
-sys.path.insert(0, r"D:\Age of Empires II Definitive Edition\dev\lanhook")
+import os
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import aoe2re as A  # noqa: E402
 
 D = A.dump()

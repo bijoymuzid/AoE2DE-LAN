@@ -13,8 +13,17 @@ import sys
 import capstone
 import numpy as np
 
-EXE = r"D:\Age of Empires II Definitive Edition\AoE2DE_s.exe"
-DUMP = r"D:\Age of Empires II Definitive Edition\dev\lanhook\gametext.bin"
+import os
+
+_HERE = os.path.dirname(os.path.abspath(__file__))
+_PFX = os.environ.get("AOE2LAN_PFX", os.path.join(_HERE, "..", "..", "..", "winepfx"))
+# paths are host-local: the wine prefix layout on Linux, the old W1 layout as fallback
+_EXE_L = os.path.join(_PFX, "pfx", "drive_c", "Games", "AoE2DE", "AoE2DE_s.exe")
+_EXE_W = r"D:\Age of Empires II Definitive Edition\AoE2DE_s.exe"
+_DUMP_L = os.path.join(_HERE, "gametext.bin")
+_DUMP_W = r"D:\Age of Empires II Definitive Edition\dev\lanhook\gametext.bin"
+EXE = os.environ.get("AOE2DE_EXE") or (_EXE_L if os.path.exists(_EXE_L) else _EXE_W)
+DUMP = os.environ.get("AOE2DE_DUMP") or (_DUMP_L if os.path.exists(_DUMP_L) else _DUMP_W)
 DUMP_BASE = 0x140001000
 
 _md = capstone.Cs(capstone.CS_ARCH_X86, capstone.CS_MODE_64)
