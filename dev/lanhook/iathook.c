@@ -24,11 +24,16 @@
 #include "hookcore.h"
 #include "iathook.h"
 
+#ifdef __clang__
+#define _AddressOfReturnAddress() ((void*)((char*)__builtin_frame_address(0) + 8))
+#endif
+
 typedef void *HIN;
 int strcmp_f(const char *a, const char *b);   // defined below; used by realfn()
 
 // ---------------------------------------------------------------- patch table
-// flat name->stub map; names are unique across the three DLLs.
+// flat name->stub map; names are unique across the hooked DLLs.
+BOOL WINAPI Hook_PeekMessageW(MSG*, HWND, UINT, UINT, UINT);
 int WINAPI Hook_HCCallGetNetErr(void*, DWORD*, DWORD*);
 int WINAPI Hook_HCCallSetReadFn(void*, void*, SIZE_T, void*);
 int WINAPI Hook_HCCallGetBodySize(void*, SIZE_T*);
@@ -53,6 +58,8 @@ BOOL WINAPI Hook_CertFreeCtx(void*);
 BOOL WINAPI Hook_CryptQueryObject(DWORD, const void*, DWORD, DWORD, DWORD, DWORD*, DWORD*, DWORD*, void**, const void**);
 DWORD WINAPI Hook_CertGetNameStringW(void*, DWORD, DWORD, void*, wchar_t*, DWORD);
 DWORD WINAPI Hook_CertGetNameStringA(void*, DWORD, DWORD, void*, char*, DWORD);
+BOOL WINAPI Hook_DeviceIoControl(HANDLE, DWORD, LPVOID, DWORD, LPVOID, DWORD, LPDWORD, LPOVERLAPPED);
+int __cdecl Hook_stdio_vsprintf(unsigned __int64, char*, size_t, const char*, void*, void*);
 
 static struct { const char *fn; void *stub; void *real; } g_Map[] = {
     // WINHTTP.dll
@@ -135,6 +142,14 @@ static struct { const char *fn; void *stub; void *real; } g_Map[] = {
     {"socket",                      (void*)&Hook_socket,                 0},
     // KERNEL32 — IOCP completion port (overlapped recv delivery path)
     {"GetQueuedCompletionStatus",   (void*)&Hook_GQCS,                   0},
+    // KERNEL32 — the game-layer log record sink (see Hook_DeviceIoControl).
+    // APPENDED LAST on purpose: g_Map indices are referenced by number above.
+    {"DeviceIoControl",             (void*)&Hook_DeviceIoControl,         0},
+    // UCRT — the game-layer log MESSAGE formatter (see Hook_stdio_vsprintf).
+    {"__stdio_common_vsprintf",     (void*)&Hook_stdio_vsprintf,          0},
+    // USER32 — the main message pump: our only reliable "UI thread, every frame"
+    // seam. Used to run the host-lobby combo rebuild on the right thread.
+    {"PeekMessageW",               (void*)&Hook_PeekMessageW,            0},
 };
 #define NMAP (int)(sizeof(g_Map)/sizeof(g_Map[0]))
 // certified g_Map indices (layout sensitive — edits above must update these):
@@ -142,6 +157,131 @@ static struct { const char *fn; void *stub; void *real; } g_Map[] = {
 #define IDX_CLOSE    57  // CertCloseStore
 #define IDX_FREECTX  58  // CertFreeCertificateContext
 #define IDX_ENUM     54  // CertEnumCertificatesInStore
+#define IDX_DIC      (NMAP - 3)  // DeviceIoControl (appended)
+#define IDX_VSPRINTF (NMAP - 2)  // __stdio_common_vsprintf (appended)
+#define IDX_PEEK     (NMAP - 1)  // PeekMessageW (appended)
+
+// ---------------------------------------------------------------- game-layer log
+// The game-layer log fn 0x140f19210 formats "[Category] message" and hands the
+// record to 0x14101bb50, which on the level-0 path does
+//   DeviceIoControl(h=[logger+0x6f0], 0x95358204, inBuf, 2*len, 0,0,&n,0)
+// (0x14101c6fa) BEFORE anything reaches the rlink sink our vptr hook watches -
+// which is why AOE2LAN_VERBOSE=1 alone still showed no TComm_* line. On Windows
+// the GLOG hook reads the same record at the vsnprintf helper 0x1407db520, a
+// .text detour that is fatal on wine. This slot is a plain .rdata IAT write, the
+// same kind the shim already does for 68 other imports.
+// Opt-in: AOE2LAN_GLOG=1. Records are UTF-16LE.
+static int g_GlogOn = -1;
+static volatile LONG g_GlogLines = 0;
+static DWORD g_GlogSeen[16];
+static volatile LONG g_GlogNSeen = 0;
+
+// lazily read the env once, from either hook (they fire independently)
+static int glog_on(void) {
+    if (g_GlogOn < 0) {
+        char v[8];
+        g_GlogOn = (GetEnvironmentVariableA("AOE2LAN_GLOG", v, sizeof v) && v[0] == '1');
+        log_line(g_GlogOn ? "glog: AOE2LAN_GLOG=1, game-layer messages logged off the UCRT formatter"
+                          : "glog off (AOE2LAN_GLOG unset)");
+    }
+    return g_GlogOn;
+}
+
+BOOL WINAPI Hook_DeviceIoControl(HANDLE h, DWORD code, LPVOID in, DWORD insz,
+                                 LPVOID out, DWORD outsz, LPDWORD got, LPOVERLAPPED ov) {
+    if (g_GlogOn < 0) glog_on();
+    if (g_GlogOn) {
+        if (code == 0x95358204 && in && insz >= 2) {
+            if (InterlockedIncrement(&g_GlogLines) <= 50000) {
+                char b[400]; int i = 0; const char *m = "glog: ";
+                while (*m) b[i++] = *m++;
+                HC_TRY
+                    int n = (int)(insz / 2);
+                    for (int k = 0; k < n && i < (int)sizeof b - 4; k++) {
+                        WORD c = ((const WORD*)in)[k];
+                        b[i++] = (c >= 0x20 && c < 0x7f) ? (char)c : (c ? '.' : ' ');
+                    }
+                } __except (EXCEPTION_EXECUTE_HANDLER) {
+                    const char *m2 = "<fault>";
+                    while (*m2 && i < (int)sizeof b - 2) b[i++] = *m2++;
+                }
+                b[i] = 0; log_line(b);
+            }
+        } else {
+            // discovery: which ioctl codes does this process actually use?
+            LONG n = g_GlogNSeen;
+            int known = 0;
+            for (LONG k = 0; k < n && k < 16; k++) if (g_GlogSeen[k] == code) { known = 1; break; }
+            if (!known && n < 16) {
+                g_GlogSeen[n] = code;
+                InterlockedIncrement(&g_GlogNSeen);
+                { char b[96]; int i = 0; const char *m = "glog: ioctl code=0x";
+                  while (*m) b[i++] = *m++;
+                  for (int k = 7; k >= 0; k--) { int d2 = (int)((code >> (k * 4)) & 15);
+                      b[i++] = (char)(d2 < 10 ? '0' + d2 : 'a' + d2 - 10); }
+                  m = " insz="; while (*m) b[i++] = *m++;
+                  { char t[12]; int tl = 0; DWORD v = insz;
+                    if (!v) t[tl++] = '0';
+                    while (v) { t[tl++] = (char)('0' + (v % 10)); v /= 10; }
+                    while (tl) b[i++] = t[--tl]; }
+                  b[i] = 0; log_line(b); }
+            }
+        }
+    }
+    { typedef BOOL (WINAPI *PfnDIC)(HANDLE,DWORD,LPVOID,DWORD,LPVOID,DWORD,LPDWORD,LPOVERLAPPED);
+      PfnDIC real = (PfnDIC)g_Map[IDX_DIC].real;
+      return real ? real(h, code, in, insz, out, outsz, got, ov) : FALSE; }
+}
+
+// ---------------------------------------------------------------- game-layer log text
+// The level-0 record never reaches the rlink sink (the writer 0x14101bb50 drops
+// dl=0xe at 0x14101bba8) and never calls DeviceIoControl either - measured: the
+// DIO hook above fires zero times in a 30 s boot. What DOES run for every
+// game-layer message is the UCRT formatter: 0x14101b4b0 formats the timestamp,
+// then calls __stdio_common_vsprintf at 0x14101b56c with the caller's format
+// string. Filtering on that return address gives exactly what the Windows GLOG
+// hook (0x1407db520, a .text detour) gave: the format string of every
+// game-layer message, including TComm_* at level 0.
+// Opt-in: AOE2LAN_GLOG=1.
+int __cdecl Hook_stdio_vsprintf(unsigned __int64 opt, char *buf, size_t size,
+                                const char *fmt, void *locale, void *va) {
+    typedef int (__cdecl *PfnVSP)(unsigned __int64, char*, size_t, const char*, void*, void*);
+    PfnVSP real = (PfnVSP)g_Map[IDX_VSPRINTF].real;
+    if (glog_on() > 0 && fmt) {
+        DWORD64 ret = (DWORD64)__builtin_return_address(0);
+        { static volatile LONG seen = 0;
+          if (InterlockedIncrement(&seen) <= 8) {
+              char b[220]; int i = 0; const char *m = "glog: vsprintf ret=0x";
+              while (*m) b[i++] = *m++;
+              { char t[20]; int tl = 0; DWORD64 v = ret;
+                if (!v) t[tl++] = '0';
+                while (v) { int d2 = (int)(v & 15);
+                    t[tl++] = (char)(d2 < 10 ? '0' + d2 : 'a' + d2 - 10); v >>= 4; }
+                while (tl) b[i++] = t[--tl]; }
+              m = " fmt="; while (*m) b[i++] = *m++;
+              HC_TRY
+                  for (int k = 0; k < 120 && fmt[k]; k++) {
+                      char c = fmt[k]; b[i++] = (c == '\n' || c == '\r') ? ' ' : c; }
+              } __except (EXCEPTION_EXECUTE_HANDLER) { }
+              b[i] = 0; log_line(b);
+          } }
+        if (ret == g_ModBase() + 0x101b572ULL && InterlockedIncrement(&g_GlogLines) <= 50000) {
+            char b[400]; int i = 0; const char *m = "glog: ";
+            while (*m) b[i++] = *m++;
+            HC_TRY
+                for (int k = 0; k < 360 && fmt[k]; k++) {
+                    char c = fmt[k];
+                    b[i++] = (c == '\n' || c == '\r') ? ' ' : c;
+                }
+            } __except (EXCEPTION_EXECUTE_HANDLER) {
+                const char *m2 = "<fault>";
+                while (*m2 && i < (int)sizeof b - 2) b[i++] = *m2++;
+            }
+            b[i] = 0; log_line(b);
+        }
+    }
+    return real ? real(opt, buf, size, fmt, locale, va) : -1;
+}
 
 // ---------------------------------------------------------------- handle map
 // HINTERNET keys: session->connect->request tree. We need host/verb/path per
@@ -159,8 +299,8 @@ static REQ g_Req[512];
 static volatile LONG g_ReqLock = 0;
 static volatile LONG g_ReqN = 0;
 
-volatile LONG g_IatReqCap = 900;   // request-side log lines
-volatile LONG g_IatRespCap = 1400; // response-side log lines
+volatile LONG g_IatReqCap = 10000;  // request-side log lines
+volatile LONG g_IatRespCap = 10000; // response-side log lines
 
 // session 12 (stage 8): rlink DNS redirect + trust-pool injection
 int  g_IatRedirect;        // set by lanhook before patching (stage 8)
@@ -651,6 +791,11 @@ static int ends_with(const char *s, const char *suf) {
     return 1;
 }
 
+// last sender IPv4 ("192.168.1.9") of a UDP 9999 LAN BattleServer beacon
+// (magic 0x21, 0x24, 0x00), so getaddrinfo(gethostname(), NULL) in 0x140deabd0
+// resolves to the same IP on Linux/Wine where /etc/hosts returns 127.0.1.1.
+static char g_LanBeaconIP[24];
+
 int WINAPI Hook_getaddrinfo(const char *node, const char *service, const void *hints, void **result) {
     typedef int (WINAPI *Pfn)(const char*, const char*, const void*, void**);
     Pfn real = (Pfn)realfn("getaddrinfo");
@@ -661,12 +806,27 @@ int WINAPI Hook_getaddrinfo(const char *node, const char *service, const void *h
          !strcmp_f(node, "aoe-api.reliclink.com"))) {
         nodeUsed = "127.0.0.1";
         redirected = 1;
+    } else if (g_IatRedirect && node && (!service || !service[0]) && g_LanBeaconIP[0]) {
+        // 0x140deabd0 calls getaddrinfo(gethostname(), NULL, ...) to enumerate
+        // local IPs for 0x140ee9420's LAN server match. Any node without dots or
+        // colons (and not "localhost") with service==NULL is the local hostname.
+        int plain = strcmp_f(node, "localhost") != 0;
+        for (int k = 0; plain && node[k]; k++)
+            if (node[k] == '.' || node[k] == ':') plain = 0;
+        if (plain) {
+            nodeUsed = g_LanBeaconIP;
+            redirected = 2;
+        }
     }
     if (take_req() && node) {
         char b[220]; int i=0; const char *m= redirected ? "DNS REDIRECT " : "DNS resolve ";
         while (*m) b[i++]=*m++;
         for (int j=0; node[j] && i<170; j++) b[i++]=node[j];
-        if (redirected) { const char *t=" -> 127.0.0.1"; while (*t) b[i++]=*t++; }
+        if (redirected == 1) { const char *t=" -> 127.0.0.1"; while (*t) b[i++]=*t++; }
+        else if (redirected == 2) {
+            const char *t=" -> "; while (*t) b[i++]=*t++;
+            for (int j=0; nodeUsed[j] && i<190; j++) b[i++]=nodeUsed[j];
+        }
         if (service && service[0] && i<180) { const char *t=" svc="; while (*t) b[i++]=*t++;
             for (int j=0; service[j] && i<190; j++) b[i++]=service[j]; }
         b[i]=0; log_line(b);
@@ -805,6 +965,15 @@ int WINAPI Hook_recvfrom(SOCKT s, char *buf, int len, int flags, void *from, int
     typedef int (WINAPI *Pfn)(SOCKT, char*, int, int, void*, int*);
     Pfn real = (Pfn)realfn("recvfrom");
     int r = real(s, buf, len, flags, from, fromlen);
+    if (r >= 39 && buf && (unsigned char)buf[0] == 0x21 && (unsigned char)buf[1] == 0x24 && buf[2] == 0) {
+        char peer[28]; fmt_peer(from, fromlen ? *fromlen : 0, peer, 28);
+        int k = 0;
+        while (peer[k] && peer[k] != ':' && peer[k] != '[' && k < 20) {
+            g_LanBeaconIP[k] = peer[k];
+            k++;
+        }
+        if (k > 0) g_LanBeaconIP[k] = 0;
+    }
     if (r > 0 && take_resp()) {
         char peer[28]; fmt_peer(from, fromlen ? *fromlen : 0, peer, 28);
         char tag[64]; int i=0; const char *m="SOCK recvfrom";
@@ -1592,10 +1761,20 @@ BOOL WINAPI Hook_WinHttpCrackUrl(LPCWSTR url, DWORD len, DWORD flags, LPVOID com
     return real(url, len, flags, comps);
 }
 
+BOOL WINAPI Hook_PeekMessageW(MSG*, HWND, UINT, UINT, UINT);
 BOOL WINAPI Hook_WinHttpCloseHandle(HIN h) {
     PfnClose real = (PfnClose)g_Map[10].real;
     req_del(h);
     return real(h);
+}
+
+// Main message pump. hc_ui_tick() is throttled inside and does nothing unless a
+// lobby combo rebuild was requested, so the per-message cost is a GetTickCount.
+BOOL WINAPI Hook_PeekMessageW(MSG *m, HWND h, UINT a, UINT b, UINT c) {
+    typedef BOOL (WINAPI *PfnPeek)(MSG*, HWND, UINT, UINT, UINT);
+    PfnPeek real = (PfnPeek)g_Map[IDX_PEEK].real;
+    hc_ui_tick();
+    return real ? real(m, h, a, b, c) : 0;
 }
 
 void *WINAPI Hook_WinHttpSetStatusCallback(HIN h, void *cb, DWORD flags, DWORD_PTR resv) {
@@ -1826,7 +2005,9 @@ int iathook_patch_module(HMODULE mod) {
             !ascii_ieq(dllName, "WSOCK32.dll", 11) &&
             !ascii_ieq(dllName, "WS2_32.dll", 10) &&
             !ascii_ieq(dllName, "CRYPT32.dll", 11) &&
-            !ascii_ieq(dllName, "KERNEL32.dll", 12))
+            !ascii_ieq(dllName, "KERNEL32.dll", 12) &&
+            !ascii_ieq(dllName, "USER32.dll", 11) &&
+            !ascii_ieq(dllName, "api-ms-win-crt-stdio-l1-1-0.dll", 32))
             continue;
         { // patch every thunk whose name matches our table
           DWORD64 *thunk = (DWORD64*)(base + (imp->OriginalFirstThunk ? imp->OriginalFirstThunk : imp->FirstThunk));

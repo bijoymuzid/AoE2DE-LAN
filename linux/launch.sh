@@ -13,7 +13,11 @@ GAMEDIR="$PFX/pfx/drive_c/Games/AoE2DE"
 DLL="${AOE2LAN_DLL:-$REPO/dbghelp.dll}"   # delivered by W1 (gitignored); cannot be built on Linux
 export AOE2LAN_STAGE="${AOE2LAN_STAGE:-8}"
 export AOE2LAN_NOHOOKS="${AOE2LAN_NOHOOKS:-1}"
+export AOE2LAN_HOOKS="${AOE2LAN_HOOKS:-4,5,13,14}"
+export AOE2LAN_WSETVT="${AOE2LAN_WSETVT:-0}"
 export AOE2LAN_AIGATE="${AOE2LAN_AIGATE:-1}"
+export AOE2LAN_LOGVT="${AOE2LAN_LOGVT:-1}"
+export AOE2LAN_GLOG="${AOE2LAN_GLOG:-1}"
 # AOE2LAN_RTDYN=1 additionally re-points the __RTDynamicCast IAT slot, which is how
 # the host-lobby AI gate (screen+0x1cf8) gets written without touching .text/.rdata.
 # Not default yet: untested on wine (needs a display + a click into the host lobby).

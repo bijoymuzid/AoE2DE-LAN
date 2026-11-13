@@ -1101,8 +1101,11 @@ static void rules_scan(void) {
 // which is the whole point: Arxan checksums all of .text and at least the
 // VCRUNTIME140!__RTDynamicCast IAT slot, and killed AOE2LAN_RTDYN=1 at t~3s
 // (notes/linux-session4.md §4d/§4e). AOE2LAN_AIGATE=1 enables this thread.
+#define LOBBY_SVC_RVA   0x42dc4f0ULL   // [0x1442dc4f0] = online service owner (+0xd10 = match state ptr)
 #define LOBBY_VT_RVA    0x33416e0ULL   // UIScreenMultiplayerLobbyHost primary vtable
+#define LOBBY_SUBVT_RVA 0x32dd198ULL   // subobject vtable at [screen+0x710] (ctor 0x141a238b2)
 #define LOBBY_SENT_RVA  0x326b258ULL   // global the gate compares +0x1cf8 against
+#define LOBBY_F_SUBVT   0x0710ULL      // qword, == g_Base + LOBBY_SUBVT_RVA
 #define LOBBY_F_GATE    0x1cf8ULL      // qword, want == [LOBBY_SENT_RVA]
 #define LOBBY_F_24F4    0x24f4ULL      // byte, want 1
 #define LOBBY_F_24E6    0x24e6ULL      // byte, want 0
@@ -1111,10 +1114,20 @@ static void rules_scan(void) {
 
 static DWORD64 g_LobbyObj = 0;
 
-// First committed RW qword equal to the vtable whose +0x1cf8 holds a plausible gate
-// value (0 = open, -1 = the locked value the game writes, or the sentinel itself).
+// The combo rebuild (0x141a344f0) is only reachable from the DSPM/0x1e receive
+// path, and a self-hosted lobby gets no DSPM after the screen is built, so the AI
+// list that 0x141a31940 fills (log 15090884: screen+0x588 span 0x18 = 3
+// personalities) never reaches the combos, which stay at their creation item.
+// Calling the populator from this thread crashed the game (log 15317557), so hand
+// the request to the WidgetSetEn hook, which runs on the UI thread.
+static int g_ComboTries = 0;
+
+// First committed RW qword equal to the vtable whose +0x710 holds the secondary
+// vtable and +0x1cf8 holds a plausible gate value (0 = open, -1 = the locked
+// value the game writes, or the sentinel itself). Also skip our own stack region.
 static DWORD64 lobby_find(DWORD64 vt, DWORD64 sent) {
     BYTE *a = 0;
+    DWORD64 sp = (DWORD64)&a, subvt = g_Base + LOBBY_SUBVT_RVA;
     MEMORY_BASIC_INFORMATION mbi;
     for (;;) {
         if (!VirtualQuery(a, &mbi, sizeof mbi)) break;
@@ -1122,12 +1135,15 @@ static DWORD64 lobby_find(DWORD64 vt, DWORD64 sent) {
         if ((DWORD64)mbi.BaseAddress >= g_Base && (DWORD64)mbi.BaseAddress < g_Base + 0x5000000) continue;
         if (mbi.State != MEM_COMMIT || !(mbi.Protect & (PAGE_READWRITE | PAGE_WRITECOPY))) continue;
         if (mbi.RegionSize > (64u << 20)) continue;
-        for (DWORD64 p = (DWORD64)mbi.BaseAddress; p + 8 <= (DWORD64)mbi.BaseAddress + mbi.RegionSize; p += 8) {
-            DWORD64 v = 0, f = 0;
+        if (sp >= (DWORD64)mbi.BaseAddress && sp < (DWORD64)mbi.BaseAddress + mbi.RegionSize) continue;
+        for (DWORD64 p = (DWORD64)mbi.BaseAddress; p + 0x7df8 <= (DWORD64)mbi.BaseAddress + mbi.RegionSize; p += 8) {
+            DWORD64 v = 0, sv = 0, f = 0;
             HC_TRY v = HC_RD64(p); } __except (EXCEPTION_EXECUTE_HANDLER) { continue; }
             if (v != vt) continue;
-            HC_TRY f = HC_RD64((p + LOBBY_F_GATE)); } __except (EXCEPTION_EXECUTE_HANDLER) { continue; }
-            if (f != 0 && f != (DWORD64)-1 && f != sent) continue;
+            (void)sent; (void)f;
+            HC_TRY sv = HC_RD64((p + LOBBY_F_SUBVT)); }
+            __except (EXCEPTION_EXECUTE_HANDLER) { continue; }
+            if (sv != subvt) continue;
             return p;
         }
     }
@@ -1138,9 +1154,22 @@ static void lobby_gate(void) {
     DWORD64 obj = g_LobbyObj;
     int fixed = 0, found = 0;
     DWORD r24f4 = 0x100;                  // 0x100 = not read
+    DWORD64 d_gate = 0, d_edit = 0, d_slots = 0, d_sent = 0;  // S17 diag
+    DWORD64 d_5e0 = 0, d_beg0 = 0, d_span0 = 0;                // S17 diag: Block A gate + slot0 raw
+    DWORD64 d_row0 = 0, d_dd0 = 0;                              // S17 diag: slot0 widget chain
+    DWORD64 d_beg0w = 0;                                        // S17 diag: first qword at beg
+    DWORD64 d_s588 = ~0ULL, d_558 = ~0ULL;                     // S17 diag: AI-list span + +0x558
+    DWORD64 d_7d43 = ~0ULL;                                     // S17 diag: rebuild-request flag
+    DWORD64 d_2988 = ~0ULL;                                     // DSPM-handler run counter
+    DWORD64 d_item1 = 0, d_iq[8] = {0};                         // P2 first-item object dump
+    DWORD64 d_msz = ~0ULL, d_mkey = ~0ULL, d_midx = ~0ULL, d_sb0 = ~0ULL;  // settings resolve
     HC_TRY
-        DWORD64 vt = g_Base + LOBBY_VT_RVA, sent = HC_RD64((g_Base + LOBBY_SENT_RVA));
-        if (obj && HC_RD64(obj) != vt) obj = 0;      // screen freed or rebuilt
+        DWORD64 vt = g_Base + LOBBY_VT_RVA, subvt = g_Base + LOBBY_SUBVT_RVA;
+        DWORD64 sent = HC_RD64((g_Base + LOBBY_SENT_RVA));
+        DWORD64 root = HC_RD64((g_Base + LOBBY_SVC_RVA));
+        DWORD64 mobj = root ? HC_RD64((root + 0xd10)) : 0;
+        if (mobj && HC_RD64((mobj + 0xc8)) != sent) { HC_WR64((mobj + 0xc8), sent); fixed |= 256; }
+        if (obj && (HC_RD64(obj) != vt || HC_RD64((obj + LOBBY_F_SUBVT)) != subvt)) obj = 0; // screen freed or rebuilt
         if (!obj) obj = lobby_find(vt, sent);
         if (obj) {
             found = 1;
@@ -1150,6 +1179,126 @@ static void lobby_gate(void) {
             if (HC_RD8((obj + LOBBY_F_24E6)) != 0)     { HC_WR8((obj + LOBBY_F_24E6), 0);     fixed |= 4; }
             if (HC_RD8((obj + LOBBY_F_24E5)) != 0)     { HC_WR8((obj + LOBBY_F_24E5), 0);     fixed |= 8; }
             if (HC_RD8((obj + LOBBY_F_24C0)) != 0)     { HC_WR8((obj + LOBBY_F_24C0), 0);     fixed |= 16; }
+            { DWORD64 p1cf0 = HC_RD64((obj + 0x1cf0));
+              if (!p1cf0 && mobj) {
+                  DWORD64 p1170 = HC_RD64((mobj + 0x1170));
+                  p1cf0 = p1170 ? HC_RD64((p1170 + 0xa8)) : 0;
+              }
+              DWORD64 arr   = p1cf0 ? HC_RD64((p1cf0 + 0x170)) : 0;
+              if (arr) {
+                  for (int i = 0; i < 8; i++)
+                      if (HC_RD32((arr + (unsigned)i * 4)) == 0) { HC_WR32((arr + (unsigned)i * 4), 1); fixed |= 64; }
+              } }
+            // No combo-vector clear: 0x141a43d50 only repopulates a combo whose
+            // entry count is 0, and it runs only from the DSPM receive path, so
+            // clearing it left every slot permanently blank (log 13329336).
+            // 0x141a31940 (fills screen+0x588, the AI list 0x141a344f0 iterates at
+            // 0x141a35e9a) runs only while screen+0x558 != 0, and 0x141a2885d ->
+            // 0x141a3abb0 clears 0x558 after one send - so re-arm it while empty.
+            // [screen+0x7d43] is the "rebuild every slot combo" request flag: the
+            // DSPM handler at 0x141a27f7c runs the 0x141a344f0 loop for all 8 slots
+            // when it is non-zero (or when any slot state changed), then CLEARS it.
+            // Writing it ourselves makes the flag useless as evidence of whether a
+            // DSPM ever arrives (we re-arm it 10 ms after the handler clears it) -
+            // so the write is now opt-in only (AOE2LAN_7D43=1) and off by default.
+            { DWORD64 r0 = HC_RD64((obj + 0x2688));
+              DWORD64 d0 = r0 ? HC_RD64((r0 + 0x4a0)) : 0;
+              DWORD64 b0 = d0 ? HC_RD64((d0 + 0x5a0)) : 0, e0 = d0 ? HC_RD64((d0 + 0x5a8)) : 0;
+              if (getenv_flag(L"AOE2LAN_7D43")
+                  && (!b0 || e0 < b0 + 0x28) && HC_RD64((obj + 0x588)) != HC_RD64((obj + 0x590))) {
+                  HC_WR8((obj + 0x7d43), 1); fixed |= 1024;
+              } }
+            { DWORD64 r0 = HC_RD64((obj + 0x2688));
+              DWORD64 d0 = r0 ? HC_RD64((r0 + 0x4a0)) : 0;
+              DWORD64 b0 = d0 ? HC_RD64((d0 + 0x5a0)) : 0, e0 = d0 ? HC_RD64((d0 + 0x5a8)) : 0;
+              static DWORD64 seen_at = 0;
+              if (!seen_at && r0) seen_at = GetTickCount();
+              // opt-in: calling the game's populator killed the process inside the
+              // first 0x141a12820 on every delivery thread tried (logs 15317557,
+              // 16061311, 16663214, 252-1368107). The proven path is leave/re-enter:
+              // the screen is reused with the gate held, so the game's own first pass
+              // adds AI. Default OFF.
+              if (getenv_flag(L"AOE2LAN_COMBO") && (!b0 || e0 < b0 + 0x28)
+                  && seen_at && GetTickCount() - seen_at > 3000
+                  && HC_RD64((obj + 0x588)) != HC_RD64((obj + 0x590)) && g_ComboTries < 200) {
+                  g_ComboTries++;
+                  hc_lobby_request(obj, sent);
+                  fixed |= 2048;
+              } }
+            int pulsed = 0;
+            if (HC_RD64((obj + 0x588)) == HC_RD64((obj + 0x590))) { HC_WR8((obj + 0x558), 1); pulsed = 1; }
+            {
+                // Also clear the lock bit directly on the cached settings widgets.
+                for (unsigned off = 0x2508; off <= 0x25f8; off += 8) {
+                    DWORD64 w = HC_RD64((obj + off));
+                    if (!w) continue;
+                    DWORD64 fl = HC_RD64((w + 0x3d8));
+                    if (fl & 4ULL) { HC_WR64((w + 0x3d8), fl & ~4ULL); HC_WR8((w + 0x3e0), 1); }
+                    DWORD64 cb = HC_RD64((w + 0x70)), ce = HC_RD64((w + 0x78));
+                    for (DWORD64 cp = cb; cp && cp + 8 <= ce && cp < cb + 128; cp += 8) {
+                        DWORD64 cw = HC_RD64(cp);
+                        if (!cw) continue;
+                        DWORD64 cfl = HC_RD64((cw + 0x3d8));
+                        if (cfl & 4ULL) { HC_WR64((cw + 0x3d8), cfl & ~4ULL); HC_WR8((cw + 0x3e0), 1); }
+                    }
+                }
+                if (pulsed) fixed |= 128;
+            }
+            // S17 diagnostic: read-only field values + per-slot item counts.
+            // No game-code calls; proves whether the vector stays empty after
+            // the reset and what the gate/edit fields actually hold.
+            { DWORD64 b588 = HC_RD64((obj + 0x588)), e588 = HC_RD64((obj + 0x590));
+              d_s588 = (b588 && e588 >= b588) ? (e588 - b588) : ~0ULL; }
+            d_558 = HC_RD8((obj + 0x558));
+            d_7d43 = HC_RD8((obj + 0x7d43));
+            d_2988 = HC_RD64((obj + 0x2988));   // DSPM-handler per-slot run counter
+            { DWORD64 r1 = HC_RD64((obj + 0x2690));            // slot 1 (P2) row
+              DWORD64 d1 = r1 ? HC_RD64((r1 + 0x4a0)) : 0;
+              DWORD64 b1 = d1 ? HC_RD64((d1 + 0x5a0)) : 0;
+              d_item1 = b1 ? HC_RD64(b1) : 0;                  // first item object
+              for (int q = 0; q < 8; q++)
+                  d_iq[q] = d_item1 ? HC_RD64((d_item1 + 8 + (unsigned)q * 8)) : 0; }
+            // replicate 0x140e83240(id=0) read-only: map1 (0x1442e18c8) id->index,
+            // table at [0x1442e18b0], 0xc0-byte entries; [entry+0xb0]==1 locks the
+            // slot combo to a single current-value item (0x141a35c30 region).
+            { DWORD64 h1 = HC_RD64(0x1442e18c8);
+              d_msz = h1 ? HC_RD64((0x1442e18c8 + 8)) : ~0ULL;
+              d_mkey = ~0ULL; d_midx = ~0ULL; d_sb0 = ~0ULL;
+              if (h1) {
+                  DWORD64 node = HC_RD64((h1 + 8)), best = h1;
+                  for (int st = 0; st < 64 && node && !HC_RD8((node + 0x19)); st++) {
+                      if ((long long)HC_RD64((node + 0x20)) < 0) node = HC_RD64((node + 0x10));
+                      else best = node;
+                      if (best == node) node = HC_RD64(node);     // left
+                  }
+                  if (!HC_RD8((best + 0x19)) && (long long)HC_RD64((best + 0x20)) <= 0) {
+                      d_mkey = HC_RD64((best + 0x20));
+                      d_midx = (DWORD64)(int)HC_RD32((best + 0x28));
+                      DWORD64 tb = HC_RD64(0x1442e18b0);
+                      if (tb) d_sb0 = HC_RD64((tb + d_midx * 0xc0 + 0xb0));
+                      // [settings+0xb0]==1 makes 0x141a344f0 skip the Open/Closed+AI
+                      // block and emit only the current-value item (measured live:
+                      // P2="Open" only, P3-P8="Closed" only). Pin it to 0.
+                      if (tb && d_midx < 64 && (int)d_sb0 == 1) {
+                          HC_WR32((tb + d_midx * 0xc0 + 0xb0), 0); fixed |= 4096;
+                      }
+                  }
+              } }
+            d_gate = HC_RD64((obj + LOBBY_F_GATE));
+            d_sent = sent;
+            d_edit = HC_RD8((obj + 0x604));
+            d_5e0 = HC_RD64((obj + 0x5e0));
+            for (int s = 0; s < 8; s++) {
+                DWORD64 row = HC_RD64((obj + 0x2688 + (unsigned)s * 8));
+                DWORD64 dd  = row ? HC_RD64((row + 0x4a0)) : 0;
+                DWORD64 beg = dd  ? HC_RD64((dd  + 0x5a0)) : 0;
+                DWORD64 end = dd  ? HC_RD64((dd  + 0x5a8)) : 0;
+                DWORD64 cnt = (beg && end >= beg) ? (end - beg) / 8 : 0;
+                if (cnt > 15) cnt = 15;
+                d_slots |= (cnt << (s * 4));
+                if (s == 0) { d_row0 = row; d_dd0 = dd; d_beg0 = beg; d_span0 = (beg && end >= beg) ? (end - beg) : 0;
+                              if (beg) d_beg0w = HC_RD64(beg); }
+            }
         }
     } __except (EXCEPTION_EXECUTE_HANDLER) { g_LobbyObj = 0; return; }
     g_LobbyObj = obj;
@@ -1158,9 +1307,11 @@ static void lobby_gate(void) {
     // per-frame refresh, instead of spamming one line per 50 ms poll.
     { static DWORD64 last_obj = 0; static int last_fixed = -1; static DWORD last_24f4 = 0x101;
       static volatile LONG n = 0;
-      if (obj != last_obj || fixed != last_fixed || r24f4 != last_24f4) {
+      // bit 0x2 (24f4 rewrite) and r24f4 flap every 20 ms; masking them out of
+      // change detection keeps the cap for real transitions
+      if (obj != last_obj || (fixed & ~2) != (last_fixed & ~2)) {
           last_obj = obj; last_fixed = fixed; last_24f4 = r24f4;
-          if (InterlockedIncrement(&n) <= 200) {
+          if (InterlockedIncrement(&n) <= 20000) {
               char b[192]; int i = cput(b, 0, "lobbygate: obj=");
               i = chx(b, i, obj);
               i = cput(b, i, " 24f4_was="); i = chx(b, i, r24f4);
@@ -1168,6 +1319,53 @@ static void lobby_gate(void) {
               b[i] = 0; log_line(b);
           } }
       (void)found; }
+    // S17 diagnostic: log gate/edit/24f4 + per-slot item counts on change.
+    // slots are packed 4 bits each, slot 7 (leftmost) .. slot 0 (rightmost).
+    { static DWORD64 l_gate = ~0ULL, l_edit = ~0ULL, l_24f4 = ~0ULL, l_slots = ~0ULL, l_sent = 0;
+      static DWORD64 l_5e0 = ~0ULL, l_beg0 = ~0ULL, l_span0 = ~0ULL, l_row0 = ~0ULL, l_dd0 = ~0ULL, l_beg0w = ~0ULL;
+      static DWORD64 l_s588 = ~0ULL, l_558 = ~0ULL, l_7d43 = ~0ULL, l_2988 = ~0ULL, l_item1 = ~0ULL;
+      static DWORD64 l_msz = ~0ULL, l_mkey = ~0ULL, l_sb0 = ~0ULL;
+      static volatile LONG dn = 0;
+      if (obj && (d_gate != l_gate || d_edit != l_edit || d_slots != l_slots || d_sent != l_sent
+               || d_5e0 != l_5e0 || d_beg0 != l_beg0 || d_span0 != l_span0 || d_row0 != l_row0 || d_dd0 != l_dd0 || d_beg0w != l_beg0w
+               || d_s588 != l_s588 || d_558 != l_558 || d_7d43 != l_7d43 || d_2988 != l_2988 || d_item1 != l_item1
+               || d_msz != l_msz || d_mkey != l_mkey || d_sb0 != l_sb0)) {
+          l_gate = d_gate; l_edit = d_edit; l_24f4 = r24f4; l_slots = d_slots; l_sent = d_sent;
+          l_5e0 = d_5e0; l_beg0 = d_beg0; l_span0 = d_span0; l_row0 = d_row0; l_dd0 = d_dd0; l_beg0w = d_beg0w;
+          l_s588 = d_s588; l_558 = d_558; l_7d43 = d_7d43; l_2988 = d_2988; l_item1 = d_item1;
+          l_msz = d_msz; l_mkey = d_mkey; l_sb0 = d_sb0;
+          if (InterlockedIncrement(&dn) <= 20000) {
+              char b[384]; int i = cput(b, 0, "lobbydiag: gate=0x"); i = chx(b, i, d_gate);
+              i = cput(b, i, " sent=0x"); i = chx(b, i, d_sent);
+              i = cput(b, i, " eq="); i = cpct(b, i, (unsigned long long)(d_gate == d_sent));
+              i = cput(b, i, " 5e0=0x"); i = chx(b, i, d_5e0);
+              i = cput(b, i, " edit604="); i = chx(b, i, d_edit);
+              i = cput(b, i, " 24f4="); i = chx(b, i, r24f4);
+              i = cput(b, i, " s0row=0x"); i = chx(b, i, d_row0);
+              i = cput(b, i, " s0dd=0x"); i = chx(b, i, d_dd0);
+              i = cput(b, i, " s0beg=0x"); i = chx(b, i, d_beg0);
+              i = cput(b, i, " s0w0=0x"); i = chx(b, i, d_beg0w);
+              i = cput(b, i, " s0span=0x"); i = chx(b, i, d_span0);
+              i = cput(b, i, " s588=0x"); i = chx(b, i, d_s588);
+              i = cput(b, i, " 558="); i = chx(b, i, d_558);
+              i = cput(b, i, " 7d43="); i = chx(b, i, d_7d43);
+              i = cput(b, i, " 2988="); i = chx(b, i, d_2988);
+              i = cput(b, i, " it1="); i = chx(b, i, d_item1);
+              i = cput(b, i, " msz="); i = chx(b, i, d_msz);
+              i = cput(b, i, " mkey="); i = chx(b, i, d_mkey);
+              i = cput(b, i, " midx="); i = chx(b, i, d_midx);
+              i = cput(b, i, " sb0="); i = chx(b, i, d_sb0);
+              if (d_item1) { i = cput(b, i, " [");
+                  for (int q = 0; q < 8; q++) { if (q) b[i++] = ' '; i = chx(b, i, d_iq[q]); }
+                  i = cput(b, i, "]"); }
+              i = cput(b, i, " slots=");
+              for (int s = 7; s >= 0; s--) {
+                  i = cpct(b, i, (unsigned long long)((d_slots >> (s * 4)) & 0xF));
+                  if (s) b[i++] = ',';
+              }
+              b[i] = 0; log_line(b);
+          } }
+    }
 }
 
 // 10 ms while the object is cached (6 reads + at most 5 writes) - measured: the
@@ -1406,29 +1604,32 @@ static void logsink_hook(void) {
 // that object. Measured safe on Windows (s43 N13b). Opt-in: AOE2LAN_VERBOSE=1.
 #define GAME_LOGLEVEL_RVA  0x4356c66ULL
 #define GAME_LOGSINK2_RVA  0x4356c88ULL
-static int g_VerboseState = -1;   // -1 = not read yet, 0 = off/done, 1 = armed, 2 = written
+static int g_VerboseState = -1;   // -1 = not read yet, 0 = off, 1 = armed, 2 = written
+static volatile LONG g_VerboseFixes = 0;
 
 static void verbose_setup(void) {
     if (g_VerboseState < 0) {
         g_VerboseState = getenv_flag(L"AOE2LAN_VERBOSE") ? 1 : 0;
         if (g_VerboseState) log_line("verbose: AOE2LAN_VERBOSE=1, will raise [0x144356c66] to 2");
     }
-    if (g_VerboseState != 1) return;
+    if (g_VerboseState == 0) return;
     { BYTE old = 0; DWORD64 sink = 0, sub = 0;
       HC_TRY
         old = HC_RD8((g_Base + GAME_LOGLEVEL_RVA));
         sink = HC_RD64((g_Base + GAME_LOGSINK2_RVA));
         if (sink) sub = HC_RD64((sink + 0x6f0));
       } __except (EXCEPTION_EXECUTE_HANDLER) { log_line("verbose: read faulted, giving up"); g_VerboseState = 0; return; }
-      if (old >= 2) { g_VerboseState = 0; return; }          // already verbose
+      if (old >= 2) return;                                 // already verbose (re-checked: the game resets it)
       if (!sink || !HC_IS_PTR(sub)) return;                  // retry on the next pass
       HC_TRY HC_WR8((g_Base + GAME_LOGLEVEL_RVA), 2); }
       __except (EXCEPTION_EXECUTE_HANDLER) { log_line("verbose: write faulted"); g_VerboseState = 0; return; }
       g_VerboseState = 2;
-      { char b[160]; int i = cput(b, 0, "verbose: [0x144356c66] ");
-        i = cput(b, i, "-> 2 (was "); i = chx(b, i, old);
-        i = cput(b, i, "), game-layer level-0 lines now reach LogHelper; sink2=0x"); i = chx(b, i, sink);
-        b[i] = 0; log_line(b); } }
+      { LONG n = InterlockedIncrement(&g_VerboseFixes);
+        if (n <= 8) { char b[160]; int i = cput(b, 0, "verbose: [0x144356c66] ");
+          i = cput(b, i, "-> 2 (was "); i = chx(b, i, old);
+          i = cput(b, i, "), fix #"); i = cpct(b, i, (unsigned long long)n);
+          i = cput(b, i, "; sink2=0x"); i = chx(b, i, sink);
+          b[i] = 0; log_line(b); } } }
 }
 
 static DWORD WINAPI HeartbeatThread(LPVOID p) {

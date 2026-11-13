@@ -20,6 +20,16 @@
 extern volatile LONG g_ParseFail;   // hook 13 logged "failed to parse notification messages"
 extern volatile LONG g_MSReached;   // hook 18 ran = the MatchStartMessage factory was reached
 
+// Ask the WidgetSetEn hook (which runs on the game's UI thread) to rebuild the
+// host lobby's player-slot combos with the game's own populator 0x141a344f0.
+// They are otherwise only rebuilt from the DSPM/0x1e receive path, which a
+// self-hosted lobby never gets (log 15610076: the rebuild-request byte
+// screen+0x7d43 stays 1 forever = no handler pass after screen creation).
+void hc_lobby_request(DWORD64 screen, DWORD64 sent);
+// Runs on the game's UI thread from the PeekMessageW IAT hook: throttled, and a
+// no-op unless a combo rebuild was requested.
+void hc_ui_tick(void);
+
 typedef struct {
     const char *name;
     DWORD64     va;       // VA at imagebase 0x140000000

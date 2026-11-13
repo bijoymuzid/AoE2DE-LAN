@@ -244,6 +244,87 @@ volatile LONG g_MSReached = 0;
 // on/off switch for the re-assertion.
 static volatile DWORD64 g_LobbyScreen = 0;
 static DWORD64 g_LobbySent = 0;
+static volatile LONG g_ComboReq = 0;      // pending combo rebuild asked for by lanhook
+
+// PeekMessageW fires on wine worker threads too; running the populator off the
+// window thread is the LobbyGateThread crash (log 15317557) all over again.
+static volatile DWORD g_UiTid = 0;
+static int CALLBACK ui_enum(HWND h, LPARAM l) {
+    DWORD pid = 0, tid = GetWindowThreadProcessId(h, &pid);
+    if (pid != GetCurrentProcessId()) return 1;
+    if (!IsWindowVisible(h) || GetWindowTextLengthW(h) == 0) return 1;
+    *(DWORD *)l = tid;
+    return 0;
+}
+static DWORD ui_tid(void) {
+    DWORD tid = g_UiTid;
+    if (tid) return tid;
+    EnumWindows(ui_enum, (LPARAM)&tid);
+    if (tid) { g_UiTid = tid;
+               char b[48]; int i = bsput(b, 0, "ui: window thread tid=");
+               i = bnput(b, i, tid); b[i] = 0; log_line(b); }
+    return tid;
+}
+
+void hc_lobby_request(DWORD64 screen, DWORD64 sent) {
+    if (!screen) return;
+    ui_tid();
+    g_LobbyScreen = screen;
+    g_LobbySent = sent;
+    InterlockedExchange(&g_ComboReq, 1);
+}
+
+// 0x141a12820 (slot-state copy) + 0x141a344f0 (combo rebuild) - the same two
+// calls the DSPM handler makes at 0x141a28014/0x141a2802e. UI thread only:
+// calling the populator from lanhook's 10 ms thread crashed the game (log 15317557).
+static void lobby_keepgate(void);
+static void lobby_combos(DWORD64 s) {
+    typedef void (__fastcall *PFN_CPY)(void*, void*);
+    typedef void (__fastcall *PFN_FILL)(DWORD64, int, void*, BYTE);
+    DWORD64 base = g_ModBase();
+    BYTE st[0x200];
+    static volatile LONG in_call = 0;
+    static volatile LONG s_Trace = 0;
+    int trace;
+    if (InterlockedExchange(&in_call, 1)) return;    // nested message pump
+    trace = (InterlockedCompareExchange(&s_Trace, 1, 0) == 0);
+    if (trace) log_line("combo: enter");
+    HC_TRY
+        for (int k = 0; k < 8; k++) {
+            ZeroMemory(st, sizeof st);
+            if (trace) { char b[32]; int i = bsput(b, 0, "combo: pre k=");
+                         i = bnput(b, i, (DWORD)k); b[i] = 0; log_line(b); }
+            ((PFN_CPY)(base + 0x1a11820ULL))(st, (void*)(s + 0x1d98 + (unsigned)k * 0xd0));
+            if (trace) { char b[32]; int i = bsput(b, 0, "combo: cpy k=");
+                         i = bnput(b, i, (DWORD)k); b[i] = 0; log_line(b); }
+            ((PFN_FILL)(base + 0x1a334f0ULL))(s, k, st, 0);   // 0 = per-AI list, 1 = single "AI"
+            if (trace) { char b[32]; int i = bsput(b, 0, "combo: fill k=");
+                         i = bnput(b, i, (DWORD)k); b[i] = 0; log_line(b); }
+        }
+    } __except (EXCEPTION_EXECUTE_HANDLER) { in_call = 0; g_LobbyScreen = 0; return; }
+    in_call = 0;
+    { char b[80]; int i = bsput(b, 0, "lobby_combos: rebuilt 8 combos on the UI thread");
+      b[i] = 0; log_line(b); }
+}
+
+void hc_ui_tick(void) {
+    static DWORD last = 0;
+    DWORD now;
+    DWORD64 s = g_LobbyScreen;
+    if (!s) return;
+    if (!g_UiTid || GetCurrentThreadId() != g_UiTid) return;  // window thread only
+    now = GetTickCount();
+    if (now - last < 200) return;
+    last = now;
+    lobby_keepgate();
+    if (InterlockedExchange(&g_ComboReq, 0)) {
+        { static volatile LONG s_Once = 0;
+          if (InterlockedCompareExchange(&s_Once, 1, 0) == 0) log_line("ui: combo req consumed on window thread"); }
+        if (HC_RD64((s + 0x1cf8)) != g_LobbySent)
+            HC_WR64((s + 0x1cf8), g_LobbySent);   // the populator's AI gate
+        lobby_combos(s);
+    }
+}
 
 static int g_AiGate = -1;
 static int aigate(void) {
@@ -572,6 +653,11 @@ void lanhook_log_hit(int id, const unsigned long long *ctx) {
         if (GetTickCount() - g_t0 < 20000) return;
         // s41: keep the lobby's AI/row-lock gate at the sentinel between refreshes
         if (g_LobbyScreen) lobby_keepgate();
+        if (g_LobbyScreen && InterlockedExchange(&g_ComboReq, 0)) {
+            if (HC_RD64((g_LobbyScreen + 0x1cf8)) != g_LobbySent)
+                HC_WR64((g_LobbyScreen + 0x1cf8), g_LobbySent);   // the populator's AI gate
+            lobby_combos(g_LobbyScreen);
+        }
         if (w < 0x10000) return;
         HC_TRY
             vt = HC_RD64(w);

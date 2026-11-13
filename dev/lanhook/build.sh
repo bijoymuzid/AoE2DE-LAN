@@ -19,6 +19,6 @@ for c in hookcore iathook lanhook loginsrv; do clang "${CFLAGS[@]}" -o "$c.obj" 
 clang --target=$TARGET -shared -fuse-ld=lld -nostartfiles -Wl,-e,DllMain -o "$OUT" \
       lanhook.obj hookcore.obj stubs.obj hooks.obj iathook.obj loginsrv.obj \
       dbghelp.def -Wl,--image-base=0x180000000 -Wl,--disable-dynamicbase \
-      -Wl,--disable-auto-import -Wl,--kill-at -lkernel32
+      -Wl,--disable-auto-import -Wl,--kill-at -lkernel32 -luser32
 
 echo "=== build ok: $OUT ($(stat -c%s "$OUT") bytes) md5 $(md5sum "$OUT" | cut -d' ' -f1)"

@@ -96,6 +96,14 @@ static int g_PushEnable = -1;
 // a game that re-sends updateState every second cannot make us spam the socket.
 static volatile LONG g_MatchStart = 0;
 
+// s5 Bug B (still bit us on 2026-11-13): every /advertisement/host echoes the
+// login sessionID back as gatheringID, so re-hosting after a match reuses the
+// DESTROYED session id and the 2nd Start skips SendSyncPacketRawMemCopy (the
+// loading-screen stall). Mint a fresh id per host: first host keeps the login
+// sid (that path is proven), later hosts get sid+1, sid+2, ...
+static long long g_HostSeq = 0;
+static char g_AdvId[24] = "";
+
 // s46: live payload channel. A local TCP client (dev/lanhook/work/livepush.py)
 // hands the shim an arbitrary WebSocket payload plus an opcode; the ws_serve
 // loop that owns the game's connection is the ONLY thread that ever sends it,
@@ -1362,10 +1370,11 @@ static void ws_serve(TLSSES *t, const char *req)
                 log_int("MSLADDER   parsefail=", (int)f);
                 log_int("MSLADDER   thunkHits=", (int)r);
                 // no failure logged = this variant parsed (the line lands ~60 ms
-                // after the frame, measured), so stop before pushing another.
-                if (!f) { logn("MSLADDER PARSED - no failure logged, ladder stops"); msVar = 4; }
+                // after the frame, measured), so stop before pushing another. Reset
+                // msVar=-1 so a subsequent lobby in the same run can fire Start too.
+                if (!f) { logn("MSLADDER PARSED - no failure logged, ladder stops"); msVar = -1; }
             }
-            if (msVar < 3) {
+            if (msVar >= 0 && msVar < 3) {
                 ev.len = 0; ev.oom = 0;
                 build_match_start(&ev, msVar);
                 if (ev.len && ws_send(t, 0x2, (const unsigned char*)ev.p, (int)ev.len)) {
@@ -1569,6 +1578,7 @@ static void build_host_reply(BUF *b, const char *body) {
     if (!form_get(body, "hostid", hostid, sizeof hostid)) hostid[0] = 0;
     if (!form_get(body, "sessionID", sid, sizeof sid) || !sid[0])
         if (!form_get(body, "connect_id", sid, sizeof sid)) sid[0] = 0;
+    if (g_AdvId[0]) { int i = 0; while (g_AdvId[i] && i < 31) { sid[i] = g_AdvId[i]; i++; } sid[i] = 0; }
     const char *dv = form_get(body, "description", desc, sizeof desc);
     int dl = dv ? (int)strlen_f(dv) : 0;
     bs(b, "{\"resultCode\":0,\"gatheringID\":");
@@ -1638,6 +1648,7 @@ static void emit_advertisement(BUF *b, const char *body) {
     char hostid[32], sid[32];
     if (!form_get(body, "hostid", hostid, sizeof hostid)) hostid[0] = 0;
     if (!form_get(body, "sessionID", sid, sizeof sid)) sid[0] = 0;
+    if (g_AdvId[0]) { int i = 0; while (g_AdvId[i] && i < 31) { sid[i] = g_AdvId[i]; i++; } sid[i] = 0; }
     bs(b, "{\"id\":");
     bs(b, sid[0] ? sid : "0");
     bs(b, ",\"hostProfileID\":");
@@ -1857,10 +1868,27 @@ static void route(TLSSES *t, const char *method, const char *path,
         // ("Request was invalid"), i.e. the host joined with no advertisement id.
         // s31: the advertisement is echoed back out of the request itself (id, host,
         // connect id, slot blob byte for byte) instead of guessed.
+        InterlockedExchange(&g_MatchStart, 0);
+        adv_set_state("0");
+        { char msid[32];
+          if (form_get(body, "sessionID", msid, sizeof msid) && msid[0]) {
+              long long v = 0; const char *p = msid;
+              while (*p >= '0' && *p <= '9') v = v * 10 + (*p++ - '0');
+              v += g_HostSeq++;
+              char rev[24]; int r = 0; long long x = v;
+              do { rev[r++] = (char)('0' + (x % 10)); x /= 10; } while (x && r < 23);
+              int i = 0; while (r) g_AdvId[i++] = rev[--r]; g_AdvId[i] = 0;
+          } }
         build_host_reply(&resp, body);
         adv_store(body);
         log_resp_head(resp.p, (int)resp.len);
         http_respond(t, resp.p);
+    } else if (contains(path, "/game/advertisement/leave")) {
+        static const char LOK[] = "{\"result\":0}";
+        InterlockedExchange(&g_MatchStart, 0);
+        adv_set_state("0");
+        log_resp_head(LOK, (int)strlen_f(LOK));
+        http_respond(t, LOK);
     } else if (contains(path, "/game/advertisement/join")) {
         // s49 Priority 3: there was NO join handler, so the call fell into the
         // catch-all "[0,[]]". That is a JSON array and the join call parses its
