@@ -79,6 +79,7 @@ static int   (WINAPI *p_closesocket)(SOCKET);
 static int   (WINAPI *p_recv)(SOCKET, char*, int,int);
 static int   (WINAPI *p_send)(SOCKET, const char*, int,int);
 static int   (WINAPI *p_setsockopt)(SOCKET,int,int,const char*,int);
+static int   (WINAPI *p_connect)(SOCKET, const struct sockaddr*, int);
 static u_short (WINAPI *p_htons)(u_short);
 static int   (WINAPI *p_WSAStartup)(WORD, void*);
 static int   (WINAPI *p_WSAGetLastError)(void);
@@ -1573,18 +1574,21 @@ static void relay_ip_init(void) {
 // session id.
 // Member record = {profileID int64 +8, ranking +0x10, statGroupID +0x18, raceID
 // dword +0x20, sessionID dword +0x24, url string +0x28} - parser 0x14056eb40.
-static void build_host_reply(BUF *b, const char *body) {
+// relayOverride: the JOIN of a REMOTE lobby must name the hosting machine's
+// IP, not ours. useAdvId=0 on that path too: the lobby's id is the host's
+// sessionID, our local g_AdvId must not clobber it.
+static void build_host_reply(BUF *b, const char *body, const char *relayOverride, int useAdvId) {
     char hostid[32], sid[32], desc[512];
     if (!form_get(body, "hostid", hostid, sizeof hostid)) hostid[0] = 0;
     if (!form_get(body, "sessionID", sid, sizeof sid) || !sid[0])
         if (!form_get(body, "connect_id", sid, sizeof sid)) sid[0] = 0;
-    if (g_AdvId[0]) { int i = 0; while (g_AdvId[i] && i < 31) { sid[i] = g_AdvId[i]; i++; } sid[i] = 0; }
+    if (useAdvId && g_AdvId[0]) { int i = 0; while (g_AdvId[i] && i < 31) { sid[i] = g_AdvId[i]; i++; } sid[i] = 0; }
     const char *dv = form_get(body, "description", desc, sizeof desc);
     int dl = dv ? (int)strlen_f(dv) : 0;
     bs(b, "{\"resultCode\":0,\"gatheringID\":");
     bs(b, sid[0] ? sid : "1");
     bs(b, ",\"relayAuthToken\":\"lan\",\"relayIP\":\"");
-    bs(b, g_RelayIP);
+    bs(b, (relayOverride && relayOverride[0]) ? relayOverride : g_RelayIP);
     bs(b, "\"");
     bs(b, ",\"relayPortRaw\":27012,\"relayPortWebSockets\":27112");
     bs(b, ",\"relayPortOutOfBandSocket\":27212,\"relayRegion\":\"LAN\"");
@@ -1644,11 +1648,11 @@ static int adv_get_state(char *out, int cap) {
     return n;
 }
 
-static void emit_advertisement(BUF *b, const char *body) {
+static void emit_advertisement_x(BUF *b, const char *body, int useAdvId) {
     char hostid[32], sid[32];
     if (!form_get(body, "hostid", hostid, sizeof hostid)) hostid[0] = 0;
     if (!form_get(body, "sessionID", sid, sizeof sid)) sid[0] = 0;
-    if (g_AdvId[0]) { int i = 0; while (g_AdvId[i] && i < 31) { sid[i] = g_AdvId[i]; i++; } sid[i] = 0; }
+    if (useAdvId && g_AdvId[0]) { int i = 0; while (g_AdvId[i] && i < 31) { sid[i] = g_AdvId[i]; i++; } sid[i] = 0; }
     bs(b, "{\"id\":");
     bs(b, sid[0] ? sid : "0");
     bs(b, ",\"hostProfileID\":");
@@ -1692,6 +1696,155 @@ static void emit_advertisement(BUF *b, const char *body) {
     adv_num(b, body, "serviceType", "service", "1");
     bs(b, ",\"matchStartTime\":0,\"matchRegion\":\"LAN\"");
     bs(b, ",\"matchRegionLocalized\":\"LAN\"}");
+}
+
+static void emit_advertisement(BUF *b, const char *body) { emit_advertisement_x(b, body, 1); }
+
+// ------------------------------------------------- lanhub client (M2, #8)
+// One-shot newline-JSON client to the local lanhub control port. The hub
+// gossips lobbies between machines (node port 47101); loginsrv stays the
+// game's only HTTP server. Every call fails fast when the hub is absent
+// (loopback connect refused is instant), so single-machine play is unchanged.
+static SOCKET hub_open(void) {
+    SOCKET s = p_socket(AF_INET, SOCK_STREAM, 0);
+    struct sockaddr_in a;
+    int tv = 2000;
+    if (s == INVALID_SOCKET) return INVALID_SOCKET;
+    a.sin_family = AF_INET;
+    a.sin_addr.s_addr = 0x0100007f;   // 127.0.0.1
+    a.sin_port = 0xFCB7;              // 47100 in network byte order
+    if (p_connect(s, (struct sockaddr*)&a, sizeof a)) { p_closesocket(s); return INVALID_SOCKET; }
+    p_setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
+    return s;
+}
+static int hub_send(SOCKET s, const char *p, int n) {
+    int off = 0;
+    while (off < n) { int w = p_send(s, p + off, n - off, 0); if (w <= 0) return 0; off += w; }
+    return 1;
+}
+// read one '\n'-terminated line (localhost control traffic: byte at a time is
+// fine); returns length without the newline, -1 on error/timeout
+static int hub_line(SOCKET s, char *out, int cap) {
+    int n = 0;
+    while (n < cap - 1) {
+        char c;
+        int r = p_recv(s, &c, 1, 0);
+        if (r <= 0) return n ? n : -1;
+        if (c == '\n') break;
+        out[n++] = c;
+    }
+    out[n] = 0;
+    return n;
+}
+
+static char g_HubAdvId[48];   // hub-side advertisementID of the lobby we host
+static void hub_host(const char *body) {
+    BUF q = {0}; char rep[256]; SOCKET s;
+    bs(&q, "{\"type\":\"HOST\",\"relayIP\":\"");
+    bs(&q, g_RelayIP);
+    bs(&q, "\",\"lobby\":{\"body\":");
+    jstr(&q, body, (int)strlen_f(body));
+    bs(&q, "}}\n");
+    s = hub_open();
+    if (s == INVALID_SOCKET) { logn("HUB absent: lobby not gossiped"); goto out; }
+    if (hub_send(s, q.p, (int)q.len) && hub_line(s, rep, sizeof rep) > 0) {
+        const char *k = "\"advertisementID\":\"";
+        char *f = 0; int i, j, i2;
+        for (i = 0; rep[i]; i++) {
+            for (j = 0; k[j]; j++) if (rep[i+j] != k[j]) break;
+            if (!k[j]) { f = rep + i + j; break; }
+        }
+        if (f) { i2 = 0; while (f[i2] && f[i2] != '"' && i2 < 47) { g_HubAdvId[i2] = f[i2]; i2++; } g_HubAdvId[i2] = 0; }
+        { char b[128]; int i3 = 0, q; const char *m = "HUB host ok, advertisementID=";
+          while (*m) b[i3++] = *m++;
+          for (q = 0; g_HubAdvId[q] && i3 < 120; q++) b[i3++] = g_HubAdvId[q];
+          b[i3] = 0; logn(b); }
+    }
+    p_closesocket(s);
+out:
+    if (q.p) HeapFree(GetProcessHeap(), 0, q.p);
+}
+static void hub_leave(void) {
+    BUF q = {0}; char rep[128]; SOCKET s;
+    if (!g_HubAdvId[0]) return;
+    bs(&q, "{\"type\":\"LEAVE\",\"advertisementID\":\""); bs(&q, g_HubAdvId); bs(&q, "\"}\n");
+    s = hub_open();
+    if (s != INVALID_SOCKET) {
+        hub_send(s, q.p, (int)q.len); hub_line(s, rep, sizeof rep);
+        p_closesocket(s);
+        logn("HUB leave: lobby withdrawn");
+    }
+    g_HubAdvId[0] = 0;
+    if (q.p) HeapFree(GetProcessHeap(), 0, q.p);
+}
+
+// Remote lobbies the hub knows about, refreshed wholesale on every browse.
+// Keyed by the host's real sessionID (= the advertisement id we hand the
+// game), so join() can map a lobby back to the hosting machine's relayIP.
+#define REM_MAX 8
+static char g_RemId[REM_MAX][24];
+static char g_RemRelay[REM_MAX][64];
+static char g_RemBody[REM_MAX][8192];
+static int  g_RemN;
+static volatile LONG g_RemLock;
+
+// appends remote advertisements to a browse reply's `advertisements` array;
+// `already` = entries the caller already emitted (comma logic). Returns count.
+static int hub_browse(BUF *resp, int already) {
+    SOCKET s = hub_open();
+    char line[8300];   // one "relayIP\tbody" line; body is capped at 8192 upstream
+    int n, i, cnt = 0, emitted = 0;
+    if (s == INVALID_SOCKET) return 0;
+    { const char *req = "{\"type\":\"FINDRAW\"}\n";
+      if (!hub_send(s, req, (int)strlen_f(req))) goto out; }
+    n = hub_line(s, line, sizeof line);
+    if (n < 3 || line[0] != 'O' || line[1] != 'K') goto out;
+    for (i = 2; i < n; i++) if (line[i] >= '0' && line[i] <= '9') cnt = cnt * 10 + (line[i] - '0');
+    while (InterlockedCompareExchange(&g_RemLock, 1, 0)) Sleep(1);
+    g_RemN = 0;
+    for (i = 0; i < cnt && i < REM_MAX; i++) {
+        int L = hub_line(s, line, sizeof line);
+        int t = 0, k;
+        char id[24];
+        const char *relay, *bd;
+        if (L <= 0) break;
+        while (t < L && line[t] != '\t') t++;
+        if (t >= L - 1) continue;              // no tab or empty body
+        line[t] = 0;
+        relay = line; bd = line + t + 1;
+        if (!form_get(bd, "sessionID", id, sizeof id) || !id[0]) continue;
+        for (k = 0; id[k] && k < 23; k++) g_RemId[g_RemN][k] = id[k]; g_RemId[g_RemN][k] = 0;
+        for (k = 0; relay[k] && k < 63; k++) g_RemRelay[g_RemN][k] = relay[k]; g_RemRelay[g_RemN][k] = 0;
+        for (k = 0; bd[k] && k < 8191; k++) g_RemBody[g_RemN][k] = bd[k]; g_RemBody[g_RemN][k] = 0;
+        g_RemN++;
+    }
+    for (i = 0; i < g_RemN; i++) {
+        if (already || i) bs(resp, ",");
+        emit_advertisement_x(resp, g_RemBody[i], 0);
+    }
+    emitted = g_RemN;
+    InterlockedExchange(&g_RemLock, 0);
+    if (emitted) { char b[64]; int i3 = 0; const char *m = "HUB browse: remote lobbies=";
+      while (*m) b[i3++] = *m++; b[i3++] = (char)('0' + emitted); b[i3] = 0; logn(b); }
+out:
+    p_closesocket(s);
+    return emitted;
+}
+// relayIP of a remote lobby by its sessionID; 0 when the id is not remote.
+static int remote_lookup(const char *id, char *relay, int rcap) {
+    int i, found = 0;
+    while (InterlockedCompareExchange(&g_RemLock, 1, 0)) Sleep(1);
+    for (i = 0; i < g_RemN; i++) {
+        int eq = 1, q;
+        for (q = 0; g_RemId[i][q] || id[q]; q++)
+            if (g_RemId[i][q] != id[q]) { eq = 0; break; }
+        if (eq) {
+            int k = 0; while (g_RemRelay[i][k] && k < rcap - 1) { relay[k] = g_RemRelay[i][k]; k++; } relay[k] = 0;
+            found = 1; break;
+        }
+    }
+    InterlockedExchange(&g_RemLock, 0);
+    return found;
 }
 
 // The last advertisement this server created or was told to update. One lobby is
@@ -1879,14 +2032,17 @@ static void route(TLSSES *t, const char *method, const char *path,
               do { rev[r++] = (char)('0' + (x % 10)); x /= 10; } while (x && r < 23);
               int i = 0; while (r) g_AdvId[i++] = rev[--r]; g_AdvId[i] = 0;
           } }
-        build_host_reply(&resp, body);
+        build_host_reply(&resp, body, 0, 1);
         adv_store(body);
+        hub_leave();   // a previous lobby of ours must not linger in the mesh
+        hub_host(body);
         log_resp_head(resp.p, (int)resp.len);
         http_respond(t, resp.p);
     } else if (contains(path, "/game/advertisement/leave")) {
         static const char LOK[] = "{\"result\":0}";
         InterlockedExchange(&g_MatchStart, 0);
         adv_set_state("0");
+        hub_leave();
         log_resp_head(LOK, (int)strlen_f(LOK));
         http_respond(t, LOK);
     } else if (contains(path, "/game/advertisement/join")) {
@@ -1916,10 +2072,12 @@ static void route(TLSSES *t, const char *method, const char *path,
         if (!have) have = form_get(body, "connect_id", sid, sizeof sid) && sid[0];
         if (!have) { sid[0] = '1'; sid[1] = 0; }
         { BUF sb = {0}; IDS ids; mk_ids(g_Alias, &ids);
+          char rrelay[64]; const char *rov = 0;
+          if (remote_lookup(sid, rrelay, sizeof rrelay)) rov = rrelay;
           bs(&sb, "hostid="); bnum(&sb, ids.profileId);
           bs(&sb, "&sessionID="); bs(&sb, sid);
           bs(&sb, "&description=");
-          if (sb.p) build_host_reply(&resp, sb.p);
+          if (sb.p) build_host_reply(&resp, sb.p, rov, !rov);
           // log the synthetic body: it carries both numbers that matter
           { char lb[160]; int i = 0; const char *m = "JOIN: ";
             while (*m) lb[i++] = *m++;
@@ -1966,8 +2124,10 @@ static void route(TLSSES *t, const char *method, const char *path,
         // known here (g_AdvBody); with none hosted the list is simply empty,
         // which is a valid answer.
         char ab[8192];
+        int had = 0;
         bs(&resp, "{\"result\":0,\"advertisements\":[");
-        if (adv_copy(ab, sizeof ab) > 0) emit_advertisement(&resp, ab);
+        if (adv_copy(ab, sizeof ab) > 0) { emit_advertisement(&resp, ab); had = 1; }
+        hub_browse(&resp, had);   // merge remote lobbies from the hub mesh
         bs(&resp, "],\"playerRatings\":[]}");
         log_resp_head(resp.p, (int)resp.len);
         http_respond(t, resp.p);
@@ -2585,6 +2745,7 @@ int loginsrv_start(void) {
     p_recv = (int (WINAPI*)(SOCKET, char*, int,int))GPA(g_hWs2, "recv");
     p_send = (int (WINAPI*)(SOCKET, const char*, int,int))GPA(g_hWs2, "send");
     p_setsockopt = (int (WINAPI*)(SOCKET,int,int,const char*,int))GPA(g_hWs2, "setsockopt");
+    p_connect = (int (WINAPI*)(SOCKET, const struct sockaddr*, int))GPA(g_hWs2, "connect");
     p_htons = (u_short (WINAPI*)(u_short))GPA(g_hWs2, "htons");
     p_WSAStartup = (int (WINAPI*)(WORD, void*))GPA(g_hWs2, "WSAStartup");
     p_WSAGetLastError = (int (WINAPI*)(void))GPA(g_hWs2, "WSAGetLastError");
@@ -2610,6 +2771,7 @@ int loginsrv_start(void) {
     pCRC = (PfnCRC)GPA(g_hAdv, "CryptReleaseContext");
 #undef GPA
     if (!p_socket || !p_bind || !p_listen || !p_accept || !p_recv || !p_send ||
+        !p_connect ||
         !pACH || !pASC || !pDSC || !pQCA || !pEM || !pDM ||
         !pCACPK || !pCCH || !pCHD || !pCGHP || !pCDH || !pCAC) {
         logn("srv: proc resolve failed");

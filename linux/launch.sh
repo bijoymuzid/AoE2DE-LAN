@@ -53,6 +53,9 @@ export WINEDLLOVERRIDES="dbghelp,winmm=n,b"
 #    Overridable: PROTON_NO_NTSYNC="" selects ntsync, which is itself a variable under
 #    test on wine 10 (notes/linux-session3.md).
 export PROTON_NO_NTSYNC="${PROTON_NO_NTSYNC-1}"
+# cross-machine (#8): the lobby we host must advertise OUR LAN IP, not loopback;
+# empty when offline -> loginsrv falls back to 127.0.0.1 (single-machine unchanged)
+export AOE2LAN_RELAY_IP="${AOE2LAN_RELAY_IP:-$(ip -4 route get 1.1.1.1 2>/dev/null | awk '{for(i=1;i<=NF;i++) if($i=="src"){print $(i+1); exit}}')}"
 # telemetry env knobs: unknown semantics beyond PLAN §2.5 names — H4 owns silence
 # in-process; nothing set here until a measurement says otherwise.
 #    runinprefix, not run: "run" goes through Proton's steam.exe stub, which under

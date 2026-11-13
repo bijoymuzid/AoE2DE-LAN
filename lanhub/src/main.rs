@@ -362,11 +362,14 @@ fn handle_control(st: &Arc<Mutex<State>>, conn_id: u64, ctx: &mut ConnCtx, tx: &
             let id = rand_hex(16);
             let token = rand_hex(16);
             let mut s = st.lock().unwrap();
+            // loginsrv sends the machine's LAN IP (its g_RelayIP); only the
+            // bare-control fallback keeps this hub's own tailnet/loopback ip.
+            let host_rip = v["relayIP"].as_str().map(str::to_string);
             let l = Lobby {
                 origin: s.guid.clone(),
                 seq: 1,
                 lobby,
-                relay_ip: s.relay_ip.clone(),
+                relay_ip: host_rip.unwrap_or_else(|| s.relay_ip.clone()),
                 relay_ports: relay_ports(),
                 relay_token: token.clone(),
                 local: true,
@@ -498,6 +501,31 @@ fn handle_control(st: &Arc<Mutex<State>>, conn_id: u64, ctx: &mut ConnCtx, tx: &
             s.peer_subs.push((conn_id, id, tx.clone())); // push subscription
             drop(s);
             reply(json!({"ok":true,"peers":peers}));
+        }
+        // C-friendly browse for loginsrv: NOT single-line JSON. Reply is
+        // "OK <n>\n" then n lines of "<relayIP>\t<body>" for every REMOTE
+        // lobby (a node's own lobby is served by its in-process server).
+        // Bodies are form-encoded (no raw \n/\t); sanitized anyway.
+        "FINDRAW" => {
+            let s = st.lock().unwrap();
+            let mut lines = vec![];
+            for l in s.lobbies.values() {
+                if l.local {
+                    continue;
+                }
+                let body = l.lobby["body"].as_str().unwrap_or("");
+                if body.is_empty() {
+                    continue;
+                }
+                let clean: String = body.chars().map(|c| if c == '\n' || c == '\t' { ' ' } else { c }).collect();
+                lines.push(format!("{}\t{}", l.relay_ip, clean));
+            }
+            drop(s);
+            let _ = tx.send(format!("OK {}", lines.len()));
+            for l in lines {
+                let _ = tx.send(l);
+            }
+            return; // no JSON envelope on purpose
         }
         "PING" => {
             let s = st.lock().unwrap();
