@@ -16,3 +16,5 @@ linux/*.pid
 __pycache__/
 *.pyc
 .venv/
+dev/lanhook/.venv/
+*.obj.tmp
