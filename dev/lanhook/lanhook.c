@@ -1764,7 +1764,11 @@ static volatile LONG g_PrProbe = 0;
 static void ls_stackprobe(void) {
     if (InterlockedIncrement(&g_PrProbe) > 4) return;
     DWORD64 anchor = 0, teb = 0, sbase = 0;
+#ifdef __clang__
     __asm__("movq %%gs:0x30, %0" : "=r"(teb));
+#else
+    teb = __readgsqword(0x30);   // MSVC has no GNU asm; same TEB read
+#endif
     HC_TRY sbase = HC_RD64((teb + 8)); } __except (EXCEPTION_EXECUTE_HANDLER) { sbase = 0; }
     char b[600]; int i = cput(b, 0, "PRSTACK");
     if (sbase) HC_TRY

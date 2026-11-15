@@ -248,7 +248,7 @@ int __cdecl Hook_stdio_vsprintf(unsigned __int64 opt, char *buf, size_t size,
     typedef int (__cdecl *PfnVSP)(unsigned __int64, char*, size_t, const char*, void*, void*);
     PfnVSP real = (PfnVSP)g_Map[IDX_VSPRINTF].real;
     if (glog_on() > 0 && fmt) {
-        DWORD64 ret = (DWORD64)__builtin_return_address(0);
+        DWORD64 ret = (DWORD64)_ReturnAddress();
         { static volatile LONG seen = 0;
           if (InterlockedIncrement(&seen) <= 8) {
               char b[220]; int i = 0; const char *m = "glog: vsprintf ret=0x";
@@ -899,7 +899,11 @@ int WINAPI Hook_send(SOCKT s, const char *buf, int len, int flags) {
         b[i++] = "0123456789abcdef"[((unsigned char)buf[26]) >> 4];
         b[i++] = "0123456789abcdef"[((unsigned char)buf[26]) & 15];
         DWORD64 teb = 0, sbase = 0;
+#ifdef __clang__
         __asm__("movq %%gs:0x30, %0" : "=r"(teb));
+#else
+        teb = __readgsqword(0x30);   // MSVC has no GNU asm; same TEB read
+#endif
         HC_TRY sbase = HC_RD64((teb + 8)); } __except (EXCEPTION_EXECUTE_HANDLER) { sbase = 0; }
         b[i++] = ' '; b[i++] = 'b'; b[i++] = '=';
         { DWORD64 r = base; for (int sh = 60; sh >= 0; sh -= 4) b[i++] = "0123456789abcdef"[(r >> sh) & 15]; }

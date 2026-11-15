@@ -1829,9 +1829,14 @@ static volatile LONG g_LanGuidsLock;
 // live BS GUID - without it the joiner gets "LAN" and dies with R_NATFailure.
 // Inject the first guid of the game's own lanServerGuids list when the body
 // lacks one. Returns a HeapAlloc'd patched body, or 0 (use body as-is).
+// s51: a body-carried relayRegion can go STALE under a live lobby (host's
+// BattleServer respawned mid-session: adv said 06c8aa89 while the beacons
+// moved on to 0687d755; the joiner's zombie filter then dropped the live
+// lobby and every join died R_MatchExpired). A body guid that is no longer
+// in lanServerGuids is REPLACED with the live one, not kept.
 static char *adv_patch(const char *body) {
     char rg[48];
-    if (form_get(body, "relayRegion", rg, sizeof rg) && rg[0]) return 0;
+    int has = form_get(body, "relayRegion", rg, sizeof rg) && rg[0];
     char lg[512]; int j = 0;
     while (InterlockedCompareExchange(&g_LanGuidsLock, 1, 0)) Sleep(1);
     while (g_LanGuids[j] && j < 511) { lg[j] = g_LanGuids[j]; j++; } lg[j] = 0;
@@ -1840,14 +1845,32 @@ static char *adv_patch(const char *body) {
       if (!*p) return 0;
       p++; { const char *e = p; while (*e && *e != '"') e++;
              if (e == p || !*e) return 0;
-             { size_t bl = strlen_f(body); int gl = (int)(e - p);
+             { int gl = (int)(e - p);
+               if (has) {
+                   const char *k, *ke; size_t pre; char *nb;
+                   if (contains(lg, rg)) return 0;   // still live: keep
+                   k = strstr_f(body, "relayRegion=");
+                   if (!k) return 0;
+                   k += 12; ke = k; while (*ke && *ke != '&') ke++;
+                   pre = (size_t)(k - body); { size_t tail = strlen_f(ke);
+                   nb = (char*)HeapAlloc(GetProcessHeap(), 0, pre + (size_t)gl + tail + 1);
+                   if (!nb) return 0;
+                   memcpy(nb, body, pre);
+                   memcpy(nb + pre, p, (size_t)gl);
+                   memcpy(nb + pre + gl, ke, tail + 1); }
+                   { char b2[112]; int i = 0; const char *m = "ADVPATCH: stale relayRegion -> ";
+                     while (*m) b2[i++] = *m++;
+                     { int q = 0; while (q < gl && i < 110) b2[i++] = p[q++]; }
+                     b2[i] = 0; logn(b2); }
+                   return nb; }
+               { size_t bl = strlen_f(body);
                char *nb = (char*)HeapAlloc(GetProcessHeap(), 0, bl + (size_t)gl + 32);
                if (!nb) return 0;
                memcpy(nb, body, bl);
                memcpy(nb + bl, "&relayRegion=", 13);
                memcpy(nb + bl + 13, p, (size_t)gl);
                nb[bl + 13 + gl] = 0;
-               return nb; } } }
+               return nb; } } } }
 }
 
 // Remote lobbies the hub knows about, refreshed wholesale on every browse.

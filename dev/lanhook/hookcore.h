@@ -89,7 +89,9 @@ __attribute__((noinline)) void hc_wr(DWORD64 addr, DWORD64 val, int sz);
 #else
 #define HC_TRY __try {
 // MSVC covers every statement of a __try body with its scope table, so the
-// direct access is correct (and free) there.
+// direct access is correct (and free) there. lanhook.c calls hc_rd directly,
+// so give it a direct-read shape here too.
+#define hc_rd(a, o, s)  do { if ((s) == 4) *(DWORD *)(o) = HC_RD32(a); else *(DWORD64 *)(o) = HC_RD64(a); } while (0)
 #define HC_RD64(a)     (*(const volatile DWORD64 *)(DWORD64)(a))
 #define HC_RD32(a)     (*(const volatile DWORD   *)(DWORD64)(a))
 #define HC_RD16(a)     (*(const volatile WORD    *)(DWORD64)(a))
