@@ -880,9 +880,71 @@ int WINAPI Hook_WSAConnect(SOCKT s, const void *name, int namelen, void *cd, voi
     return real(s, name, namelen, cd, le, sq, gq);
 }
 
+static LONG g_KickProbe = 0;
+
 int WINAPI Hook_send(SOCKT s, const char *buf, int len, int flags) {
     typedef int (WINAPI *Pfn)(SOCKT, const char*, int, int);
     Pfn real = (Pfn)realfn("send");
+    // kick probe: the 31B relay peer-remove message (…09 01 06 00 00 6b…)
+    if (len == 31 && (unsigned char)buf[21] == 0x09 && (unsigned char)buf[22] == 0x01 &&
+        (unsigned char)buf[23] == 0x06 &&
+        ((unsigned char)buf[26] == 0x6b || (unsigned char)buf[26] == 0x00) &&
+        InterlockedIncrement(&g_KickProbe) <= 8) {
+        DWORD64 base = g_ModBase();
+        DWORD64 anchor = 0;
+        DWORD64 *sp = &anchor;   // local-var anchor: works without frame pointers
+        char b[240]; int i = 0; const char *m = "KICKSEND";
+        while (*m) b[i++] = *m++;
+        b[i++] = ' ';
+        b[i++] = "0123456789abcdef"[((unsigned char)buf[26]) >> 4];
+        b[i++] = "0123456789abcdef"[((unsigned char)buf[26]) & 15];
+        DWORD64 teb = 0, sbase = 0;
+        __asm__("movq %%gs:0x30, %0" : "=r"(teb));
+        HC_TRY sbase = HC_RD64((teb + 8)); } __except (EXCEPTION_EXECUTE_HANDLER) { sbase = 0; }
+        b[i++] = ' '; b[i++] = 'b'; b[i++] = '=';
+        { DWORD64 r = base; for (int sh = 60; sh >= 0; sh -= 4) b[i++] = "0123456789abcdef"[(r >> sh) & 15]; }
+        b[i++] = ' '; b[i++] = 't'; b[i++] = '=';
+        { DWORD64 r = sbase; for (int sh = 60; sh >= 0; sh -= 4) b[i++] = "0123456789abcdef"[(r >> sh) & 15]; }
+        // collect image-range return addresses scanning the real stack up to its base
+        DWORD64 frames[8]; int nfr = 0;
+        if (sbase) HC_TRY
+            for (DWORD64 *p = &anchor; (DWORD64)p < sbase - 8 && nfr < 8; p++) {
+                DWORD64 a = *p;
+                if (a > base && a < base + 0x4000000ULL) frames[nfr++] = a;
+            }
+        } __except (EXCEPTION_EXECUTE_HANDLER) { }
+        for (int q2 = 0; q2 < nfr; q2++) {
+            DWORD64 r = frames[q2] - base; int started = 0;
+            b[i++] = ' '; b[i++] = '+'; b[i++] = '0'; b[i++] = 'x';
+            for (int sh = 28; sh >= 0; sh -= 4) {
+                unsigned nib = (unsigned)((r >> sh) & 15);
+                if (nib) started = 1;
+                if (started || sh == 0) b[i++] = "0123456789abcdef"[nib];
+            }
+        }
+        b[i] = 0; log_line(b);
+        // dump runtime-decrypted code around each captured frame (disk is packed)
+        for (int q3 = 0; q3 < nfr; q3++) {
+            DWORD64 a = frames[q3];
+            char cb[240]; int ci = 0;
+            const char *p2 = "KICKCODE +0x"; while (*p2) cb[ci++] = *p2++;
+            DWORD64 r = a - base; int started = 0;
+            for (int sh = 28; sh >= 0; sh -= 4) {
+                unsigned nib = (unsigned)((r >> sh) & 15);
+                if (nib) started = 1;
+                if (started || sh == 0) cb[ci++] = "0123456789abcdef"[nib];
+            }
+            cb[ci++] = ':'; cb[ci++] = ' ';
+            HC_TRY
+                for (int q = -80; q < 16 && ci < (int)sizeof cb - 4; q++) {
+                    unsigned c = HC_RD8((a + q));
+                    cb[ci++] = "0123456789abcdef"[c >> 4];
+                    cb[ci++] = "0123456789abcdef"[c & 15];
+                }
+            } __except (EXCEPTION_EXECUTE_HANDLER) { cb[ci++] = '?'; }
+            cb[ci] = 0; log_line(cb);
+        }
+    }
     if (len > 0 && take_req()) {
         SKENT *e = sock_find(s);
         char tag[64]; int i=0; const char *m="SOCK send";

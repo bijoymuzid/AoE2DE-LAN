@@ -701,7 +701,16 @@ fn main() {
         peer_subs: vec![],
     }));
 
-    let ctl = TcpListener::bind(("127.0.0.1", control_port)).expect("control bind");
+    // s49: control on 0.0.0.0 - the PEER dll pulls the live lobby list
+    // directly from this port over the tailnet (hub_remote_find in
+    // loginsrv.c); the node gossip mesh proved unreliable between the two
+    // machines. HUBCTL_LOOPBACK=1 restores the old loopback-only bind.
+    let ctl_bind: &str = std::env::var("HUBCTL_LOOPBACK")
+        .ok()
+        .filter(|v| v == "1")
+        .map(|_| "127.0.0.1")
+        .unwrap_or("0.0.0.0");
+    let ctl = TcpListener::bind((ctl_bind, control_port)).expect("control bind");
     let node = TcpListener::bind(("0.0.0.0", node_port)).expect("node bind");
     {
         let s = st.lock().unwrap();

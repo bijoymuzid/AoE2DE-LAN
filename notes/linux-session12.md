@@ -44,3 +44,21 @@ Startup race seen twice and misdiagnosed once: a backgrounded lanhub prints its 
 ## 12e. Next session shape
 
 Friend online, Tailscale up both ends (autodiscover seeds the hubs; plain-LAN ini peers are the fallback). Order: (1) he sees my lobby in his browser, (2) I see his, (3) he joins — read both logs, fix what the join body shows, repeat, (4) then measure the Start-press gap and wire the match-start relay. His log: newest `lanhook-*.log` next to `AoE2DE_s.exe`, collected after a NORMAL menu-quit (kill loses the tail).
+
+## session 12b — RE tooling + live watchpoint hunt
+- dump_text.py / disasm.py / scan_calls.py / supervise.py / watchkick2.py in AoE2DE-LAN/dev/re/
+- ptrace_scope=0 was set by user (sudo sysctl kernel.yama.ptrace_scope=0) — RESTORE to 1 when done (todo #5)
+- .text is mapped ANONYMOUS r-xp (Arxan remaps), base 0x140001000, size 0x3196000, dumped via /proc/pid/mem -> /tmp/aoe_text_menu.bin
+- full linear disasm (812MB) at /tmp/aoe_text_full.asm (objdump -D -b binary -m i386:x86-64 -M intel --adjust-vma=0x140001000)
+- exe "symbols" gdb shows = PE export table only, sparse; no syms in 0x14030-0x14041 range
+- rlink remove fn 0x309310(rcx=manager [[0x144c9e5f0]+0x1880], rdx=[peer+0x10] key, r8=byte peer+0x40, r9=&peer+0x18); reason = DWORD [peer+0x18], switched 1..0x83 (jump tbl 0x30acac); 1000 = default case
+- peer array: manager+0x70=begin,+0x78=end, 16B stride, entry[0]=peer*; count=0 at menu
+- event dispatcher 0x358640: 12-case jump tbl (RVA 0x359390), case1 (type 2) = destroy peer -> 0x358798 block -> calls remove @0x3587f4
+- drain loop fn at 0x14041c960 (call *0x8(%rax) per node @0x41ca1a) is NOT per-frame at menu (0 hits/20s)
+- gdb watchpoint harness watchkick2.py: async continue + 5ms /proc/mem poll of peer array; on NEW peer -> interrupt, arm h/w WP on peer+0x18/+0x40, blocking continue, dump peer+bt on write
+
+## session 12c — harness v3 (after two game deaths)
+- NEVER kill gdb while it has the game ptrace-stopped — kernel kills the tracee. Always detach first. pkill -f with the pattern also self-matches the calling shell (exit 143) — use [b]racket patterns.
+- gdb "continue &" async did NOT resume the target in -batch (game froze). Abandoned async entirely.
+- watchkick2.py RETIRED. New: watchpoll.py (ptrace-free /proc/mem poller, 5ms) + armcatch.py (gdb -p -batch; attaches on demand, arms h/w WP on PEER+0x18/+0x40, blocking continue, dumps peer+bt on hit, DETACHES cleanly, 45s cap).
+- BattleServer.exe must be running (proton runinprefix BattleServer/BattleServer.exe); it died with game restart -> friend JoinAsync TIMEOUT (0xfffffff0 "Request was invalid" dialog) instead of the kick.

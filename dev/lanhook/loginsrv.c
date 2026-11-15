@@ -25,6 +25,7 @@
 #include "loginsrv.h"
 
 // forward decls (no CRT, definitions below)
+static char g_RelayIP[64];   // defined at relay_ip_init(); forward decl for emit_loginresp
 static size_t strlen_f(const char *s);
 static char *strstr_f(const char *h, const char *n);
 static void memmove_f(char *d, const char *s, size_t n);
@@ -304,6 +305,12 @@ typedef struct { DWORD64 profileId, statId; char platformUser[32]; } IDS;
 static void mk_ids(const char *alias, IDS *o) {
     DWORD64 profileId = fnv1a64("aoe2lan:");
     { const char *p = alias; while (*p) { profileId ^= (unsigned char)*p++; profileId *= 0x100000001b3ULL; } }
+    // Two machines whose Steam alias is the same (same steam_emu user) would
+    // otherwise synthesize the SAME profileID, and the match rejects the second
+    // player with R_PlayerNameInUse. The machine name is the cheapest per-box
+    // salt: no config, stable across runs.
+    { char hn[64]; DWORD n = sizeof hn;
+      if (GetComputerNameA(hn, &n)) for (DWORD i = 0; i < n; i++) { profileId ^= (unsigned char)hn[i]; profileId *= 0x100000001b3ULL; } }
     o->profileId = profileId & 0x7FFFFFFFFFFFFFFFULL;
     o->statId = 1000000 + (o->profileId % 900000000ULL);
     { DWORD64 pu = o->profileId % 76561198000000000ULL;
@@ -400,7 +407,7 @@ static void build_login_response(BUF *b, const char *alias) {
     bs(b, "},\"sslCertificates\":[]");
     bs(b, ",\"shouldUseClientSync\":false,\"relayServers\":[{");
     bs(b, "\"region\":\"LAN\",\"regionLocalized\":\"LAN\"");
-    bs(b, ",\"publicIP\":\"127.0.0.1\"");
+    bs(b, ",\"publicIP\":\""); bs(b, g_RelayIP); bs(b, "\"");
     bs(b, ",\"rawSocketPort\":27012,\"webSocketPort\":27112");
     bs(b, ",\"outOfBandSocketPort\":27212}]}");
 }
@@ -1484,7 +1491,8 @@ static const char *form_get(const char *body, const char *key, char *out, int ca
     out[0] = 0;
     if (!body) return 0;
     for (const char *p = body; (p = strstr_f(p, key)) != 0; p += kl) {
-        if (p != body && p[-1] != '&') continue;
+        // '?' too: query strings now reach handlers (getProfileName et al)
+        if (p != body && p[-1] != '&' && p[-1] != '?') continue;
         p += kl;
         if (*p != '=') continue;
         p++;
@@ -1532,7 +1540,8 @@ static void jstr(BUF *b, const char *s, int n) {
 // tailnet IP or a remote peer can never reach BattleServer.exe. One env var,
 // read once at startup, 127.0.0.1 fallback so single-machine hosting is
 // unchanged. Set it in the PLAY-*.cmd beside AOE2LAN_STAGE.
-static char g_RelayIP[64] = "127.0.0.1";
+// g_RelayIP forward-declared above; initialise default here
+static void relay_ip_init_default(void) { g_RelayIP[0]='1';g_RelayIP[1]='2';g_RelayIP[2]='7';g_RelayIP[3]='.';g_RelayIP[4]='0';g_RelayIP[5]='.';g_RelayIP[6]='0';g_RelayIP[7]='.';g_RelayIP[8]='1';g_RelayIP[9]=0; }
 static void relay_ip_init(void) {
     char v[sizeof g_RelayIP], b[96];
     DWORD n = GetEnvironmentVariableA("AOE2LAN_RELAY_IP", v, sizeof v);
@@ -1542,7 +1551,9 @@ static void relay_ip_init(void) {
     if (!n || n >= sizeof v) {
         m = "unset/oversize, using 127.0.0.1";
         while (*m && k < 90) b[k++] = *m++;
-        b[k] = 0; logn(b); return;
+        b[k] = 0; logn(b);
+        const char *def = "127.0.0.1"; DWORD i = 0; while (def[i]) { g_RelayIP[i] = def[i]; i++; } g_RelayIP[i] = 0;
+        return;
     }
     // trust boundary: spliced straight into a JSON string, so only the
     // characters an IP literal or a hostname can contain are accepted.
@@ -1552,7 +1563,9 @@ static void relay_ip_init(void) {
               || c == '.' || c == ':' || c == '-')) {
             m = "rejected (bad char), using 127.0.0.1";
             while (*m && k < 90) b[k++] = *m++;
-            b[k] = 0; logn(b); return;
+            b[k] = 0; logn(b);
+            const char *def = "127.0.0.1"; DWORD i2 = 0; while (def[i2]) { g_RelayIP[i2] = def[i2]; i2++; } g_RelayIP[i2] = 0;
+            return;
         }
     }
     { DWORD i = 0; while (v[i]) { g_RelayIP[i] = v[i]; i++; } g_RelayIP[i] = 0; }
@@ -1577,7 +1590,7 @@ static void relay_ip_init(void) {
 // relayOverride: the JOIN of a REMOTE lobby must name the hosting machine's
 // IP, not ours. useAdvId=0 on that path too: the lobby's id is the host's
 // sessionID, our local g_AdvId must not clobber it.
-static void build_host_reply(BUF *b, const char *body, const char *relayOverride, int useAdvId) {
+static void build_host_reply(BUF *b, const char *body, const char *relayOverride, const char *regionOverride, int useAdvId) {
     char hostid[32], sid[32], desc[512];
     if (!form_get(body, "hostid", hostid, sizeof hostid)) hostid[0] = 0;
     if (!form_get(body, "sessionID", sid, sizeof sid) || !sid[0])
@@ -1590,8 +1603,21 @@ static void build_host_reply(BUF *b, const char *body, const char *relayOverride
     bs(b, ",\"relayAuthToken\":\"lan\",\"relayIP\":\"");
     bs(b, (relayOverride && relayOverride[0]) ? relayOverride : g_RelayIP);
     bs(b, "\"");
+    // relayRegion must name the relay server's beacon GUID, not the literal
+    // "LAN": a pure joiner resolves the reply's region against its beacon-
+    // discovered LAN server table (keyed by GUID), and "LAN" is never there
+    // (R_NATFailure 0xb, "Failed to find server"). The host body's relayRegion
+    // carries the GUID; fall back to LAN for bodies that lack it.
+    char rguid[48];
+    if (regionOverride && regionOverride[0]) { int i = 0; while (regionOverride[i] && i < 47) { rguid[i] = regionOverride[i]; i++; } rguid[i] = 0; }
+    else if (form_get(body, "relayRegion", rguid, sizeof rguid) && rguid[0]) { /* body carried it */ }
+    else {
+        rguid[0] = 'L'; rguid[1] = 'A'; rguid[2] = 'N'; rguid[3] = 0;
+    }
     bs(b, ",\"relayPortRaw\":27012,\"relayPortWebSockets\":27112");
-    bs(b, ",\"relayPortOutOfBandSocket\":27212,\"relayRegion\":\"LAN\"");
+    bs(b, ",\"relayPortOutOfBandSocket\":27212,\"relayRegion\":\"");
+    bs(b, rguid);
+    bs(b, "\"");
     bs(b, ",\"yourMatchMembers\":[{\"profileID\":");
     bs(b, hostid[0] ? hostid : "0");
     bs(b, ",\"sessionID\":");
@@ -1694,7 +1720,16 @@ static void emit_advertisement_x(BUF *b, const char *body, int useAdvId) {
     adv_num(b, body, "observerDelay", "observerDelay", "0");
     bs(b, ",\"isObserverPassworded\":0");
     adv_num(b, body, "serviceType", "service", "1");
-    bs(b, ",\"matchStartTime\":0,\"matchRegion\":\"LAN\"");
+    // matchRegion is the client's advert->relay-server key: it must be the
+    // host relay's beacon GUID (the real server emits it there; "LAN" is only
+    // the display string). Without it a remote joiner cannot bind the advert
+    // to a server and dies with R_NATFailure "Failed to find server LAN".
+    { char rg[48];
+      if (!form_get(body, "relayRegion", rg, sizeof rg) || !rg[0]) {
+          rg[0]='L'; rg[1]='A'; rg[2]='N'; rg[3]=0; }
+      bs(b, ",\"matchStartTime\":0,\"matchRegion\":\"");
+      bs(b, rg);
+      bs(b, "\""); }
     bs(b, ",\"matchRegionLocalized\":\"LAN\"}");
 }
 
@@ -1778,6 +1813,43 @@ static void hub_leave(void) {
     if (q.p) HeapFree(GetProcessHeap(), 0, q.p);
 }
 
+// s49: the game's LIVE relay table. Every browse request carries
+// lanServerGuids=["<guid>",...] - the relay servers the game currently hears
+// beacons from. A mesh entry whose relayRegion GUID is not in that list names
+// a DEAD BattleServer: the hub mesh never expires lobbies, so after host
+// restarts the joiner's browser fills with zombie lobbies and clicking one
+// dies with R_NATFailure "Failed to find server <guid>" (8760-127248828
+// t=43.5: 8 zombie entries, join hit dead session-B GUID 88020dbb).
+static char g_LanGuids[512];
+static volatile LONG g_LanGuidsLock;
+
+// s49: this host session's advertisement bodies carry no relayRegion (the
+// game includes it only sometimes; the 21:5x session did, this one doesn't).
+// The mesh entry, the served matchRegion AND the join reply all need the
+// live BS GUID - without it the joiner gets "LAN" and dies with R_NATFailure.
+// Inject the first guid of the game's own lanServerGuids list when the body
+// lacks one. Returns a HeapAlloc'd patched body, or 0 (use body as-is).
+static char *adv_patch(const char *body) {
+    char rg[48];
+    if (form_get(body, "relayRegion", rg, sizeof rg) && rg[0]) return 0;
+    char lg[512]; int j = 0;
+    while (InterlockedCompareExchange(&g_LanGuidsLock, 1, 0)) Sleep(1);
+    while (g_LanGuids[j] && j < 511) { lg[j] = g_LanGuids[j]; j++; } lg[j] = 0;
+    InterlockedExchange(&g_LanGuidsLock, 0);
+    { const char *p = lg; while (*p && *p != '"') p++;
+      if (!*p) return 0;
+      p++; { const char *e = p; while (*e && *e != '"') e++;
+             if (e == p || !*e) return 0;
+             { size_t bl = strlen_f(body); int gl = (int)(e - p);
+               char *nb = (char*)HeapAlloc(GetProcessHeap(), 0, bl + (size_t)gl + 32);
+               if (!nb) return 0;
+               memcpy(nb, body, bl);
+               memcpy(nb + bl, "&relayRegion=", 13);
+               memcpy(nb + bl + 13, p, (size_t)gl);
+               nb[bl + 13 + gl] = 0;
+               return nb; } } }
+}
+
 // Remote lobbies the hub knows about, refreshed wholesale on every browse.
 // Keyed by the host's real sessionID (= the advertisement id we hand the
 // game), so join() can map a lobby back to the hosting machine's relayIP.
@@ -1790,11 +1862,166 @@ static volatile LONG g_RemLock;
 
 // appends remote advertisements to a browse reply's `advertisements` array;
 // `already` = entries the caller already emitted (comma logic). Returns count.
+// s49: direct lobby pull. The hub node gossip proved unreliable between
+// the two machines (the peer hub dropped our floods, and its registry entry
+// flickered in ~15 s cycles), so a NON-HOSTING dll pulls the live list
+// straight from the hosting machine's hub control port: AOE2LAN_RELAY_IP:47100,
+// FIND. The host's hub always holds the current lobby (AdvPushThread
+// re-pushes every 5 s), so every browse reflects the live state - the mesh,
+// the peer hub's zombie entries and its flicker are all off the critical
+// path. Returns a HeapAlloc'd array of at most REM_MAX entries; caller frees.
+typedef struct { char id[24]; char relay[64]; char body[8192]; } REMENT;
+static int adv_copy(char *out, int cap);   // defined below (adv store section)
+// s50: a JOIN-click refresh must never see an empty list. The host's hub used
+// to withdraw and re-insert its lobby on every 5 s republish, so a FIND that
+// landed in that gap came back empty and the game aborted the join with
+// R_MatchExpired ("lobby no longer exists") before sending /join at all
+// (friend log 14088 t=67.0 served the lobby, t=71.9 same browse EMPTY).
+// The republish now UPDATES the same advertisementID (no gap, see
+// hub_republish) and every successful fetch is cached for 60 s and reused
+// when a fetch does come back empty. Cached entries still go through
+// HUBFILTER, so they vanish once their relayRegion GUID is no longer live.
+static char g_RfId[REM_MAX][24];
+static char g_RfRelay[REM_MAX][64];
+static char g_RfBody[REM_MAX][8192];
+static DWORD64 g_RfTick[REM_MAX];
+static volatile LONG g_RfLock;
+
+static void rf_log(const char *msg, int n) {
+    char b[112]; int i = 0, k = 0, j; char num[12];
+    const char *m = "REMOTEFIND: ";
+    while (*m) b[i++] = *m++;
+    while (*msg && i < 60) b[i++] = *msg++;
+    if (n >= 0) {
+        if (!n) num[k++] = '0';
+        while (n > 0) { num[k++] = (char)('0' + n % 10); n /= 10; }
+        for (j = k - 1; j >= 0; j--) b[i++] = num[j];
+    }
+    b[i] = 0; logn(b);
+}
+// MERGE, never replace: during the a republish the host's hub can hold only the
+// stale-lobby leftovers, so a replace-style cache would be poisoned by an
+// otherwise successful but useless fetch.
+static void rf_merge(REMENT *e, int n) {
+    int i, k;
+    if (n > REM_MAX) n = REM_MAX;
+    while (InterlockedCompareExchange(&g_RfLock, 1, 0)) Sleep(1);
+    for (i = 0; i < n; i++) {
+        int slot = -1;
+        for (k = 0; k < REM_MAX; k++) {
+            int q = 0;
+            if (!g_RfId[k][0]) continue;
+            while (g_RfId[k][q] || e[i].id[q]) { if (g_RfId[k][q] != e[i].id[q]) break; q++; }
+            if (!g_RfId[k][q] && !e[i].id[q]) { slot = k; break; }
+        }
+        if (slot < 0) for (k = 0; k < REM_MAX && slot < 0; k++) if (!g_RfId[k][0]) slot = k;
+        if (slot < 0) { slot = 0;
+            for (k = 1; k < REM_MAX; k++) if (g_RfTick[k] < g_RfTick[slot]) slot = k; }
+        { int q = 0;
+          while (e[i].id[q] && q < 23) { g_RfId[slot][q] = e[i].id[q]; q++; } g_RfId[slot][q] = 0;
+          q = 0; while (e[i].relay[q] && q < 63) { g_RfRelay[slot][q] = e[i].relay[q]; q++; } g_RfRelay[slot][q] = 0;
+          q = 0; while (e[i].body[q] && q < 8191) { g_RfBody[slot][q] = e[i].body[q]; q++; } g_RfBody[slot][q] = 0; }
+        g_RfTick[slot] = GetTickCount64();
+    }
+    InterlockedExchange(&g_RfLock, 0);
+}
+static int rf_collect(REMENT *ents) {
+    int n = 0, k;
+    while (InterlockedCompareExchange(&g_RfLock, 1, 0)) Sleep(1);
+    for (k = 0; k < REM_MAX && n < REM_MAX; k++) {
+        int q = 0;
+        if (!g_RfId[k][0]) continue;
+        if (GetTickCount64() - g_RfTick[k] >= 60000) continue;
+        while (g_RfId[k][q] && q < 23) { ents[n].id[q] = g_RfId[k][q]; q++; } ents[n].id[q] = 0;
+        q = 0; while (g_RfRelay[k][q] && q < 63) { ents[n].relay[q] = g_RfRelay[k][q]; q++; } ents[n].relay[q] = 0;
+        q = 0; while (g_RfBody[k][q] && q < 8191) { ents[n].body[q] = g_RfBody[k][q]; q++; } ents[n].body[q] = 0;
+        n++;
+    }
+    InterlockedExchange(&g_RfLock, 0);
+    return n;
+}
+// one FIND round trip to the hosting machine's hub control port
+static int rf_fetch(struct sockaddr_in *a, char *buf) {
+    SOCKET s = p_socket(AF_INET, SOCK_STREAM, 0);
+    int bl = 0;
+    if (s == INVALID_SOCKET) { rf_log("socket failed", -1); return 0; }
+    { int tv = 2500; p_setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv); }
+    if (p_connect(s, (struct sockaddr*)a, sizeof *a)) {
+        rf_log("connect failed", -1); p_closesocket(s); return 0; }
+    { const char *req = "{\"type\":\"FIND\"}\n";
+      if (!hub_send(s, req, (int)strlen_f(req))) {
+          rf_log("send failed", -1); p_closesocket(s); return 0; } }
+    while (bl < 65535) {
+        int r = p_recv(s, buf + bl, 65535 - bl, 0);
+        if (r <= 0) break;
+        bl += r;
+        if (buf[bl-1] == '\n') break;
+    }
+    p_closesocket(s);
+    if (bl <= 0) { rf_log("empty reply", -1); return 0; }
+    rf_log("reply bytes=", bl);
+    return bl;
+}
+static int hub_remote_find(REMENT **out) {
+    struct sockaddr_in a;
+    char *buf; int bl = 0, n = 0;
+    REMENT *ents;
+    *out = 0;
+    if (!g_RelayIP[0]) return 0;
+    { const char *p = g_RelayIP; int oct[4], oi = 0, cur = 0;
+      while (*p && oi < 4) {
+          if (*p >= '0' && *p <= '9') { cur = cur * 10 + (*p - '0'); p++; }
+          else { oct[oi++] = cur; cur = 0; p++; } }
+      if (oi == 3) { oct[3] = cur; oi = 4; }
+      if (oi != 4) return 0;
+      a.sin_family = AF_INET;
+      a.sin_addr.s_addr = (DWORD)oct[0] | ((DWORD)oct[1] << 8) | ((DWORD)oct[2] << 16) | ((DWORD)oct[3] << 24); }
+    a.sin_port = 0xFCB7;              // 47100 network byte order
+    ents = (REMENT*)HeapAlloc(GetProcessHeap(), 0, sizeof(REMENT) * REM_MAX);
+    buf = (char*)HeapAlloc(GetProcessHeap(), 0, 65536);
+    if (!ents || !buf) { if (ents) HeapFree(GetProcessHeap(), 0, ents);
+                         if (buf) HeapFree(GetProcessHeap(), 0, buf); return 0; }
+    bl = rf_fetch(&a, buf);
+    if (bl) {
+        // entries: ..."lobby":{"body":"<form body>"},"relayIP":"<ip>"...
+        const char *p = buf; buf[bl] = 0;
+        while (n < REM_MAX) {
+            const char *b = strstr_f(p, "\"body\":\"");
+            const char *be, *rp, *re; char tb[8192]; int tl, k; char id[24];
+            if (!b) break;
+            b += 8; be = b; while (*be && *be != '"') be++;
+            tl = 0; while (b < be && tl < 8191) tb[tl++] = *b++; tb[tl] = 0;
+            rp = strstr_f(be, "\"relayIP\":\"");
+            if (!rp) break;
+            rp += 11; re = rp; while (*re && *re != '"') re++;
+            if (form_get(tb, "sessionID", id, sizeof id) && id[0]) {
+                for (k = 0; id[k] && k < 23; k++) ents[n].id[k] = id[k]; ents[n].id[k] = 0;
+                for (k = 0; rp < re && k < 63; k++) ents[n].relay[k] = *rp++; ents[n].relay[k] = 0;
+                for (k = 0; tb[k] && k < 8191; k++) ents[n].body[k] = tb[k]; ents[n].body[k] = 0;
+                n++;
+            }
+            p = re;
+        }
+        rf_log("entries=", n);
+        rf_merge(ents, n);
+    }
+    n = rf_collect(ents);
+    if (n) { *out = ents; return n; }
+    HeapFree(GetProcessHeap(), 0, ents);
+    HeapFree(GetProcessHeap(), 0, buf);
+    return 0;
+}
+
 static int hub_browse(BUF *resp, int already) {
     SOCKET s = hub_open();
     char line[8300];   // one "relayIP\tbody" line; body is capped at 8192 upstream
     int n, i, cnt = 0, emitted = 0;
-    if (s == INVALID_SOCKET) return 0;
+    REMENT *re = 0; int rn = 0;
+    // s49: when we host nothing ourselves, pull the live list straight from
+    // the hosting machine's hub too (see hub_remote_find)
+    { char ab[8192];
+      if (adv_copy(ab, sizeof ab) <= 0) rn = hub_remote_find(&re); }
+    if (s == INVALID_SOCKET) goto out2;
     { const char *req = "{\"type\":\"FINDRAW\"}\n";
       if (!hub_send(s, req, (int)strlen_f(req))) goto out; }
     n = hub_line(s, line, sizeof line);
@@ -1818,20 +2045,50 @@ static int hub_browse(BUF *resp, int already) {
         for (k = 0; bd[k] && k < 8191; k++) g_RemBody[g_RemN][k] = bd[k]; g_RemBody[g_RemN][k] = 0;
         g_RemN++;
     }
-    for (i = 0; i < g_RemN; i++) {
-        if (already || i) bs(resp, ",");
-        emit_advertisement_x(resp, g_RemBody[i], 0);
+    // merge the direct-fetched entries (dedup by id)
+    for (i = 0; i < rn && g_RemN < REM_MAX; i++) {
+        int dup = 0, k;
+        for (k = 0; k < g_RemN; k++) {
+            int q = 0;
+            while (g_RemId[k][q] || re[i].id[q]) { if (g_RemId[k][q] != re[i].id[q]) break; q++; }
+            if (!g_RemId[k][q] && !re[i].id[q]) { dup = 1; break; }
+        }
+        if (dup) continue;
+        for (k = 0; re[i].id[k] && k < 23; k++) g_RemId[g_RemN][k] = re[i].id[k]; g_RemId[g_RemN][k] = 0;
+        for (k = 0; re[i].relay[k] && k < 63; k++) g_RemRelay[g_RemN][k] = re[i].relay[k]; g_RemRelay[g_RemN][k] = 0;
+        for (k = 0; re[i].body[k] && k < 8191; k++) g_RemBody[g_RemN][k] = re[i].body[k]; g_RemBody[g_RemN][k] = 0;
+        g_RemN++;
     }
-    emitted = g_RemN;
+    { char lg[512]; int j = 0, dropped = 0, live_n = 0;
+      while (InterlockedCompareExchange(&g_LanGuidsLock, 1, 0)) Sleep(1);
+      while (g_LanGuids[j] && j < 511) { lg[j] = g_LanGuids[j]; j++; } lg[j] = 0;
+      InterlockedExchange(&g_LanGuidsLock, 0);
+      for (i = 0; i < g_RemN; i++) {
+          if (lg[0] && contains(lg, "\"")) {
+              char rg[48];
+              if (!form_get(g_RemBody[i], "relayRegion", rg, sizeof rg) || !rg[0] || !contains(lg, rg)) {
+                  dropped++;
+                  continue;               // relay server is dead: drop the zombie
+              } }
+          if (already || live_n) bs(resp, ",");
+          emit_advertisement_x(resp, g_RemBody[i], 0);
+          live_n++;
+      }
+      if (dropped) { char b[80]; int i3 = 0; const char *m = "HUBFILTER: dropped ";
+        while (*m) b[i3++] = *m++; b[i3++] = (char)('0' + dropped);
+        m = " stale-relay entries"; while (*m) b[i3++] = *m++; b[i3] = 0; logn(b); }
+      emitted = live_n; }
     InterlockedExchange(&g_RemLock, 0);
     if (emitted) { char b[64]; int i3 = 0; const char *m = "HUB browse: remote lobbies=";
       while (*m) b[i3++] = *m++; b[i3++] = (char)('0' + emitted); b[i3] = 0; logn(b); }
 out:
     p_closesocket(s);
+out2:
+    if (re) HeapFree(GetProcessHeap(), 0, re);
     return emitted;
 }
 // relayIP of a remote lobby by its sessionID; 0 when the id is not remote.
-static int remote_lookup(const char *id, char *relay, int rcap) {
+static int remote_lookup(const char *id, char *relay, int rcap, char *bodyOut, int bcap) {
     int i, found = 0;
     while (InterlockedCompareExchange(&g_RemLock, 1, 0)) Sleep(1);
     for (i = 0; i < g_RemN; i++) {
@@ -1840,6 +2097,7 @@ static int remote_lookup(const char *id, char *relay, int rcap) {
             if (g_RemId[i][q] != id[q]) { eq = 0; break; }
         if (eq) {
             int k = 0; while (g_RemRelay[i][k] && k < rcap - 1) { relay[k] = g_RemRelay[i][k]; k++; } relay[k] = 0;
+            if (bodyOut) { int q = 0; while (bodyOut && g_RemBody[i][q] && q < bcap - 1) { bodyOut[q] = g_RemBody[i][q]; q++; } bodyOut[q] = 0; }
             found = 1; break;
         }
     }
@@ -1864,6 +2122,63 @@ static int adv_copy(char *out, int cap) {
     { int i = 0; while (g_AdvBody[i] && i < cap - 1) { out[i] = g_AdvBody[i]; i++; } out[i] = 0; n = i; }
     InterlockedExchange(&g_AdvLock, 0);
     return n;
+}
+static void adv_clear(void) {
+    while (InterlockedCompareExchange(&g_AdvLock, 1, 0)) Sleep(1);
+    g_AdvBody[0] = 0;
+    InterlockedExchange(&g_AdvLock, 0);
+}
+
+// s49: republish our hosted lobby to the hub mesh. hub_host fires once at
+// HOST time, but the game's /advertisement/update cadence is unreliable (it
+// stopped at t=161 one session, t=80 the next) and this session's bodies
+// carried no relayRegion at all, so the mesh entry went out unjoinable and
+// the joiner's zombie filter dropped it -> "can't see lobby". The
+// AdvPushThread calls this every 5 s while a lobby is stored: always patched
+// with the live GUID, always fresh, independent of the game.
+// s50: republish via UPDATE on the SAME advertisementID. hub_leave + hub_host
+// left the lobby absent from the hub registry for the whole leave->host round
+// trip (two connections over a DERP-relayed tailnet = up to ~1 s of every 5 s),
+// and a joiner's browse that landed in the gap got an empty list -> the game
+// aborted the join with R_MatchExpired before sending /join (friend log 14088
+// t=67.0 lobby served, t=71.9 join refresh EMPTY). Only fall back to
+// leave+host when the hub no longer knows the id (hub restarted).
+static int hub_update(const char *body) {
+    BUF q = {0}; char rep[256]; SOCKET s; int ok = 0;
+    if (!g_HubAdvId[0]) return 0;
+    bs(&q, "{\"type\":\"UPDATE\",\"advertisementID\":\"");
+    bs(&q, g_HubAdvId);
+    bs(&q, "\",\"patch\":{\"body\":");
+    jstr(&q, body, (int)strlen_f(body));
+    bs(&q, "}}\n");
+    s = hub_open();
+    if (s == INVALID_SOCKET) { logn("HUB absent: lobby not gossiped"); goto out; }
+    if (hub_send(s, q.p, (int)q.len) && hub_line(s, rep, sizeof rep) > 0)
+        ok = contains(rep, "\"ok\":true");
+    p_closesocket(s);
+out:
+    if (q.p) HeapFree(GetProcessHeap(), 0, q.p);
+    return ok;
+}
+static volatile LONG g_HubPushLock;
+static void hub_republish(const char *body) {
+    char *patched; const char *ub;
+    while (InterlockedCompareExchange(&g_HubPushLock, 1, 0)) Sleep(1);
+    patched = adv_patch(body);
+    ub = patched ? patched : body;
+    if (!hub_update(ub)) { hub_leave(); hub_host(ub); }
+    if (patched) HeapFree(GetProcessHeap(), 0, patched);
+    InterlockedExchange(&g_HubPushLock, 0);
+}
+
+static DWORD WINAPI AdvPushThread(void *p) {
+    (void)p;
+    if (p_WSAStartup) { WSADATA wd; p_WSAStartup(0x0202, &wd); }
+    for (;;) {
+        Sleep(5000);
+        { char ab[8192];
+          if (adv_copy(ab, sizeof ab) > 0) hub_republish(ab); }
+    }
 }
 
 // s43: THE missing push. The game-layer advertisement dispatcher 0x140eeb930
@@ -1958,6 +2273,66 @@ static void registry_dump(void)
     log_int("MSREG nodes=", k);
 }
 
+// ------------------------------------------------- relationship shape cycling
+// Path B: /game/relationship/getRelationships. The host asks for its
+// relationships ~100 ms after a remote peer lands in the lobby; our old
+// catch-all ("[0,[]]") and the 9-element array both log
+//   rlink ERROR "RelationshipCache - response was not formatted correctly: <body>"
+// and the joiner is kicked 9.9 s later. Instead of guessing once more, serve a
+// different candidate on each request and read the winner from the log.
+// AOE2LAN_REL=<1..8> pins one candidate (winner verification, no rebuild).
+// The RELSHAPE line stays in the log permanently: one line per request.
+#define REL_N 8
+static volatile LONG g_RelN;   /* getRelationships request ordinal, 1-based */
+
+static void rel_log(int cand, const char *path) {
+    char cn[16]; cn[0] = 0;
+    form_get(path, "callNum", cn, sizeof cn);
+    BUF b = {0};
+    bs(&b, "RELSHAPE n="); bnum(&b, (DWORD64)g_RelN);
+    bs(&b, " cand=");      bnum(&b, (DWORD64)cand);
+    bs(&b, " callNum=");   bs(&b, cn[0] ? cn : "?");
+    bs(&b, " fullpath=");  bs(&b, path);
+    if (b.p) { logn(b.p); HeapFree(GetProcessHeap(), 0, b.p); }
+}
+
+static void rel_build(BUF *b, int idx, const char *alias) {
+    IDS ids; mk_ids(alias, &ids);
+    // s49: the JOINING friend. ageLANServer's Relationships() fills
+    // lastConnection (slot 6) with the OTHER online users' profileInfo; the
+    // empty envelope parses (2 clean sessions) but the host still kicks the
+    // readying peer 10.4 s in - it validates the peer against this content.
+    // mk_ids is deterministic, so the host reproduces the friend's exact
+    // profileID (2949963597078017023 = mk_ids("AmiEktamc")) from the alias
+    // their own dll logged at login (18148 t=4.5).
+    IDS fr; mk_ids("AmiEktamc", &fr);
+    switch (idx) {
+    case 0:  /* TRUE ageLANServer shape: 8 elements, 7 ARRAY slots
+                ([errorCode, friends, [], [], [], lastConnection, [], []]).
+                v1 of this candidate ([0,[],{},{},{},[],{},{}]) FAILED - objects
+                are wrong; the old 9-element all-arrays build FAILED - count is
+                wrong. This is the only form nobody has served yet, and it
+                matches the RE finding: Info dtor 0x1403a09d0 destroys 8
+                fields at +0x38..+0xe0. */
+        bs(b, "[0,[],[],[],[],[],[],[]]"); break;
+    case 1:  /* same envelope + the friend's profileInfo in lastConnection
+                (slot 6) - the ageLANServer content for a 2-player LAN */
+        bs(b, "[0,[],[],[],[],["); emit_profileinfo(b, "AmiEktamc", &fr); bs(b, "],[],[]]"); break;
+    case 2:  /* friend row in friends (slot 2) instead */
+        bs(b, "[0,["); emit_profileinfo(b, "AmiEktamc", &fr); bs(b, "],[],[],[],[],[],[]]"); break;
+    case 3:  /* friend row in BOTH slots 2 and 6 */
+        bs(b, "[0,["); emit_profileinfo(b, "AmiEktamc", &fr); bs(b, "],[],[],[],["); emit_profileinfo(b, "AmiEktamc", &fr); bs(b, "],[],[]]"); break;
+    case 4:  /* object envelope; 'relationships' member from RE */
+        bs(b, "{\"result\":0,\"relationships\":[]}"); break;
+    case 5:  /* 10 empty arrays */
+        bs(b, "[0,[],[],[],[],[],[],[],[],[]]"); break;
+    case 6:  /* 7 elements */
+        bs(b, "[0,[],[],[],[],[],[]]"); break;
+    case 7:  /* objects in slots 1..7 */
+        bs(b, "[0,{},{},{},{},{},{},{}]"); break;
+    }
+}
+
 // ---------------------------------------------------------------- route
 static void route(TLSSES *t, const char *method, const char *path,
                   const char *body, int bodyLen) {
@@ -2032,10 +2407,13 @@ static void route(TLSSES *t, const char *method, const char *path,
               do { rev[r++] = (char)('0' + (x % 10)); x /= 10; } while (x && r < 23);
               int i = 0; while (r) g_AdvId[i++] = rev[--r]; g_AdvId[i] = 0;
           } }
-        build_host_reply(&resp, body, 0, 1);
-        adv_store(body);
-        hub_leave();   // a previous lobby of ours must not linger in the mesh
-        hub_host(body);
+        { char *patched = adv_patch(body);
+          const char *ub = patched ? patched : body;
+          build_host_reply(&resp, ub, 0, 0, 1);
+          adv_store(ub);
+          hub_leave();   // a previous lobby of ours must not linger in the mesh
+          hub_host(ub);
+          if (patched) HeapFree(GetProcessHeap(), 0, patched); }
         log_resp_head(resp.p, (int)resp.len);
         http_respond(t, resp.p);
     } else if (contains(path, "/game/advertisement/leave")) {
@@ -2043,6 +2421,7 @@ static void route(TLSSES *t, const char *method, const char *path,
         InterlockedExchange(&g_MatchStart, 0);
         adv_set_state("0");
         hub_leave();
+        adv_clear();   // AdvPushThread must not resurrect a left lobby
         log_resp_head(LOK, (int)strlen_f(LOK));
         http_respond(t, LOK);
     } else if (contains(path, "/game/advertisement/join")) {
@@ -2072,12 +2451,18 @@ static void route(TLSSES *t, const char *method, const char *path,
         if (!have) have = form_get(body, "connect_id", sid, sizeof sid) && sid[0];
         if (!have) { sid[0] = '1'; sid[1] = 0; }
         { BUF sb = {0}; IDS ids; mk_ids(g_Alias, &ids);
-          char rrelay[64]; const char *rov = 0;
-          if (remote_lookup(sid, rrelay, sizeof rrelay)) rov = rrelay;
+          char rrelay[64], rbody[8192], rreg[48]; const char *rov = 0, *rgv = 0;
+          rreg[0] = 0;
+          if (remote_lookup(sid, rrelay, sizeof rrelay, rbody, sizeof rbody)) {
+              rov = rrelay;
+              // the stored lobby body names the host's relay GUID (beacon key);
+              // the joiner can only resolve a GUID, never the word "LAN"
+              if (form_get(rbody, "relayRegion", rreg, sizeof rreg) && rreg[0]) rgv = rreg;
+          }
           bs(&sb, "hostid="); bnum(&sb, ids.profileId);
           bs(&sb, "&sessionID="); bs(&sb, sid);
           bs(&sb, "&description=");
-          if (sb.p) build_host_reply(&resp, sb.p, rov, !rov);
+          if (sb.p) build_host_reply(&resp, sb.p, rov, rgv, !rov);
           // log the synthetic body: it carries both numbers that matter
           { char lb[160]; int i = 0; const char *m = "JOIN: ";
             while (*m) lb[i++] = *m++;
@@ -2110,7 +2495,27 @@ static void route(TLSSES *t, const char *method, const char *path,
         bs(&resp, "{\"result\":0,\"updatedAvertisement\":");
         emit_advertisement(&resp, src);
         bs(&resp, "}");
-        if (src == body) adv_store(body);
+        if (src == body) {
+            char *patched = adv_patch(body);
+            const char *ub = patched ? patched : body;
+            adv_store(ub);
+        // s49: keep OUR lobby in the hub mesh. hub_host pushed it once at HOST
+        // time; if that flood is lost the joiner's registry keeps only zombie
+        // lobbies. The game updates the lobby every few seconds - re-withdraw +
+        // re-push on each full update keeps exactly one live entry flooding the
+        // mesh with the CURRENT relayRegion GUID. Guard: only the owner pushes
+        // (hostid == our profileID); a joiner's update carries the host's id and
+        // must not republish the lobby under our relayIP.
+        if (src == body) {
+            IDS ids; mk_ids(g_Alias, &ids);
+            char pb[24]; { DWORD64 v = ids.profileId; int r = 0, w = 0; char rev[24];
+              do { rev[r++] = (char)('0' + (int)(v % 10)); v /= 10; } while (v && r < 23);
+              while (r) pb[w++] = rev[--r]; pb[w] = 0; }
+            int same = 1; { int q = 0; while (pb[q] || hb[q]) { if (pb[q] != hb[q]) { same = 0; break; } q++; } }
+            if (same) { hub_leave(); hub_host(ub); }
+            if (patched) HeapFree(GetProcessHeap(), 0, patched);
+        }
+        }
         log_resp_head(resp.p, (int)resp.len);
         http_respond(t, resp.p);
     } else if (contains(path, "/game/advertisement/getLanAdvertisements") ||
@@ -2123,6 +2528,13 @@ static void route(TLSSES *t, const char *method, const char *path,
         // formatted correctly: [0,[]]". Only the lobby we host ourselves is
         // known here (g_AdvBody); with none hosted the list is simply empty,
         // which is a valid answer.
+        // s49: capture the game's live relay GUID list first - hub_browse
+        // filters zombie entries against it (see g_LanGuids).
+        { char gl[512];
+          if (form_get(path, "lanServerGuids", gl, sizeof gl) && gl[0]) {
+              while (InterlockedCompareExchange(&g_LanGuidsLock, 1, 0)) Sleep(1);
+              { int k = 0; while (gl[k] && k < 511) { g_LanGuids[k] = gl[k]; k++; } g_LanGuids[k] = 0; }
+              InterlockedExchange(&g_LanGuidsLock, 0); } }
         char ab[8192];
         int had = 0;
         bs(&resp, "{\"result\":0,\"advertisements\":[");
@@ -2146,6 +2558,146 @@ static void route(TLSSES *t, const char *method, const char *path,
         static const char POK[] = "{\"result\":0}";
         log_resp_head(POK, (int)strlen_f(POK));
         http_respond(t, POK);
+    } else if (contains(path, "/game/account/getProfileName")) {
+        // Host runs this lookup the moment a remote peer lands in its lobby;
+        // the catch-all "[0,[]]" logged "not formatted correctly" and the peer
+        // was kicked ~350 ms later. Real shape (ageLANServer routes/game/
+        // account/getProfileName.go): [0, [profileInfo...]] with POSITIONAL
+        // rows: [entityVersion, profileId, name, metaData, alias,
+        // sanitizedAlias, clanName, personalStatGroupID, xp, level,
+        // leaderboardRegionID, banInfo, platformUserID, accountType,
+        // linkedPlatformAccounts].
+        // shortcut: we only know OUR alias; unknown ids get ageLANServer's
+        // "Player <id>" placeholder (its PlaceholderProfile), which is all the
+        // lobby UI needs. Upgrade if a caller ever needs real remote names.
+        char pv[1024];
+        pv[0] = 0;
+        if (!form_get(path, "profileIDs", pv, sizeof pv) || !pv[0])
+            if (!form_get(body, "profile_ids", pv, sizeof pv) || !pv[0])
+                form_get(path, "profile_ids", pv, sizeof pv);
+        IDS mine; mk_ids(g_Alias, &mine);
+        char myid[24]; { int tl = 0; DWORD64 v = mine.profileId;
+            if (!v) myid[tl++] = '0'; char tmp[24]; int k = 0;
+            while (v) { tmp[k++] = (char)('0' + (int)(v % 10)); v /= 10; }
+            while (k) myid[tl++] = tmp[--k]; myid[tl] = 0; }
+        bs(&resp, "[0,[");
+        if (pv[0]) {
+            const char *p = pv; int first = 1;
+            while (*p) {
+                int neg = 0;
+                if (*p == '-' && p[1] >= '0' && p[1] <= '9') { neg = 1; p++; }
+                if (*p < '0' || *p > '9') { p++; continue; }
+                char idb[24]; int il = 0;
+                while (*p >= '0' && *p <= '9' && il < 20) idb[il++] = *p++;
+                idb[il] = 0;
+                // -1 ids are the lobby's empty slots; the real server returns
+                // NO row for them (the UI renders "Open"). A row here reads as
+                // a phantom member and the host drops the joiner.
+                if (neg) continue;
+                int isme = 1; { int q = 0; while (idb[q] || myid[q]) { if (idb[q] != myid[q]) { isme = 0; break; } q++; } }
+                if (!first) bs(&resp, ",");
+                first = 0;
+                bs(&resp, "[1,"); bs(&resp, idb); bs(&resp, ",");
+                if (isme) { bs(&resp, "\""); jesc(&resp, g_Alias); bs(&resp, "\",");
+                            bs(&resp, "\"{}\",");
+                            bs(&resp, "\""); jesc(&resp, g_Alias); bs(&resp, "\",");
+                            bs(&resp, "\""); jesc(&resp, g_Alias); bs(&resp, "\","); }
+                else      { bs(&resp, "\"Player "); bs(&resp, idb); bs(&resp, "\",");
+                            bs(&resp, "\"{}\",");
+                            bs(&resp, "\"Player "); bs(&resp, idb); bs(&resp, "\",");
+                            bs(&resp, "\"Player "); bs(&resp, idb); bs(&resp, "\","); }
+                bs(&resp, "\"\",");              // clanName
+                if (isme) bnum(&resp, mine.statId); else bs(&resp, idb);
+                bs(&resp, ",0,1,2,null,");      // xp, level, leaderboardRegionID, banInfo
+                bs(&resp, "\""); bs(&resp, isme ? mine.platformUser : idb); bs(&resp, "\",");
+                bs(&resp, "3,[]]");             // accountType=steam, linkedPlatformAccounts
+            }
+        }
+        bs(&resp, "]]");
+        log_resp_head(resp.p, resp.p ? (int)resp.len : 3);
+        http_respond(t, resp.p ? resp.p : "[0,[]]");
+    } else if (contains(path, "/game/Leaderboard/getStatsForLeaderboardByProfileName")) {
+        // Party join flow: the host queries stats for every peer that readies;
+        // the catch-all "[0,[]]" logged "LeaderboardStatsCache - response was not
+        // formatted correctly" and the joiner was kicked 40 ms later
+        // (256-20270033: err t=171.271 -> KICKSEND t=171.312; 260-28576616:
+        // query t=379.5 -> KICKSEND t=382.291). DTO 0x14062cb20 reads members
+        // `result` + `leaderboards`, element 0x10 = {profileId int64,
+        // leaderboardStats array} (notes/m1-session29.md 29d). Echo one row per
+        // requested id with an empty stats array: that parses, and our
+        // getAvailableLeaderboards reply carries statDefinitions:[], so there
+        // is nothing to fill. -1 ids are empty slots: no row (getProfileName
+        // precedent - a phantom row reads as a member and the host drops the
+        // joiner).
+        char pv[1024];
+        pv[0] = 0;
+        form_get(path, "profileids", pv, sizeof pv);
+        if (!pv[0]) form_get(body, "profileids", pv, sizeof pv);
+        bs(&resp, "{\"result\":0,\"leaderboards\":[");
+        {
+            int first = 1;
+            for (const char *p = pv; *p; ) {
+                if (*p == '-' && p[1] >= '0' && p[1] <= '9') {
+                    p += 2; while (*p >= '0' && *p <= '9') p++;
+                    continue;
+                }
+                if (*p < '0' || *p > '9') { p++; continue; }
+                char idb[24]; int il = 0;
+                while (*p >= '0' && *p <= '9' && il < 20) idb[il++] = *p++;
+                idb[il] = 0;
+                if (!first) bs(&resp, ",");
+                first = 0;
+                bs(&resp, "{\"profileId\":"); bs(&resp, idb);
+                bs(&resp, ",\"leaderboardStats\":[]}");
+            }
+        }
+        bs(&resp, "]}");
+        log_resp_head(resp.p, (int)resp.len);
+        http_respond(t, resp.p);
+    } else if (contains(path, "/game/relationship/getRelationships")) {
+        // Party join flow, second catch-all victim: the host queries its
+        // relationships the moment a remote peer lands in its lobby; the
+        // catch-all "[0,[]]" logged "RelationshipCache - response was not
+        // formatted correctly" and the peer was kicked ~10 s later
+        // (244-2508025: err t=667.322 -> KICKSEND t=677.228, 4 ms after a
+        // PlayerReadyRequest; 244-1889735 t=897.0 -> KICKSEND t=906.9).
+        // Real shape (ageLANServer relationshipResponse()): 8 slots
+        // [errorCode, friends, {}, {}, {}, lastConnection, {}, {}]; for AoE2
+        // friends=[] and lastConnection=the other online users. The previous
+        // "[0,[],[],[],[],[],[],[],[]]" is NINE slots, which is not that shape.
+        // Cycle the candidates (see rel_build above) and read RELSHAPE.
+        LONG n = InterlockedIncrement(&g_RelN);
+        int idx = (int)((n - 1) % REL_N);
+        { char v[8];
+          if (GetEnvironmentVariableA("AOE2LAN_REL", v, sizeof v) && v[0]) {
+              int pin = 0;
+              for (const char *p = v; *p >= '0' && *p <= '9'; p++) pin = pin * 10 + (*p - '0');
+              if (pin >= 1 && pin <= REL_N) idx = pin - 1; } }
+        rel_log(idx + 1, path);
+        rel_build(&resp, idx, alias);
+        log_resp_head(resp.p, (int)resp.len);
+        http_respond(t, resp.p);
+    } else if (contains(path, "/game/relationship/getPresenceData")) {
+        // PresenceDataCache: the catch-all "[0,[]]" logged "response was not
+        // formatted correctly" at host login (244-1889735 t=11.034, request
+        // t=10.924) and cached nothing. The real route serves a signed asset;
+        // ageLANServer's captured age2 file is [0, rows, "<dataSignature>"]
+        // with rows = [presenceID, "name", null, "presenceID"]. Serve those
+        // exact bytes: that signature is one the retail client already accepts.
+        static const char PD[] =
+            "[0,[[0,\"offline\",null,\"0\"],[1,\"online\",null,\"1\"],[2,\"away\",null,\"2\"]],"
+            "\"uv8OGn3SjQak5N9XqY1yRRerEuLRAHN7cH92evtjfz+S9e48nBl+8UeDmGrZGJPcSSRXuw43nFQrr/vH3CvjH86dgh+TW3Pd4ZOpen1u3LQPfn8rfOSjaORG3Cn4ZOZRh4G2QXLjD1CR6gIRlWqaoaWYg2FB5ZYngY7yw4dVe4UXXX+bj41PlSXkk/1hFA17m/F7JGMAWMG9dScq3Vw5Cq9Z8hlMv/j8g18MzEr+uXA5upKRj6B97bPw+jg6txW1AiU9+QOxdyAnqFI+ujHbwXZ5Fu/FOUqgKrupKP5FtrKnK125+DPhBK19RjPubSMV3I6MgMdWxIZy5elfS+Qr6Q==\"]";
+        logn("PRESENCE n=3 body=age2 signed asset verbatim");
+        log_resp_head(PD, (int)strlen_f(PD));
+        http_respond(t, PD);
+    } else if (contains(path, "/game/relationship/setPresence")) {
+        // The friend logs "WorldWideSetPresenceAsync - response was not
+        // formatted correctly: [0,[]]" every ~30 s (18008-102449500 t=38.9).
+        // ageLANServer routes/game/relationship/setPresence.go answers
+        // [0] (single-element array), which is what its own tests assert.
+        static const char SP[] = "[0]";
+        log_resp_head(SP, (int)strlen_f(SP));
+        http_respond(t, SP);
     } else if (contains(path, "/game/news/")) {
         log_resp_head("[0,[]]", 5);
         http_respond(t, "[0,[]]");
@@ -2515,7 +3067,7 @@ static void serve_conn(SOCKET s) {
                     char method[12] = {0};
                     char path[256] = {0};
                     { int i = 0; while (req[i] != ' ' && i < 11) { method[i] = req[i]; i++; }
-                      int j = 0; while (req[i+j+1] != ' ' && req[i+j+1] != '?' && j < 250) { path[j] = req[i+j+1]; j++; } }
+                      int j = 0; while (req[i+j+1] != ' ' && j < 250) { path[j] = req[i+j+1]; j++; } }
                     if (contains(path, "/wss")) {
                         // the socket stops being HTTP here; ws_serve owns it
                         log_req(path);
@@ -2788,8 +3340,9 @@ int loginsrv_start(void) {
           if (h) CloseHandle(h);
       } else logn("cert: AOE2LAN_NOROOT=1 (RootRegThread skipped)"); }
     { HANDLE h = CreateThread(NULL, 0, ServerThread, NULL, 0, NULL);
-      if (!h) return 0;
-      CloseHandle(h); }
+      if (h) CloseHandle(h); }
+    { HANDLE h = CreateThread(NULL, 0, AdvPushThread, NULL, 0, NULL);
+      if (h) CloseHandle(h); }
     { char v[8];
       if (GetEnvironmentVariableA("AOE2LAN_LIVE", v, sizeof v) && v[0] == '1') {
           HANDLE h = CreateThread(NULL, 0, LiveThread, NULL, 0, NULL);

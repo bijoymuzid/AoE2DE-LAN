@@ -40,6 +40,7 @@
 #endif
 static int cput(char *b, int i, const char *s);            // defined below
 static int chx(char *b, int i, DWORD64 v);
+static void kw_start(void);                                 // KICKWATCH, defined below
 static int cpct(char *b, int i, unsigned long long v);
 
 // ---------------------------------------------------------------- stages:
@@ -459,6 +460,7 @@ static DWORD WINAPI MainThread(LPVOID p) {
             if (!loginsrv_start()) log_line("loginsrv: START FAILED");
             if (!getenv_flag(L"AOE2LAN_NOCERT")) g_LoginInjectCert = loginsrv_inject_cert();
         } else log_line("stage=8: AOE2LAN_NOSRV=1 (server disabled)");
+        kw_start();
         if (g_NoHooks || getenv_flag(L"AOE2LAN_NOHOOKS")) {
             log_line("stage=8: skipping all E9 detours");
             { WCHAR hv[16];
@@ -637,6 +639,236 @@ static LONG WINAPI LanCrashFilter(EXCEPTION_POINTERS *ep) {
     }
     return EXCEPTION_CONTINUE_SEARCH;             // let the game's own handler run
 }
+// ===================== KICKWATCH (session 12c) =====================
+// In-process hunt for the host-side kick decision. Facts baked in from RE:
+//   peer list: mgr = [[g_Base+0x4c9e5f0] + 0x1880]; vec = [mgr+0x70]..[mgr+0x78],
+//              stride 0x10, entry[0] = peer object ptr.
+//   remove fn  game+0x309310(rcx=mgr, rdx=[peer+0x10] key, r8=byte[peer+0x40],
+//              r9=&peer+0x18); reason = DWORD [peer+0x18], switched 1..0x83.
+//   destroy-event dispatcher game+0x358640 case1 -> remove call at game+0x3587f4.
+// On a NEW peer: arm DR write-watchpoints (peer+0x18 dword, peer+0x40 byte) in
+// every thread; the VEH logs the writer (rip/regs/.text stack words/peer dump).
+// No gdb, no int3, no code patches — DR registers + VEH only.
+#define KW_MAXPEER 2
+static volatile DWORD64 g_KwPeer[KW_MAXPEER];
+static DWORD g_KwLastReason[KW_MAXPEER], g_KwLastFlag[KW_MAXPEER];
+static int   g_KwActive = 0;
+static volatile int g_KwVehInstalled = 0;
+
+static DWORD64 kw_dr7(void) {
+    DWORD64 d = 0;
+    for (int k = 0; k < KW_MAXPEER; k++) {
+        if (!g_KwPeer[k]) continue;
+        int i0 = 2 * k, i1 = 2 * k + 1;
+        d |= (1ULL << (2 * i0)) | (1ULL << (16 + 4 * i0)) | (3ULL << (18 + 4 * i0)); // DR even: write, 4B
+        d |= (1ULL << (2 * i1)) | (1ULL << (16 + 4 * i1));                        // DR odd:  write, 1B
+    }
+    return d;
+}
+
+static void kw_arm_all(void) {
+    DWORD64 dr7 = kw_dr7();
+    if (!dr7) return;
+    HANDLE snap = CreateToolhelp32Snapshot(4 /*TH32CS_SNAPTHREAD*/, 0);
+    if (snap == INVALID_HANDLE_VALUE) return;
+    THREADENTRY32 te; te.dwSize = sizeof(te);
+    DWORD me = GetCurrentThreadId(), pid = GetCurrentProcessId();
+    int armed = 0;
+    static int lastArmed = -1;
+    if (Thread32First(snap, &te)) do {
+        if (te.th32OwnerProcessID != pid || te.th32ThreadID == me) continue;
+        HANDLE h = OpenThread(THREAD_SUSPEND_RESUME | THREAD_GET_CONTEXT | THREAD_SET_CONTEXT, 0, te.th32ThreadID);
+        if (!h) continue;
+        if (SuspendThread(h) != (DWORD)-1) {
+            CONTEXT c; c.ContextFlags = CONTEXT_DEBUG_REGISTERS;
+            if (GetThreadContext(h, &c)) {
+                for (int k = 0; k < KW_MAXPEER; k++) {
+                    if (!g_KwPeer[k]) continue;
+                    if (k == 0) { c.Dr0 = g_KwPeer[k] + 0x18; c.Dr1 = g_KwPeer[k] + 0x40; }
+                    else        { c.Dr2 = g_KwPeer[k] + 0x18; c.Dr3 = g_KwPeer[k] + 0x40; }
+                }
+                c.Dr7 = dr7;
+                if (SetThreadContext(h, &c)) armed++;
+            }
+            ResumeThread(h);
+        }
+        CloseHandle(h);
+    } while (Thread32Next(snap, &te));
+    CloseHandle(snap);
+    if (armed != lastArmed) {
+      lastArmed = armed;
+      char b[80]; int i = 0;
+      i = cput(b, i, "KW: armed dr7=0x"); i = chx(b, i, dr7);
+      i = cput(b, i, " on threads="); i = cpct(b, i, (unsigned long long)armed);
+      b[i] = 0; log_line(b); }
+}
+
+static LONG WINAPI KwVeh(EXCEPTION_POINTERS *ep) {
+    if (ep->ExceptionRecord->ExceptionCode != EXCEPTION_SINGLE_STEP)
+        return EXCEPTION_CONTINUE_SEARCH;
+    CONTEXT *c = ep->ContextRecord;
+    DWORD64 dr6 = c->Dr6;
+    if (!(dr6 & 0xF)) return EXCEPTION_CONTINUE_SEARCH;
+    for (int k = 0; k < 4; k++) if (dr6 & (1 << k)) {
+        DWORD64 peer = g_KwPeer[k >> 1];
+        DWORD64 off = (k & 1) ? 0x40 : 0x18;
+        DWORD64 newv = 0;
+        if (peer) { HC_TRY newv = (k & 1) ? HC_RD8((peer + off)) : HC_RD64((peer + off)) & 0xFFFFFFFF; }
+            __except (EXCEPTION_EXECUTE_HANDLER) { newv = 0xEEEEEEEE; } }
+        { char b[256]; int i = 0;
+          i = cput(b, i, "KWWRITE dr"); i = cpct(b, i, (unsigned long long)k);
+          i = cput(b, i, " peer=0x"); i = chx(b, i, peer);
+          i = cput(b, i, " off=0x"); i = chx(b, i, off);
+          i = cput(b, i, " new=0x"); i = chx(b, i, newv);
+          i = cput(b, i, " tid="); i = cpct(b, i, (unsigned long long)GetCurrentThreadId());
+          i = cput(b, i, " rip=0x"); i = chx(b, i, c->Rip);
+          if (c->Rip >= g_Base && c->Rip < g_Base + 0x3196000) {
+              i = cput(b, i, " game+0x"); i = chx(b, i, c->Rip - g_Base); }
+          b[i] = 0; log_line(b); }
+        { char b[320]; int i = 0;   // regs
+          i = cput(b, i, "KWREG rax=0x"); i = chx(b, i, c->Rax);
+          i = cput(b, i, " rbx=0x"); i = chx(b, i, c->Rbx);
+          i = cput(b, i, " rcx=0x"); i = chx(b, i, c->Rcx);
+          i = cput(b, i, " rdx=0x"); i = chx(b, i, c->Rdx);
+          i = cput(b, i, " rsi=0x"); i = chx(b, i, c->Rsi);
+          i = cput(b, i, " rdi=0x"); i = chx(b, i, c->Rdi);
+          b[i] = 0; log_line(b); }
+        { char b[320]; int i = 0;
+          i = cput(b, i, "KWREG r8=0x"); i = chx(b, i, c->R8);
+          i = cput(b, i, " r9=0x"); i = chx(b, i, c->R9);
+          i = cput(b, i, " r12=0x"); i = chx(b, i, c->R12);
+          i = cput(b, i, " r13=0x"); i = chx(b, i, c->R13);
+          i = cput(b, i, " r14=0x"); i = chx(b, i, c->R14);
+          i = cput(b, i, " r15=0x"); i = chx(b, i, c->R15);
+          b[i] = 0; log_line(b); }
+        // code bytes around rip (rip = insn AFTER the write)
+        { char b[200]; int i = 0;
+          i = cput(b, i, "KWCODE rip-16..+16: ");
+          for (int q = -16; q < 16 && i < 190; q++) {
+              BYTE v = 0; int ok = 0;
+              HC_TRY v = HC_RD8((c->Rip + q)); ok = 1; }
+              __except (EXCEPTION_EXECUTE_HANDLER) { ok = 0; }
+              const char *hx = "0123456789abcdef";
+              if (ok) { b[i++] = hx[(v >> 4) & 0xF]; b[i++] = hx[v & 0xF]; }
+              else { b[i++] = '?'; b[i++] = '?'; }
+          }
+          b[i] = 0; log_line(b); }
+        // .text words on the stack = the decision call chain
+        { DWORD64 sp = c->Rsp; int n = 0;
+          for (int s = 0; s < 256 && n < 40; s++) {
+              DWORD64 v = 0; int ok = 0;
+              HC_TRY v = HC_RD64((sp + 8 * s)); ok = 1; }
+              __except (EXCEPTION_EXECUTE_HANDLER) { break; }
+              if (!ok) break;
+              if (v >= g_Base + 0x1000 && v < g_Base + 0x3196000) {
+                  char l[96]; int j = 0;
+                  j = cput(l, j, "KWSTK["); j = cpct(l, j, (unsigned long long)s);
+                  j = cput(l, j, "] game+0x"); j = chx(l, j, v - g_Base);
+                  l[j] = 0; log_line(l);
+                  n++;
+              }
+          } }
+        // peer object dump (0x80)
+        if (peer) for (int row = 0; row < 4; row++) {
+            char b[200]; int i = 0;
+            i = cput(b, i, "KWPEER+0x"); i = chx(b, i, (DWORD64)(row * 32)); i = cput(b, i, ": ");
+            for (int q = 0; q < 32 && i < 190; q++) {
+                BYTE v = 0; int ok = 0;
+                HC_TRY v = HC_RD8((peer + row * 32 + q)); ok = 1; }
+                __except (EXCEPTION_EXECUTE_HANDLER) { ok = 0; }
+                const char *hx = "0123456789abcdef";
+                if (ok) { b[i++] = hx[(v >> 4) & 0xF]; b[i++] = hx[v & 0xF]; }
+                else { b[i++] = '?'; b[i++] = '?'; }
+            }
+            b[i] = 0; log_line(b);
+        }
+    }
+    c->Dr6 = 0;
+    return EXCEPTION_CONTINUE_EXECUTION;
+}
+
+static DWORD WINAPI KwThread(void *unused) {
+    (void)0;
+    log_line("KW: thread up");
+    DWORD tArm = 0;
+    for (;;) {
+        DWORD64 g = 0, mgr = 0, beg = 0, end = 0;
+        HC_TRY
+            hc_rd(g_Base + (0x144C9E5F0 - 0x140000000), &g, 8);
+            if (g) hc_rd(g + 0x1880, &mgr, 8);
+            if (mgr) { hc_rd(mgr + 0x70, &beg, 8); hc_rd(mgr + 0x78, &end, 8); }
+        }
+        __except (EXCEPTION_EXECUTE_HANDLER) { g = mgr = beg = end = 0; }
+        if (mgr && end > beg && end - beg <= 0x1000) {
+            int n = (int)((end - beg) / 0x10);
+            for (int e = 0; e < n && e < 16; e++) {
+                DWORD64 peer = 0;
+                HC_TRY hc_rd(beg + 0x10 * e, &peer, 8); }
+                __except (EXCEPTION_EXECUTE_HANDLER) { peer = 0; }
+                if (!peer) continue;
+                int slot = -1;
+                for (int k = 0; k < KW_MAXPEER; k++) if (g_KwPeer[k] == peer) slot = k;
+                if (slot < 0) {
+                    for (int k = 0; k < KW_MAXPEER; k++) if (!g_KwPeer[k]) { slot = k; break; }
+                    if (slot >= 0) {
+                        g_KwPeer[slot] = peer;
+                        HC_TRY
+                            hc_rd(peer + 0x18, &g_KwLastReason[slot], 4);
+                            hc_rd(peer + 0x40, &g_KwLastFlag[slot], 4);
+                        }
+                        __except (EXCEPTION_EXECUTE_HANDLER) { }
+                        { char b[128]; int i = 0;
+                          i = cput(b, i, "KW: NEW PEER slot="); i = cpct(b, i, (unsigned long long)slot);
+                          i = cput(b, i, " peer=0x"); i = chx(b, i, peer);
+                          i = cput(b, i, " reason=0x"); i = chx(b, i, g_KwLastReason[slot]);
+                          i = cput(b, i, " flag=0x"); i = chx(b, i, g_KwLastFlag[slot] & 0xFF);
+                          b[i] = 0; log_line(b); }
+                        // Lazy VEH install: only once, when first peer appears.
+                        // Installing at startup (kw_start) interfered with Arxan's
+                        // own VEH chain and broke beacon processing.
+                        if (!g_KwVehInstalled) {
+                            g_KwVehInstalled = 1;
+                            AddVectoredExceptionHandler(1, KwVeh);
+                            log_line("KW: VEH installed (lazy, first peer)");
+                        }
+                        kw_arm_all();
+                    }
+                }
+                if (slot >= 0) {   // field-change log (50 ms cadence)
+                    DWORD r = 0, f = 0;
+                    HC_TRY hc_rd(peer + 0x18, &r, 4); hc_rd(peer + 0x40, &f, 4); }
+                    __except (EXCEPTION_EXECUTE_HANDLER) { continue; }
+                    f &= 0xFF;
+                    if (r != g_KwLastReason[slot] || f != g_KwLastFlag[slot]) {
+                        char b[160]; int i = 0;
+                        i = cput(b, i, "KWCHG slot="); i = cpct(b, i, (unsigned long long)slot);
+                        i = cput(b, i, " reason 0x"); i = chx(b, i, g_KwLastReason[slot]);
+                        i = cput(b, i, "->0x"); i = chx(b, i, r);
+                        i = cput(b, i, " flag 0x"); i = chx(b, i, g_KwLastFlag[slot]);
+                        i = cput(b, i, "->0x"); i = chx(b, i, f);
+                        b[i] = 0; log_line(b);
+                        g_KwLastReason[slot] = r; g_KwLastFlag[slot] = f;
+                    }
+                }
+            }
+        }
+        if (g_KwPeer[0] && GetTickCount() - tArm > 500) { tArm = GetTickCount(); kw_arm_all(); }
+        Sleep(20);
+    }
+    return 0;
+}
+
+static void kw_start(void) {
+    if (g_KwActive) return;
+    if (getenv_flag(L"AOE2LAN_NOKW")) { log_line("KW: disabled by env"); return; }
+    g_KwActive = 1;
+    // VEH is installed lazily in KwThread on first peer appearance;
+    // installing here (at game startup) broke Arxan's beacon VEH chain.
+    HANDLE h = CreateThread(NULL, 0, KwThread, NULL, 0, NULL);
+    if (h) { CloseHandle(h); log_line("KW: started (peer watch + DR watchpoints, VEH lazy)"); }
+    else { g_KwActive = 0; log_line("KW: thread create FAILED"); }
+}
+
 // session 25: 1 s re-read of the three re-pointed slots. Logs once per slot
 // when it no longer holds our stub — "asked then overruled/reverted" vs
 // "never asked" (the one-shot stub lines above).
@@ -1526,6 +1758,47 @@ static int ls_cstr(DWORD64 p, char *out, int maxn) {
 // home slots are left untouched for the real sink.
 static volatile LONG g_LsLines = 0;
 
+// peerremove stack probe: the kick decision path is on the stack when the
+// "peerremove" line is logged, unlike the relay send which is a queue flush.
+static volatile LONG g_PrProbe = 0;
+static void ls_stackprobe(void) {
+    if (InterlockedIncrement(&g_PrProbe) > 4) return;
+    DWORD64 anchor = 0, teb = 0, sbase = 0;
+    __asm__("movq %%gs:0x30, %0" : "=r"(teb));
+    HC_TRY sbase = HC_RD64((teb + 8)); } __except (EXCEPTION_EXECUTE_HANDLER) { sbase = 0; }
+    char b[600]; int i = cput(b, 0, "PRSTACK");
+    if (sbase) HC_TRY
+        int got = 0;
+        for (DWORD64 *p = &anchor; (DWORD64)p < sbase - 8 && got < 24; p++) {
+            DWORD64 a = *p;
+            if (a > g_Base && a < g_Base + 0x3196000ULL) {   // .text only
+                i = cput(b, i, " +0x"); i = chx(b, i, a - g_Base); got++;
+            }
+        }
+    } __except (EXCEPTION_EXECUTE_HANDLER) { }
+    b[i] = 0; log_line(b);
+    if (sbase) HC_TRY
+        int got = 0;
+        for (DWORD64 *p = &anchor; (DWORD64)p < sbase - 8 && got < 10; p++) {
+            DWORD64 a = *p;
+            if (a > g_Base && a < g_Base + 0x3196000ULL) {
+                got++;
+                char cb[240]; int ci = cput(cb, 0, "PRCODE +0x");
+                ci = chx(cb, ci, a - g_Base); ci = cput(cb, ci, ": ");
+                HC_TRY
+                    for (int q = -80; q < 16 && ci < (int)sizeof cb - 4; q++) {
+                        unsigned c = HC_RD8((a + q));
+                        cb[ci++] = "0123456789abcdef"[c >> 4];
+                        cb[ci++] = "0123456789abcdef"[c & 15];
+                    }
+                } __except (EXCEPTION_EXECUTE_HANDLER) { cb[ci++] = '?'; }
+                cb[ci] = 0; log_line(cb);
+            }
+        }
+    } __except (EXCEPTION_EXECUTE_HANDLER) { }
+    b[0] = 0;
+}
+
 static void ls_emit(const char *lvl, const char *fmt, void *va) {
     char fs[160]; char b[640]; int i = 0;
     if (InterlockedIncrement(&g_LsLines) > 20000) return;
@@ -1544,6 +1817,7 @@ static void ls_emit(const char *lvl, const char *fmt, void *va) {
         }
     } __except (EXCEPTION_EXECUTE_HANDLER) { i = cput(b, i, " ?"); }
     b[i] = 0; log_line(b);
+    if (fs[0]=='p' && fs[1]=='e' && fs[2]=='e' && fs[3]=='r') ls_stackprobe();
 }
 
 static void ls_error (void *s, const char *f, void *v) { ls_emit("ERROR",  f, v); g_LsReal[1](s, f, v); }
