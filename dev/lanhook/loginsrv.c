@@ -1714,7 +1714,16 @@ static void emit_advertisement_x(BUF *b, const char *body, int useAdvId) {
     bs(b, hostid[0] ? hostid : "0");
     bs(b, ",\"sessionID\":");
     bs(b, sid[0] ? sid : "0");
-    bs(b, ",\"ranking\":0,\"statGroupID\":0,\"raceID\":-1,\"teamID\":-1,\"url\":\"\"}]");
+    bs(b, ",\"ranking\":0,\"statGroupID\":0,\"raceID\":-1,\"teamID\":-1,\"url\":\"\"}");
+    // s52: joined remote peers (see g_Peers). Without them the advertisement
+    // the host serves lists only itself and the joiner is kicked at 10.4 s.
+    { extern volatile LONG g_PeerN; extern char g_Peers[8][24];
+      int pn = (int)g_PeerN;
+      for (int j = 0; j < pn && j < 8; j++) {
+          bs(b, ",{\"profileID\":"); bs(b, g_Peers[j]);
+          bs(b, ",\"sessionID\":"); bs(b, sid[0] ? sid : "0");
+          bs(b, ",\"ranking\":0,\"statGroupID\":0,\"raceID\":-1,\"teamID\":-1,\"url\":\"\"}"); } }
+    bs(b, "]");
     bs(b, ",\"observerNum\":0,\"observerMax\":0");
     adv_num(b, body, "isObservable", "isobservable", "0");
     adv_num(b, body, "observerDelay", "observerDelay", "0");
@@ -2143,6 +2152,13 @@ static int remote_lookup(const char *id, char *relay, int rcap, char *bodyOut, i
 // threads run concurrently.
 static char g_AdvBody[8192];
 static volatile LONG g_AdvLock;
+// s52: remote peers that joined. matchMembers was always emitted as the host
+// alone, so the host's own advertisement never listed the joiner - the game
+// kicked him at 10.4 s every session (lanhook-240-3353917 t=126.569 NEWPEER ->
+// t=136.942 KICKSEND, cand=2 with the REAL profileID served and still kicked).
+// peerAdd carries the real profile_ids; remember them and emit them.
+static char g_Peers[8][24];
+static volatile LONG g_PeerN;
 static void adv_store(const char *body) {
     if (!body) return;
     while (InterlockedCompareExchange(&g_AdvLock, 1, 0)) Sleep(1);
@@ -2155,6 +2171,27 @@ static int adv_copy(char *out, int cap) {
     { int i = 0; while (g_AdvBody[i] && i < cap - 1) { out[i] = g_AdvBody[i]; i++; } out[i] = 0; n = i; }
     InterlockedExchange(&g_AdvLock, 0);
     return n;
+}
+static void peer_add(const char *body) {
+    char ids[256]; const char *p; int n;
+    if (!form_get(body, "profile_ids", ids, sizeof ids)) return;
+    p = ids;
+    while (*p && *p != '[') p++;
+    if (*p) p++;
+    n = (int)g_PeerN;
+    while (*p && n < 8) {
+        char id[24]; int k = 0;
+        while (*p == ' ' || *p == ',') p++;
+        if (*p < '0' || *p > '9') break;
+        while (*p >= '0' && *p <= '9' && k < 23) id[k++] = *p++;
+        id[k] = 0;
+        if (k) { int q = 0, dup = 0;
+            for (int j = 0; j < n && !dup; j++) {
+                int c = 0; while (g_Peers[j][c] || id[c]) { if (g_Peers[j][c] != id[c]) break; c++; }
+                if (!g_Peers[j][c] && !id[c]) dup = 1; }
+            if (!dup) { q = 0; while (id[q]) { g_Peers[n][q] = id[q]; q++; } g_Peers[n][q] = 0; n++; } }
+    }
+    InterlockedExchange(&g_PeerN, n);
 }
 static void adv_clear(void) {
     while (InterlockedCompareExchange(&g_AdvLock, 1, 0)) Sleep(1);
@@ -2584,8 +2621,15 @@ static void route(TLSSES *t, const char *method, const char *path,
         bs(&resp, "],\"playerRatings\":[]}");
         log_resp_head(resp.p, (int)resp.len);
         http_respond(t, resp.p);
-    } else if (contains(path, "/game/party/peerAdd") ||
-               contains(path, "/game/party/peerUpdate")) {
+    } else if (contains(path, "/game/party/peerAdd")) {
+        // s52: the game reports the joined peer's REAL profileID here
+        // (callNum=83 body profile_ids=[2949963597078017023]). Remember it so
+        // the advertisement's matchMembers lists the joiner, not just the host.
+        peer_add(body);
+        static const char PAOK[] = "{\"result\":0}";
+        log_resp_head(PAOK, (int)strlen_f(PAOK));
+        http_respond(t, PAOK);
+    } else if (contains(path, "/game/party/peerUpdate")) {
         // s42: the party peer ops parse their reply with a result-only DTO reader
         // (peerAdd 0x1404d01b0 from the completion handler 0x140313810, peerUpdate
         // 0x1404d05a0 from 0x140312620). One member, "result", read into DTO+0x30 by
