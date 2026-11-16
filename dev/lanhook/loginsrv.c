@@ -2044,7 +2044,13 @@ static int hub_browse(BUF *resp, int already) {
     // the hosting machine's hub too (see hub_remote_find)
     { char ab[8192];
       if (adv_copy(ab, sizeof ab) <= 0) rn = hub_remote_find(&re); }
-    if (s == INVALID_SOCKET) goto out2;
+    // s51: a pure joiner has NO local hub (hub_open = 127.0.0.1:47100, refused
+    // on a game-only machine). Bailing here discarded the direct-fetched
+    // remote entries re[] and served an empty browser even though REMOTEFIND
+    // got entries=1 (friend log lanhook-3240-1826328 t=42.312: entries=1,
+    // empty serve, no HUBFILTER - the drop happened at this goto, not the
+    // filter). Skip only the local FINDRAW; merge + filter below still run.
+    if (s != INVALID_SOCKET) {
     { const char *req = "{\"type\":\"FINDRAW\"}\n";
       if (!hub_send(s, req, (int)strlen_f(req))) goto out; }
     n = hub_line(s, line, sizeof line);
@@ -2067,6 +2073,10 @@ static int hub_browse(BUF *resp, int already) {
         for (k = 0; relay[k] && k < 63; k++) g_RemRelay[g_RemN][k] = relay[k]; g_RemRelay[g_RemN][k] = 0;
         for (k = 0; bd[k] && k < 8191; k++) g_RemBody[g_RemN][k] = bd[k]; g_RemBody[g_RemN][k] = 0;
         g_RemN++;
+    }
+    } else {
+      while (InterlockedCompareExchange(&g_RemLock, 1, 0)) Sleep(1);
+      g_RemN = 0;
     }
     // merge the direct-fetched entries (dedup by id)
     for (i = 0; i < rn && g_RemN < REM_MAX; i++) {
@@ -2105,7 +2115,7 @@ static int hub_browse(BUF *resp, int already) {
     if (emitted) { char b[64]; int i3 = 0; const char *m = "HUB browse: remote lobbies=";
       while (*m) b[i3++] = *m++; b[i3++] = (char)('0' + emitted); b[i3] = 0; logn(b); }
 out:
-    p_closesocket(s);
+    if (s != INVALID_SOCKET) p_closesocket(s);
 out2:
     if (re) HeapFree(GetProcessHeap(), 0, re);
     return emitted;
