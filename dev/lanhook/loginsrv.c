@@ -2335,10 +2335,18 @@ static void rel_build(BUF *b, int idx, const char *alias) {
     // lastConnection (slot 6) with the OTHER online users' profileInfo; the
     // empty envelope parses (2 clean sessions) but the host still kicks the
     // readying peer 10.4 s in - it validates the peer against this content.
-    // mk_ids is deterministic, so the host reproduces the friend's exact
-    // profileID (2949963597078017023 = mk_ids("AmiEktamc")) from the alias
-    // their own dll logged at login (18148 t=4.5).
-    IDS fr; mk_ids("AmiEktamc", &fr);
+    // s52: mk_ids() salts the profileID with GetComputerNameA, so computing
+    // mk_ids("AmiEktamc") HERE yields the HOST machine's salt, not the
+    // friend's (served 8349131584420488690 while the host's own leaderboard
+    // queries named the real 2949963597078017023 - log lanhook-248-555723
+    // t=1765.972 vs t=1766.526). cand=2 with the wrong id kicked at 10.4 s
+    // exactly like the empty envelope. Use the friend's REAL identity,
+    // copied from their own login body (windows-logs/lanhook-3240-1826328).
+    IDS fr;
+    fr.profileId = 2949963597078017023ULL;
+    fr.statId = 79017023ULL;
+    { const char *pu = "40638073078017023"; int q = 0;
+      while (pu[q] && q < 31) { fr.platformUser[q] = pu[q]; q++; } fr.platformUser[q] = 0; }
     switch (idx) {
     case 0:  /* TRUE ageLANServer shape: 8 elements, 7 ARRAY slots
                 ([errorCode, friends, [], [], [], lastConnection, [], []]).
